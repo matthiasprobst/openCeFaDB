@@ -1,8 +1,9 @@
 setuptools~=75.1.0
 gldb>=1.2.0
 appdirs~=1.4.4
-click~=8.1.8
+click~=8.1.7
 rdflib~=7.1.1
 requests~=2.32.3
-h5rdmtoolbox>=1.6.1
+h5rdmtoolbox>=1.7.3
+ssnolib>=1.4.0.0
 tqdm~=4.67.1

@@ -14,9 +14,6 @@ from opencefadb.utils import download_file, download_multiple_files
 __this_dir__ = pathlib.Path(__file__).parent
 
 logger = logging.getLogger("opencefadb")
-level = logger.level
-for h in logger.handlers:
-    h.setLevel(level)
 
 
 class ApplicationType(enum.Enum):
@@ -32,6 +29,8 @@ def _get_metadata_datasets() -> rdflib.Graph:
     db_dataset_config = config_dir / f"db-dataset-config.jsonld"
     shutil.copy(src_config_filename, db_dataset_config)
 
+    logger.debug(f"Parsing database dataset config '{db_dataset_config.resolve().absolute()}'...")
+
     assert db_dataset_config.exists(), f"Database dataset config file not found: {db_dataset_config}"
     g = rdflib.Graph()
     g.parse(source=db_dataset_config, format="json-ld")
@@ -43,21 +42,29 @@ def initialize_database(metadata_directory):
 
     download_dir = pathlib.Path(metadata_directory)
 
-    logger.debug("Downloading metadata datasets...")
+    logger.info("Downloading metadata datasets...")
 
     # use sparql to get all distributions that are of type application/ld+json
 
-    filenames = download_metadata_datasets(_get_metadata_datasets(), download_dir=download_dir)
-
+    filenames = download_metadata_datasets(
+        _get_metadata_datasets(),
+        download_dir=download_dir
+    )
+    cfg = get_config()
     logger.debug("Init the opencefadb...")
-    db = connect_to_database()
+    db = connect_to_database(cfg.profile)
 
+    logger.debug("Uploading datasets...")
     cfg = get_config()
     for filename in cfg.metadata_directory.glob("*.jsonld"):
+        logger.debug(f"Uploading {filename.stem}...")
         db.rdf.upload_file(filename)
+        logger.debug("...done")
     for filename in cfg.metadata_directory.glob("*.ttl"):
+        logger.debug(f"Uploading {filename.stem}...")
         db.rdf.upload_file(filename)
-    logger.debug("...done")
+        logger.debug("...done")
+    logger.debug("...initialization done")
     return filenames
 
 

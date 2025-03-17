@@ -86,7 +86,7 @@ class GraphDBStore(RDFStore):
         return self._repo.graph
 
     def upload_file(self, filename: Union[str, pathlib.Path]) -> bool:
-        pass
+        return self._repo.upload_file(filename) == 204
 
     def execute_query(self, query: SparqlQuery) -> QueryResult:
         return QueryResult(query=query, result=query.execute(self.graph))

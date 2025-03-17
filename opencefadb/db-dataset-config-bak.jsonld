@@ -15,12 +15,12 @@
       }
     },
     {
-      "@id": "https://matthiasprobst.github.io/ssno/1.3.0/",
+      "@id": "https://zenodo.org/record/13351343",
       "@type": "dcat:Dataset",
-      "dct:identifier": "ssno-130",
+      "dct:identifier": "13351343",
       "dcat:distribution": {
         "dcat:mediaType": "text/turtle",
-        "dcat:downloadURL": "https://matthiasprobst.github.io/ssno/1.3.0/ssno.ttl"
+        "dcat:downloadURL": "https://zenodo.org/records/13351343/files/ssno.ttl"
       }
     },
     {

@@ -129,10 +129,10 @@ class OpenCeFaDB(GenericLinkedDatabase):
         query_result = self.execute_query("rdf_db", SELECT_FAN_CAD_FILE)
         bindings = query_result.result.bindings
         assert len(bindings) == 1, f"Expected one CAD file, got {len(bindings)}"
-        download_url = bindings[0]["downloadURL"]
+        download_url = bindings[0][rdflib.Variable("downloadURL")]
         _guess_filenames = download_url.rsplit("/", 1)[-1]
         target_dir = pathlib.Path(target_dir)
-        return download_file(bindings[0]["downloadURL"], target_dir / _guess_filenames)
+        return download_file(download_url, target_dir / _guess_filenames)
 
     def select_all(self) -> QueryResult:
         return self.execute_query("rdf_db", SELECT_ALL)
@@ -141,7 +141,7 @@ class OpenCeFaDB(GenericLinkedDatabase):
         result = self.execute_query("rdf_db", SELECT_ALL_OPERATION_POINTS)
 
 
-def connect_to_database(profile="DEFAULT") -> OpenCeFaDB:
+def connect_to_database(profile) -> OpenCeFaDB:
     """Connects to the database according to the configuration."""
     global _db_instance
     cfg = get_config()

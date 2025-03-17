@@ -26,13 +26,28 @@ class GraphDBRepository:
     def __getitem__(self, item):
         return self._params[item]
 
-    def upload_file(self, filename: pathlib.Path):
+    def upload_file(
+            self,
+            filename: pathlib.Path,
+            check_for_blank_nodes=True,
+            use_base_iri="https://local.org/"
+    ):
         logger.debug(f"Uploading file {filename} to {self['id']} ...")
-        filename = pathlib.Path(filename)
+        filename = pathlib.Path(filename).resolve().absolute()
         if not filename.exists():
             raise FileNotFoundError(f"File '{filename}' does not exist")
 
-        _check_for_blank_nodes(filename)
+        if check_for_blank_nodes:
+            has_blank_nodes, (s, p, o) = _check_for_blank_nodes(filename)
+            if has_blank_nodes and use_base_iri:
+                with open(str(filename), 'r', encoding='utf-8') as f:
+                    content = f.read()
+                content = content.replace("_:b", f"{use_base_iri}b")
+                with open(str(filename), 'w', encoding='utf-8') as f:
+                    f.write(content)
+            elif has_blank_nodes and not use_base_iri:
+                raise ValueError(f"File '{filename}' contains blank nodes. Blank nodes are not supported: "
+                                 f"{s}, {p}, {o}")
 
         headers = {"Content-Type": CONTENT_TYPE[filename.suffix]}
 
@@ -54,4 +69,5 @@ def _check_for_blank_nodes(filename):
     g.parse(source=filename)
     for s, p, o in g.triples((None, None, None)):
         if isinstance(s, rdflib.BNode) or isinstance(p, rdflib.BNode) or isinstance(o, rdflib.BNode):
-            raise ValueError(f"File '{filename}' contains blank nodes. Blank nodes are not supported: {s}, {p}, {o}")
+            return True, (s, p, o)
+    return False, (None, None, None)

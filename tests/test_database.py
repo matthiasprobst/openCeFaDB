@@ -20,7 +20,8 @@ class TestDatabase(unittest.TestCase):
         self._cfg = get_config()
         self._current_profile = self._cfg.profile
         self._cfg.select_profile("test")
-        db = connect_to_database()
+        self.profile = "local_graphdb.test"
+        db = connect_to_database(self.profile)
         initialize_database(self._cfg.metadata_directory)
 
     def tearDown(self):
@@ -28,8 +29,8 @@ class TestDatabase(unittest.TestCase):
         self._cfg.select_profile(self._current_profile)
 
     def test_singleton(self):
-        db1 = connect_to_database()
-        db2 = connect_to_database()
+        db1 = connect_to_database(self.profile)
+        db2 = connect_to_database(self.profile)
         self.assertIs(db1, db2)
 
     def test_read_dataset_files(self):
@@ -40,10 +41,10 @@ class TestDatabase(unittest.TestCase):
         filenames = dbinit.initialize_database(metadata_directory="./test_download")
         for filename in filenames:
             self.assertTrue(filename.exists())
-        self.assertEqual(len(filenames), 3)
+        self.assertEqual(len(filenames), 4, f"Expected 4 files, got {len(filenames)}. filenames are: {filenames}")
 
     def test_download_cad_file(self):
-        db = connect_to_database()
+        db = connect_to_database(self.profile)
         filename = db.download_cad_file(target_dir="./test_download")
         self.assertTrue(filename.exists())
         self.assertTrue(filename.suffix == ".igs")
@@ -63,7 +64,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_upload_hdf_file(self):
         self._cfg.select_profile("local_sql.test")
-        db = connect_to_database()
+        db = connect_to_database(self.profile)
         id = db.upload_hdf(
             r"C:\Users\matth\Documents\PHD\data\measurements\processed\opm\main_cases\2023-10-11\fan_curve\run1\2023-10-11-14-55-47_run.hdf"
         )
