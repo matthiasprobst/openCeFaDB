@@ -64,8 +64,8 @@ class OpenCeFaDBConfiguration:
 
     def __str__(self) -> str:
         out = f"Configuration profile: {self.profile}\n"
-        for k in self[self.profile]:
-            out += f" > {k}: {self[self.profile][k]}\n"
+        for k in self._configparser[self.profile]:
+            out += f" > {k}: {self._configparser[self.profile][k]}\n"
         return out
 
     def delete(self):

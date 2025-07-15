@@ -5,6 +5,7 @@ from typing import Union
 
 import pandas as pd
 import rdflib
+import requests.exceptions
 from gldb import GenericLinkedDatabase
 from gldb.query import Query
 from gldb.stores import DataStoreManager
@@ -64,13 +65,20 @@ class OpenCeFaDB(GenericLinkedDatabase):
         """Uploads a file to all stores in the store manager. Not all stores may support this operation.
         This is then skipped."""
         filename = pathlib.Path(filename)
+        if not filename.exists():
+            raise FileNotFoundError(f"File {filename} does not exist.")
         hdf_db_id = self.store_manager.stores.get("hdf_db").upload_file(filename)
         # get the metadata:
         cfg = get_config()
         import h5rdmtoolbox as h5tbx
         meta_filename = cfg.metadata_directory / f"{filename.stem}.jsonld"
-        with open(meta_filename, "w") as f:
-            f.write(h5tbx.dump_jsonld(filename, indent=2, blank_node_iri_base="https://local.org/"))
+        try:
+            with open(meta_filename, "w", encoding="utf-8") as f:
+                f.write(h5tbx.dump_jsonld(filename, indent=2, blank_node_iri_base="https://local.org/"))
+        except Exception as e:
+            logger.error(f"Error while generating metadata for {filename}: {e}")
+            meta_filename.unlink(missing_ok=True)
+            raise e
         self.store_manager.stores.get("rdf_db").upload_file(meta_filename)
 
         # now link both items:
@@ -87,8 +95,8 @@ class OpenCeFaDB(GenericLinkedDatabase):
         """
         result = g.query(sparql)
         # print(str(result.bindings[0].get(rdflib.Variable("h5id"))))
-        # TODO: link the resources using what? owl: sameAs?
-        self.store_manager["rdf_db"].link_resources(hdf_db_id, str(result.bindings[0].get(rdflib.Variable("h5id"))))
+        # # TODO: link the resources using what? owl: sameAs?
+        # self.store_manager["rdf_db"].link_resources(hdf_db_id, str(result.bindings[0].get(rdflib.Variable("h5id"))))
         return hdf_db_id
 
     def linked_upload(self, filename: Union[str, pathlib.Path]):
@@ -168,13 +176,16 @@ def connect_to_database(profile) -> OpenCeFaDB:
         store_manager.add_store("rdf_db", rdf_file_store)
     elif cfg.metadata_datastore.lower() == "local_graphdb":
         from opencefadb.database.stores.rdf_stores.graphdb import GraphDBStore
-        graphdb_store = GraphDBStore(
-            host=cfg["graphdb.host"],
-            port=cfg["graphdb.port"],
-            user=cfg["graphdb.user"],
-            password=cfg["graphdb.password"],
-            repository=cfg["graphdb.repository"]
-        )
+        try:
+            graphdb_store = GraphDBStore(
+                host=cfg["graphdb.host"],
+                port=cfg["graphdb.port"],
+                user=cfg["graphdb.user"],
+                password=cfg["graphdb.password"],
+                repository=cfg["graphdb.repository"]
+            )
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(f"Invalid configuration for GraphDB or GraphDB is not running. Check the config data: {cfg}. Please check your configuration file: {cfg.filename}. Original error: {e}") from e
         store_manager.add_store("rdf_db", graphdb_store)
     else:
         raise TypeError(f"Metadata store '{cfg.metadata_datastore}' not supported. Please check your configuration "

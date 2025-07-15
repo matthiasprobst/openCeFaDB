@@ -9,9 +9,11 @@ from opencefadb import set_logging_level
 from opencefadb.configuration import get_config
 from opencefadb.database import dbinit
 from opencefadb.database.dbinit import initialize_database
+from opencefadb.database.stores.rdf_stores.graphdb import GraphDBStore
 
 set_logging_level('DEBUG')
 
+__this_dir__ = pathlib.Path(__file__).parent
 
 class TestDatabase(unittest.TestCase):
 
@@ -21,6 +23,13 @@ class TestDatabase(unittest.TestCase):
         self._current_profile = self._cfg.profile
         self._cfg.select_profile("test")
         self.profile = "local_graphdb.test"
+
+        GraphDBStore.create(
+            config_filename=__this_dir__ / "test-repo-config.ttl",
+            host="localhost",
+            port=7201
+        )
+
         db = connect_to_database(self.profile)
         initialize_database(self._cfg.metadata_directory)
 

@@ -1,3 +1,4 @@
+import json.decoder
 import logging
 import pathlib
 
@@ -66,7 +67,11 @@ class GraphDBRepository:
 def _check_for_blank_nodes(filename):
     logger.debug(f"Checking file {filename} for blank nodes ...")
     g = rdflib.Graph()
-    g.parse(source=filename)
+    try:
+        g.parse(source=filename)
+    except json.decoder.JSONDecodeError as e:
+        logger.error(f"Error parsing file {filename}: {e}")
+        raise e
     for s, p, o in g.triples((None, None, None)):
         if isinstance(s, rdflib.BNode) or isinstance(p, rdflib.BNode) or isinstance(o, rdflib.BNode):
             return True, (s, p, o)

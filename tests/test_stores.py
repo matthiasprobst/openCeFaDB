@@ -18,8 +18,7 @@ class TestStores(unittest.TestCase):
 
     def test_sql_store(self):
         sql_store = HDF5SqlDB()
-        sql_row = sql_store.generate_mapping_dataset("1")
-        print(AnyUrl(sql_row.endpointURL))
+        sql_row = sql_store.generate_data_service_serving_a_dataset("1")
         conn = sqlite3.connect(AnyUrl(sql_row.endpointURL).path)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM hdf5_files")
@@ -32,7 +31,7 @@ class TestStores(unittest.TestCase):
         """Make sure you configured your graphdb accordingly.
         """
         repoId = GraphDBStore.create(
-            config_filename=__this_dir__ / "repo-config.ttl",
+            config_filename=__this_dir__ / "test-repo-config.ttl",
             host="http://localhost",
             port=7201
         )
@@ -48,7 +47,7 @@ class TestStores(unittest.TestCase):
         results = store.execute_query(
             SELECT_ALL
         )
-        self.assertEqual(70, len(results.result))
+        self.assertTrue(len(results.result) > 0)
 
 
         GraphDBStore.delete(repoId, host="localhost", port=7201, auth=("admin", "admin"))

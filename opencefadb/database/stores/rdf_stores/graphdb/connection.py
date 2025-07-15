@@ -38,7 +38,9 @@ class GraphDB:
         self._repositories = None
 
     def __getitem__(self, item) -> GraphDBRepository:
-        selected_repo = self.repositories[item]
+        selected_repo = self.repositories.get(item, None)
+        if selected_repo is None:
+            raise KeyError(f"Repository '{item}' not found in GraphDB at {self._url}.")
         selected_repo.update({"auth": self._auth})
         repo = GraphDBRepository(selected_repo)
         return repo

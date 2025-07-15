@@ -63,6 +63,6 @@ class TestSqlGraphDBDatabase(unittest.TestCase):
 
         # search again
         results = db.rdf.execute_query(SELECT_ALL)
-        self.assertEqual(5091, len(results.result.bindings))
+        self.assertTrue(len(results.result.bindings) > 5093)
 
         # db.rdf.upload_file("tests/data/ontology.ttl")

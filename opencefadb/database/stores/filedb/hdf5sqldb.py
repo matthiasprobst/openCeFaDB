@@ -100,9 +100,8 @@ class HDF5SqlDB(RawDataStore):
         """Ensure the connection is closed when the object is deleted."""
         if self._connection:
             self._connection.close()
-            logger.debug("Database connection closed.")
 
-    def generate_mapping_dataset(self, identifier: str):
+    def generate_data_service_serving_a_dataset(self, dataset_identifier: str):
         endpoint_url = self._endpointURL
         endpoint_url_file_name = endpoint_url.rsplit('/', 1)[-1]
         dataservice_id = f"{self._sql_base_uri}{endpoint_url_file_name}"
@@ -116,9 +115,13 @@ class HDF5SqlDB(RawDataStore):
                 identifier=self._hdf5_file_table_name,
                 distribution=dcat.Distribution(
                     id=f"{self._sql_base_uri}12345",
-                    identifier=identifier,
+                    identifier=dataset_identifier,
                     mediaType="application/vnd.sqlite3",
                 )
             )
         )
+        return data_service
+
+    def generate_mapping_dataset(self, dataset_identifier: str):
+        data_service = self.generate_data_service_serving_a_dataset(dataset_identifier)
         return rdflib.Graph().parse(data=data_service.model_dump_jsonld(), format="json-ld")
