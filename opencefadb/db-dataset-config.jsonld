@@ -31,7 +31,7 @@
       "dct:creator": {
         "@type": "foaf:Organization",
         "foaf:name": "Allotrope Foundation",
-        "foaf:mbox": "http://www.allotrope.org"
+        "foaf:homepage": "http://www.allotrope.org"
       },
       "dcat:distribution": {
         "dcat:mediaType": "text/turtle",

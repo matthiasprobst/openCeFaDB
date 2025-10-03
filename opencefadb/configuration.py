@@ -3,7 +3,7 @@ import logging
 import pathlib
 from typing import Union
 
-from opencefadb import paths
+from . import paths
 
 logger = logging.getLogger("opencefadb")
 
@@ -12,12 +12,12 @@ _config = None
 
 def _get_default_database_config():
     return {
-        "metadata_dir": paths['global_package_dir'] / 'database/metadata',
-        "rawdata_dir": paths['global_package_dir'] / 'database/rawdata',
+        "metadata_dir": paths.GLOBAL_PACKAGE_DIR / 'database/metadata',
+        "rawdata_dir": paths.GLOBAL_PACKAGE_DIR / 'database/rawdata',
         "rawdata_store": "hdf5_sql_db",
         "metadata_store": "rdf_file_db",
         "log_level": str(logging.ERROR),
-        "log_file": paths['global_package_dir'] / 'opencefadb.log',
+        "log_file": paths.GLOBAL_PACKAGE_DIR / 'opencefadb.log',
     }
 
 
@@ -70,10 +70,10 @@ class OpenCeFaDBConfiguration:
 
     def delete(self):
         global _config
-        _bak = paths["config"].with_suffix(".ini.bak")
+        _bak = paths.CONFIG.with_suffix(".ini.bak")
         if _bak.exists():
             _bak.unlink()
-        paths["config"].rename(paths["config"].with_suffix(".ini.bak"))
+        paths.CONFIG.rename(paths.CONFIG.with_suffix(".ini.bak"))
         _config = None
         return get_config()
 
@@ -99,7 +99,7 @@ class OpenCeFaDBConfiguration:
     def _set_config(self, section: Union[str], key, value):
         """Set a configuration value."""
         self._configparser[str(section)][key] = value
-        with open(paths["config"], 'w') as f:
+        with open(paths.CONFIG, 'w') as f:
             self._configparser.write(f)
         return self
 
@@ -146,10 +146,10 @@ def get_config(overwrite: bool = False) -> OpenCeFaDBConfiguration:
     if _config:
         return _config
 
-    logger.debug(f"Initializing config file {paths['config']}...")
-    if paths["config"].exists() and not overwrite:
-        logger.debug(f"Config file {paths['config']} already exists")
-        _config = OpenCeFaDBConfiguration(_read_config(), paths["config"])
+    logger.debug(f"Initializing config file {paths.CONFIG}...")
+    if paths.CONFIG.exists() and not overwrite:
+        logger.debug(f"Config file {paths.CONFIG} already exists")
+        _config = OpenCeFaDBConfiguration(_read_config(), paths.CONFIG)
         return _config
 
     config = configparser.ConfigParser()
@@ -157,18 +157,18 @@ def get_config(overwrite: bool = False) -> OpenCeFaDBConfiguration:
     config["test"] = _get_test_config()
     config["local_graphdb.test"] = _get_test_local_graphdb()
     config["local_sql.test"] = _get_test_local_sql()
-    with open(paths["config"], 'w') as f:
+    with open(paths.CONFIG, 'w') as f:
         config.write(f)
-    _config = OpenCeFaDBConfiguration(config, paths["config"])
+    _config = OpenCeFaDBConfiguration(config, paths.CONFIG)
     return _config
 
 
 def _read_config() -> configparser.ConfigParser:
     """Read the configuration."""
-    logger.debug(f"Reading config file {paths['config']}...")
+    logger.debug(f"Reading config file {paths.CONFIG}...")
     config = configparser.ConfigParser()
-    assert paths["config"].exists(), f"Config file {paths['config']} does not exist"
-    config.read(paths["config"])
+    assert paths.CONFIG.exists(), f"Config file {paths.CONFIG} does not exist"
+    config.read(paths.CONFIG)
     return config
 
 
@@ -183,36 +183,36 @@ class OpenCeFaDBSetup:
     @profile.setter
     def profile(self, value):
         self._configparser["DEFAULT"]["profile"] = value
-        with open(paths["setup"], 'w') as f:
+        with open(paths.SETUP, 'w') as f:
             self._configparser.write(f)
 
     def delete(self):
-        _bak = paths["setup"].with_suffix(".ini.bak")
+        _bak = paths.SETUP.with_suffix(".ini.bak")
         if _bak.exists():
             _bak.unlink()
-        paths["setup"].rename(paths["setup"].with_suffix(".ini.bak"))
+        paths.SETUP.rename(paths.SETUP.with_suffix(".ini.bak"))
         return self
 
 
 def _read_setup() -> configparser.ConfigParser:
     """Read the configuration."""
-    logger.debug(f"Reading setup file {paths['setup']}...")
+    logger.debug(f"Reading setup file {paths.SETUP}...")
     config = configparser.ConfigParser()
-    assert paths["setup"].exists(), f"Setup file {paths['config']} does not exist"
-    config.read(paths["setup"])
+    assert paths.SETUP.exists(), f"Setup file {paths.CONFIG} does not exist"
+    config.read(paths.SETUP)
     return config
 
 
 def get_setup(overwrite: bool = False) -> OpenCeFaDBSetup:
-    logger.debug(f"Initializing setup file {paths['config']}...")
-    if paths["setup"].exists() and not overwrite:
-        logger.debug(f"Setup file {paths['setup']} already exists")
+    logger.debug(f"Initializing setup file {paths.CONFIG}...")
+    if paths.SETUP.exists() and not overwrite:
+        logger.debug(f"Setup file {paths.SETUP} already exists")
         return OpenCeFaDBSetup(_read_setup())
 
     config = configparser.ConfigParser()
     config["DEFAULT"] = {
         "profile": "DEFAULT"
     }
-    with open(paths["setup"], 'w') as f:
+    with open(paths.SETUP, 'w') as f:
         config.write(f)
     return OpenCeFaDBSetup(config)

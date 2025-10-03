@@ -6,9 +6,9 @@ import rdflib
 from gldb.stores import InMemoryRDFStore
 
 from opencefadb import set_logging_level
-from opencefadb.database import dbinit
-from opencefadb.database.core import Opencefadb
-from opencefadb.database.stores.filedb.hdf5sqldb import HDF5SqlDB
+from opencefadb import dbinit
+from opencefadb.core import OpenCeFaDB
+from opencefadb.stores.filedb.hdf5sqldb import HDF5SqlDB
 from opencefadb.utils import download_file
 
 set_logging_level('DEBUG')
@@ -74,7 +74,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_database(self):
         in_memory_rdf_store = InMemoryRDFStore(data_dir=__this_dir__)
-        db = Opencefadb(
+        db = OpenCeFaDB(
             metadata_store=in_memory_rdf_store,
         )
         db.download_metadata()
@@ -94,7 +94,7 @@ class TestDatabase(unittest.TestCase):
         test_data_dir = __this_dir__ / "test-db-data"
         test_data_dir.mkdir(exist_ok=True)
         in_memory_rdf_store = InMemoryRDFStore(data_dir=__this_dir__)
-        db = Opencefadb(
+        db = OpenCeFaDB(
             metadata_store=in_memory_rdf_store,
             hdf_store=HDF5SqlDB(),
             data_directory=test_data_dir
@@ -111,7 +111,7 @@ class TestDatabase(unittest.TestCase):
         test_data_dir = __this_dir__ / "test-db-data"
         test_data_dir.mkdir(exist_ok=True)
         in_memory_rdf_store = InMemoryRDFStore(data_dir=__this_dir__)
-        db = Opencefadb(
+        db = OpenCeFaDB(
             metadata_store=in_memory_rdf_store,
             hdf_store=HDF5SqlDB(),
             data_directory=test_data_dir

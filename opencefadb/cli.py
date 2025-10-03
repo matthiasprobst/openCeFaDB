@@ -7,8 +7,8 @@ import click
 from opencefadb import __version__, paths
 from opencefadb import configuration
 from opencefadb import set_logging_level
-from opencefadb.database.core import connect_to_database
-from opencefadb.database.query_templates.sparql import SELECT_FAN_PROPERTIES
+from opencefadb.core import connect_to_database
+from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
 
 logger = logging.getLogger("opencefadb")
 
@@ -88,7 +88,7 @@ def _initialize_database():
 
     click.echo(" > Downloading all metadata from zenodo...")
     logger.debug("Downloading all metadata from zenodo...")
-    from opencefadb.database.dbinit import initialize_database
+    from opencefadb.dbinit import initialize_database
     initialize_database(cfg.metadata_directory)
 
 

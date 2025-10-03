@@ -1,4 +1,5 @@
 import enum
+import hashlib
 import pathlib
 import shutil
 from typing import List, Union
@@ -27,13 +28,21 @@ def _get_metadata_datasets(
     config_dir = pathlib.Path(config_dir)
     if not config_dir.exists():
         raise FileNotFoundError(f"Configuration directory not found: {config_dir}")
-    db_dataset_config_filename = config_dir / f"db-dataset-config.jsonld"
+    config_suffix = config_filename.suffix
+    db_dataset_config_filename = config_dir / f"db-dataset-config.{config_suffix}"
     shutil.copy(config_filename, db_dataset_config_filename)
 
     logger.debug(f"Parsing database dataset config '{db_dataset_config_filename.resolve().absolute()}'...")
 
+    if config_suffix == '.ttl':
+        fmt = "ttl"
+    elif config_suffix in ('.json', '.jsonld', '.json-ld'):
+        fmt = "json-ld"
+    else:
+        raise ValueError(f"Unsupported config file suffix: {config_suffix}")
     g = rdflib.Graph()
-    g.parse(source=db_dataset_config_filename, format="json-ld")
+    g.parse(source=db_dataset_config_filename, format=fmt)
+    logger.debug("Successfully parsed database dataset config.")
     return g
 
 
@@ -76,6 +85,10 @@ def initialize_database(metadata_directory):
     )
 
 
+def url_hash(url: str) -> str:
+    return hashlib.sha256(url.encode("utf-8")).hexdigest()
+
+
 def download_metadata_datasets(
         graph: rdflib.Graph,
         application_types=None,
@@ -89,6 +102,9 @@ def download_metadata_datasets(
     else:
         download_dir = pathlib.Path(download_dir)
 
+    print(f"Downloading metadata datasets to '{download_dir.resolve().absolute()}' ...")
+    logger.debug(f"Downloading metadata datasets to '{download_dir.resolve().absolute()}' ...")
+
     all_files = []
     for application_type in application_types:
         res = graph.query(f"""
@@ -101,33 +117,42 @@ def download_metadata_datasets(
           ?dataset dcat:distribution ?distribution .
           ?dataset dct:identifier ?identifier .
           ?distribution dcat:downloadURL ?downloadURL .
-          ?distribution dcat:mediaType "{application_type.value}" .
+          ?distribution dcat:mediaType ?mediaType .
+          FILTER (
+            ?mediaType = "{application_type.value}" ||
+            ?mediaType = <https://www.iana.org/assignments/media-types/{application_type.value}>
+          )
         }}
         """)
-        filenames = []
         download_urls = [str(r[rdflib.Variable("downloadURL")]) for r in res.bindings]
+        logger.debug(f"Found {len(download_urls)} datasets of type '{application_type.value}'.")
         target_filenames = []
 
         for r in res.bindings:
             download_url = str(r[rdflib.Variable("downloadURL")])
-            identifier = str(r[rdflib.Variable("identifier")])
-            if identifier.startswith("http"):
-                identifier = identifier.rsplit('.', 1)[-1]
-            filename = pathlib.Path(download_url.rsplit('/', 1)[-1])
-            target_filename = download_dir / f"{filename.stem}_{identifier}{filename.suffix}"
+            # identifier = str(r[rdflib.Variable("identifier")])
+
+            _filename = pathlib.Path(download_url.rsplit('/', 1)[-1])
+            _suffix = _filename.suffix
+            _name = url_hash(download_url) + _suffix
+            target_filename = download_dir / _name
+
+            # if identifier.startswith("http"):
+            #     identifier = identifier.rsplit('.', 1)[-1]
+            # target_filename = download_dir / f"{filename.stem}_{identifier}{filename.suffix}"
             target_filenames.append(target_filename)
-            filenames.append(target_filename)
-            if target_filename.exists() and exist_ok:
+
+            if target_filename.exists() and not exist_ok:
                 continue
             if n_threads == 1:
                 all_files.append(download_file(download_url, target_filename.resolve()))
 
-        if exist_ok:
+        if not exist_ok:
             _download_urls = []
             _target_filenames = []
             for u, t in zip(download_urls, target_filenames):
                 if t.exists():
-                    logger.info(f"File {t.name} already exists, skipping download.")
+                    logger.debug(f"File {t.name} already exists, skipping download.")
                 else:
                     logger.info(f"Downloading file {t.name} ...")
                     _download_urls.append(u)

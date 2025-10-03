@@ -1,23 +1,21 @@
 import logging
 import pathlib
-from typing import Any
-from typing import Union
+from typing import Any, Optional, Union
 
 import pandas as pd
 import rdflib
 from gldb import GenericLinkedDatabase
 from gldb.query import Query
-from gldb.stores import InMemoryRDFStore, RDFStore, DataStore
+from gldb.stores import RDFStore, DataStore
 
-from opencefadb.configuration import get_config
-from opencefadb.database.dbinit import download_metadata_datasets, _get_metadata_datasets
-from opencefadb.database.query_templates.sparql import (
+from opencefadb.dbinit import download_metadata_datasets, _get_metadata_datasets
+from opencefadb.query_templates.sparql import (
     SELECT_FAN_PROPERTIES,
     SELECT_ALL,
     SELECT_FAN_CAD_FILE,
     SELECT_ALL_OPERATION_POINTS
 )
-from opencefadb.database.stores.rdf_stores.rdffiledb.rdffilestore import RDFFileStore
+from opencefadb.stores.rdf_stores.rdffiledb.rdffilestore import RDFFileStore
 from opencefadb.utils import download_file
 
 logger = logging.getLogger("opencefadb")
@@ -42,13 +40,14 @@ class QueryResult:
         self.result = result
 
 
-class Opencefadb(GenericLinkedDatabase):
+class OpenCeFaDB(GenericLinkedDatabase):
 
     def __init__(
             self,
             metadata_store: RDFStore,
             hdf_store: DataStore,
-            data_directory: Union[str, pathlib.Path],
+            working_directory: Union[str, pathlib.Path],
+            config_filename: Union[str, pathlib.Path]
     ):
         super().__init__(
             stores={
@@ -56,21 +55,40 @@ class Opencefadb(GenericLinkedDatabase):
                 "hdf": hdf_store,
             }
         )
-        self.data_directory = pathlib.Path(data_directory)
-        self.metadata_directory = self.data_directory / "metadata"
-        self.rawdata_directory = self.data_directory / "rawdata"
-        self.data_directory.mkdir(parents=True, exist_ok=True)
-        self.metadata_directory.mkdir(parents=True, exist_ok=True)
+        self.working_directory = pathlib.Path(working_directory)
+        self.working_directory.mkdir(parents=True, exist_ok=True)
+        self.cache_directory = self.working_directory / ".opencefadb"
+        # self.metadata_directory = self.working_directory / "metadata"
+        # self.rawdata_directory = self.working_directory / "rawdata"
+        # self.working_directory.mkdir(parents=True, exist_ok=True)
+        # self.metadata_directory.mkdir(parents=True, exist_ok=True)
+        self._initialize(config_filename)
 
-    def initialize(self, config_filename: Union[str, pathlib.Path], exist_ok=False):
-        download_dir = self.metadata_directory
+    def _initialize(self, config_filename: Union[str, pathlib.Path], exist_ok=False):
+        download_dir = self.cache_directory
+        download_dir.mkdir(parents=True, exist_ok=True)
         filenames = download_metadata_datasets(
-            _get_metadata_datasets(config_filename, self.data_directory),
+            _get_metadata_datasets(config_filename, self.working_directory),
             download_dir=download_dir,
             exist_ok=exist_ok
         )
         for filename in filenames:
             self.stores.rdf.upload_file(filename)
+
+    @classmethod
+    def setup_local_default(cls, working_directory: Optional[Union[str, pathlib.Path]] = None):
+        from opencefadb.stores import RDFFileStore
+        from opencefadb.stores import HDF5SqlDB
+        if working_directory is not None:
+            working_directory = pathlib.Path(working_directory)
+        else:
+            working_directory = pathlib.Path.cwd()
+        return cls(
+            metadata_store=RDFFileStore(data_dir=working_directory / "metadata"),
+            hdf_store=HDF5SqlDB(),
+            working_directory=working_directory,
+            config_filename=__this_dir__ / "db-dataset-config.ttl"
+        )
 
     # def download_metadata(self):
     #     """Downloads metadata files from the metadata directory."""

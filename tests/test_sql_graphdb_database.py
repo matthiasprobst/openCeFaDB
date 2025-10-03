@@ -5,8 +5,8 @@ import unittest
 
 from opencefadb import connect_to_database
 from opencefadb.configuration import get_config
-from opencefadb.database.query_templates.sparql import SELECT_ALL
-from opencefadb.database.stores.rdf_stores.graphdb import GraphDBStore
+from opencefadb.query_templates.sparql import SELECT_ALL
+from opencefadb.stores.rdf_stores.graphdb import GraphDBStore
 
 __this_dir__ = pathlib.Path(__file__).parent
 
@@ -52,7 +52,7 @@ class TestSqlGraphDBDatabase(unittest.TestCase):
         self.assertEqual(70, len(results.result.bindings))
 
         # We need to download the metadata again and full the rdf:
-        from opencefadb.database.dbinit import initialize_database
+        from opencefadb.dbinit import initialize_database
         filenames = initialize_database(self._cfg.metadata_directory)
         self.assertEqual(4, len(filenames))
 

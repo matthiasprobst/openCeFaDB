@@ -7,7 +7,7 @@ import rdflib
 from gldb.stores import DataStore
 from gldb.query import DataStoreQuery, QueryResult
 
-from opencefadb.database.stores.filedb.database_resource import DatabaseResource
+from opencefadb.stores.filedb.database_resource import DatabaseResource
 from opencefadb.ontologies import dcat
 
 logger = logging.getLogger("opencefadb")
@@ -29,7 +29,7 @@ class HDF5SqlDB(DataStore):
     """
 
     def __init__(self):
-        from ....configuration import get_config
+        from ...configuration import get_config
         cfg = get_config()
         self._hdf5_file_table_name = "hdf5_files"
         self._sql_base_uri = "http://local.org/sqlite3/"

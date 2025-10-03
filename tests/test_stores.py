@@ -8,10 +8,10 @@ from gldb.query import SparqlQuery, QueryResult
 from pydantic import AnyUrl
 
 from opencefadb import set_logging_level
-from opencefadb.database.dbinit import initialize_database
-from opencefadb.database.stores.filedb.hdf5sqldb import HDF5SqlDB
-from opencefadb.database.stores.rdf_stores.graphdb import GraphDBStore
-from opencefadb.database.stores.rdf_stores.graphdb.store import LocalRDFStore
+from opencefadb.dbinit import initialize_database
+from opencefadb.stores.filedb.hdf5sqldb import HDF5SqlDB
+from opencefadb.stores.rdf_stores.graphdb import GraphDBStore
+from opencefadb.stores.rdf_stores.graphdb.store import LocalRDFStore
 
 set_logging_level('DEBUG')
 

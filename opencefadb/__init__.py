@@ -13,26 +13,16 @@ import pathlib
 from logging.handlers import RotatingFileHandler
 from typing import Union
 
-from .database import con
-
 import appdirs
+
 
 __this_dir__ = pathlib.Path(__file__).parent
 
 from ._version import __version__
 
 USER_LOG_DIR = pathlib.Path(appdirs.user_log_dir('opencefadb', version=__version__))
-USER_DATA_DIR = pathlib.Path(appdirs.user_data_dir('opencefadb', version=__version__))
-DB_DATA_DIR = pathlib.Path(appdirs.user_data_dir('opencefadb'))
 USER_LOG_DIR.mkdir(parents=True, exist_ok=True)
-USER_DATA_DIR.mkdir(parents=True, exist_ok=True)
-DB_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-paths = {
-    "setup": DB_DATA_DIR / 'setup.ini',
-    "config": DB_DATA_DIR / 'opencefadb-config.ini',
-    "global_package_dir": DB_DATA_DIR,
-}
 
 DEFAULT_LOGGING_LEVEL = logging.INFO
 _formatter = logging.Formatter(
@@ -65,4 +55,6 @@ def set_logging_level(level: Union[int, str]):
 
 GRAPH_DB_CONFIG_FILENAME = __this_dir__ / "../data/graphdb-config.ttl"
 
-__all__ = ['set_logging_level']
+
+from .core import OpenCeFaDB
+__all__ = ["set_logging_level", "OpenCeFaDB"]
