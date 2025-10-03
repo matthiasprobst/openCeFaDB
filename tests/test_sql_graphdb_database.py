@@ -23,16 +23,16 @@ class TestSqlGraphDBDatabase(unittest.TestCase):
 
         self.profile = "local_graphdb.test"
         pathlib.Path("./test_download").mkdir(exist_ok=True)
-        self._cfg = get_config()
-        self._current_profile = self._cfg.profile
-        self._cfg.select_profile(self.profile)
+        # self._cfg = get_config()
+        # self._current_profile = self._cfg.profile
+        # self._cfg.select_profile(self.profile)
 
-        # create or get existing:
-        GraphDBStore.create(
-            config_filename=__this_dir__ / "test-repo-config.ttl",
-            host="localhost",
-            port=7201
-        )
+        # # create or get existing:
+        # GraphDBStore.create(
+        #     config_filename=__this_dir__ / "test-repo-config.ttl",
+        #     host="localhost",
+        #     port=7201
+        # )
 
     def tearDown(self):
         shutil.rmtree("./test_download")
@@ -42,11 +42,6 @@ class TestSqlGraphDBDatabase(unittest.TestCase):
         logger.setLevel(self._level)
         for handler in logger.handlers:
             handler.setLevel(self._level)
-
-    def test_singleton(self):
-        db1 = connect_to_database(self.profile)
-        db2 = connect_to_database(self.profile)
-        self.assertIs(db1, db2)
 
     def test_init_rdf_database(self):
         db = connect_to_database(

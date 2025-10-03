@@ -13,6 +13,8 @@ import pathlib
 from logging.handlers import RotatingFileHandler
 from typing import Union
 
+from .database import con
+
 import appdirs
 
 __this_dir__ = pathlib.Path(__file__).parent
@@ -32,7 +34,7 @@ paths = {
     "global_package_dir": DB_DATA_DIR,
 }
 
-DEFAULT_LOGGING_LEVEL = logging.ERROR
+DEFAULT_LOGGING_LEVEL = logging.INFO
 _formatter = logging.Formatter(
     '%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%Y-%m-%d_%H:%M:%S')
@@ -45,11 +47,8 @@ _file_handler = RotatingFileHandler(USER_LOG_DIR / 'opencefadb.log')
 _file_handler.setLevel(logging.DEBUG)  # log everything to file!
 _file_handler.setFormatter(_formatter)
 
-logger = logging.getLogger(__package__)
-logger.addHandler(_stream_handler)
-logger.addHandler(_file_handler)
-
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("opencefadb")
+logger.setLevel(DEFAULT_LOGGING_LEVEL)
 logger.addHandler(_stream_handler)
 logger.addHandler(_file_handler)
 
@@ -64,8 +63,6 @@ def set_logging_level(level: Union[int, str]):
     return _logger.level
 
 
-from .database import connect_to_database
-
 GRAPH_DB_CONFIG_FILENAME = __this_dir__ / "../data/graphdb-config.ttl"
 
-__all__ = ['connect_to_database', 'set_logging_level']
+__all__ = ['set_logging_level']

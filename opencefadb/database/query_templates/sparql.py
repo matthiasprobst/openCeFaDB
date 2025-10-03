@@ -1,7 +1,7 @@
-from gldb.query.rdfstorequery import SparqlQuery
+from gldb.query import SparqlQuery
 
 SELECT_FAN_PROPERTIES = SparqlQuery(
-    sparql_query="""PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
+    query="""PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
 
 SELECT ?parameter ?property ?value
 WHERE {
@@ -12,7 +12,7 @@ WHERE {
     description="Selects all properties of the fan")
 
 SELECT_FAN_CAD_FILE = SparqlQuery(
-    sparql_query="""
+    query="""
 PREFIX schema: <http://schema.org/>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
@@ -29,7 +29,7 @@ WHERE {
 SELECT_ALL = SparqlQuery("SELECT * WHERE {?s ?p ?o}", description="Selects all triples in the RDF database")
 
 SELECT_ALL_OPERATION_POINTS = SparqlQuery(
-    sparql_query=""""
+    query=""""
 PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
 PREFIX qudt: <http://qudt.org/vocab/unit#>
     

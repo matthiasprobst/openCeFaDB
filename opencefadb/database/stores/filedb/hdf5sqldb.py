@@ -4,8 +4,8 @@ import pathlib
 import sqlite3
 
 import rdflib
-from gldb import RawDataStore
-from gldb.query import RawDataStoreQuery, QueryResult
+from gldb.stores import DataStore
+from gldb.query import DataStoreQuery, QueryResult
 
 from opencefadb.database.stores.filedb.database_resource import DatabaseResource
 from opencefadb.ontologies import dcat
@@ -13,17 +13,17 @@ from opencefadb.ontologies import dcat
 logger = logging.getLogger("opencefadb")
 
 
-class SQLQuery(RawDataStoreQuery):
+class SQLQuery(DataStoreQuery):
 
-    def __init__(self, sql_query: str, filters=None):
-        self.sql_query = sql_query
+    def __init__(self, query: str, description: str = None,filters=None, ):
+        super().__init__(query, description)
         self.filters = filters
 
     def execute(self, *args, **kwargs) -> QueryResult:
         pass
 
 
-class HDF5SqlDB(RawDataStore):
+class HDF5SqlDB(DataStore):
     """
     HDF5SQLDB is a SQL database interface that stores data in HDF5 files.
     """

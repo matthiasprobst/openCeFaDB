@@ -3,7 +3,7 @@ import pathlib
 
 import rdflib
 from gldb.query.query import QueryResult
-from gldb.query.rdfstorequery import SparqlQuery
+from gldb.query import SparqlQuery
 
 from ..abstracts import OpenCeFaDBRDFStore
 

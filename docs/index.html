@@ -137,7 +137,8 @@
     };
 
     // 🔗 Load TTL from remote GitHub repo
-    const ttlURL = 'https://raw.githubusercontent.com/matthiasprobst/openCeFaDB/dev/examples/me.ttl?raw=true';
+<!--    const ttlURL = 'https://raw.githubusercontent.com/matthiasprobst/openCeFaDB/dev-page/examples/me.ttl?raw=true';-->
+    const ttlURL = 'https://sandbox.zenodo.org/api/records/259585/draft/files/2023-11-07-15-42-29_run.ttl/content';
 
     fetch(ttlURL)
       .then(res => res.text())

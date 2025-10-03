@@ -3,13 +3,71 @@ import pathlib
 from typing import Union, Optional
 
 import rdflib
-from gldb.query import QueryResult
-from gldb.query.rdfstorequery import SparqlQuery
+from gldb.query import QueryResult, SparqlQuery
 from gldb.stores import RDFStore
 
 from .connection import GraphDB
 
 logger = logging.getLogger("opencefadb")
+
+EXCEPTION_PROPERTIES_NAMESPACES = {
+    str(rdflib.OWL),
+    str(rdflib.RDF),
+    str(rdflib.RDFS),
+    str(rdflib.XSD)
+}
+
+
+def _raise_on_blank_nodes(filename: Union[str, pathlib.Path],
+                          exception_properties=None) -> rdflib.Graph:
+    """Raises an error if the given RDF file contains blank nodes."""
+    if exception_properties is None:
+        exception_properties = EXCEPTION_PROPERTIES_NAMESPACES
+    filename = pathlib.Path(filename).resolve().absolute()
+    if not filename.exists():
+        raise FileNotFoundError(f"File '{filename}' does not exist")
+    temp_graph = rdflib.Graph()
+    temp_graph.parse(location=str(filename))
+
+    # Check if there are any blank nodes
+    has_blank_nodes = any(
+        isinstance(term, rdflib.BNode)
+        for triple in temp_graph
+        for term in triple
+    )
+    if has_blank_nodes:
+        for s, p, o in temp_graph:
+            if isinstance(s, rdflib.BNode) or isinstance(p, rdflib.BNode) or isinstance(o, rdflib.BNode):
+                # allow all owl properties:
+                for ep in exception_properties:
+                    if str(p).startswith(ep):
+                        break
+                else:
+                    raise ValueError(
+                        f"File '{filename}' contains blank nodes. Blank nodes are not supported: {s}, {p}, {o}")
+    return temp_graph
+
+
+class LocalRDFStore(RDFStore):
+    """A local RDF store using rdflib's in-memory store."""
+
+    def __init__(self):
+        self._graph = rdflib.Graph()
+        self._expected_file_extensions = {".ttl", ".rdf", ".jsonld"}
+
+    def upload_file(self, filename: Union[str, pathlib.Path]) -> bool:
+        """Uploads a file to the local RDF store."""
+        _tmp_graph = _raise_on_blank_nodes(filename)
+        logger.debug(f"Uploading file {filename} to local RDF store ...")
+        self._graph += _tmp_graph
+        return True
+
+    @property
+    def graph(self) -> rdflib.Graph:
+        return self._graph
+
+    def execute_query(self, SELECT_ALL):
+        pass
 
 
 class GraphDBStore(RDFStore):
@@ -20,7 +78,8 @@ class GraphDBStore(RDFStore):
             port,
             user,
             password,
-            repository):
+            repository
+    ):
         self._graphdb_url = f"http://{host}:{port}"
         self._auth = (user, password)
         _graphdb = GraphDB(
@@ -34,7 +93,7 @@ class GraphDBStore(RDFStore):
         self._expected_file_extensions = {".ttl", ".rdf", ".jsonld"}
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} (GraphDB-Repo={self._repo})>"
+        return f"<{self.__class__.__name__} (GraphDB-Repo={self._repo['id']})>"
 
     def reset(self, config_filename: Optional[Union[str, pathlib.Path]] = None):
         logger.debug("Resetting the GraphDB store.")
