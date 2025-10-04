@@ -11,6 +11,14 @@ from tqdm import tqdm
 logger = logging.getLogger("opencefadb")
 
 
+class ExportFormat(enum.Enum):
+    JSON_LD = "json-ld"
+    DCAT = "dcat-ap"
+    JSON = "json"
+    CODEMETA = "Codemeta"
+    CFF = "cff"
+
+
 def _parse_checksum_algorithm(algorithm: str) -> str:
     algorithm = str(algorithm)
     if algorithm in ("sha256", "sha-256", "sha_256"):
@@ -97,14 +105,6 @@ def download_multiple_files(
             except Exception as e:
                 print(f"Failed to download a file: {e}")
     return results
-
-
-class ExportFormat(enum.Enum):
-    JSON_LD = "json-ld"
-    DCAT = "dcat-ap"
-    JSON = "json"
-    CODEMETA = "Codemeta"
-    CFF = "cff"
 
 
 def download_zenodo_metadata(record_id: int,

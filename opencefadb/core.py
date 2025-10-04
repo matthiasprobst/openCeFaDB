@@ -1,31 +1,59 @@
-import logging
+import enum
+import hashlib
 import pathlib
-from typing import Any, Optional, Union
+import shutil
+from dataclasses import dataclass
+from typing import List, Union, Optional
 
-import pandas as pd
 import rdflib
 from gldb import GenericLinkedDatabase
-from gldb.query import Query
 from gldb.stores import RDFStore, DataStore
+from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 
-from opencefadb.dbinit import download_metadata_datasets, _get_metadata_datasets, MediaType
+from opencefadb import logger
 from opencefadb.query_templates.sparql import (
-    SELECT_FAN_PROPERTIES,
-    SELECT_ALL,
-    SELECT_FAN_CAD_FILE,
-    SELECT_ALL_OPERATION_POINTS
+    SELECT_FAN_CAD_FILE
 )
 from opencefadb.stores.rdf_stores.rdffiledb.rdffilestore import RDFFileStore
 from opencefadb.utils import download_file
+from opencefadb.utils import download_multiple_files
 
-logger = logging.getLogger("opencefadb")
 __this_dir__ = pathlib.Path(__file__).parent
 CONFIG_DIR = __this_dir__
 
 _db_instance = None
 
 
-def _parse_to_qname(uri: rdflib.URIRef):
+@dataclass
+class DistributionMetadata:
+    download_url: str
+    size: Optional[str] = None
+    checksum: Optional[str] = None
+    checksum_algorithm: Optional[str] = None
+
+
+class MediaType(enum.Enum):
+    JSON_LD = "application/ld+json"
+    TURTLE = "text/turtle"
+    IGES = "model/iges"
+
+    @classmethod
+    def parse(cls, media_type: str):
+        media_type = str(media_type)
+        if media_type is None:
+            return None
+        if media_type.startswith("https://"):
+            media_type = str(media_type).rsplit('media-types/', 1)[-1]
+        elif media_type.startswith("http://"):
+            media_type = str(media_type).rsplit('media-types/', 1)[-1]
+        try:
+            return cls(media_type)
+        except ValueError:
+            return None
+
+
+def _parse_to_qualified_name(uri: rdflib.URIRef):
+    """Converts a URI to a qualified name using the namespaces defined in RDFFileStore."""
     uri_str = str(uri)
     for prefix, namespace in RDFFileStore.namespaces.items():
         if namespace in uri_str:
@@ -33,11 +61,187 @@ def _parse_to_qname(uri: rdflib.URIRef):
     return uri_str
 
 
-class QueryResult:
+def _url_hash(url: str) -> str:
+    return hashlib.sha256(url.encode("utf-8")).hexdigest()
 
-    def __init__(self, query: Query, result: Any):
-        self.query = query
-        self.result = result
+
+def _get_download_urls_of_metadata_distributions_of_publisher(
+        publisher: str,
+        identifier: str
+):
+    publisher = str(publisher)
+    if publisher.lower() != "zenodo":
+        raise ValueError(f"Unsupported publisher: {publisher}")
+    return _get_download_urls_of_metadata_distributions_of_zenodo_record(identifier)
+
+
+def _get_download_urls_of_metadata_distributions_of_zenodo_record(identifier: str) -> List[DistributionMetadata]:
+    _identifier = str(identifier)
+    sandbox = "10.5072/zenodo" in _identifier
+    record_id = _identifier.rsplit('zenodo.', 1)[-1]
+    z = ZenodoRecord(source=int(record_id), sandbox=sandbox)
+    return [DistributionMetadata(download_url=file.download_url, size=file.size, checksum=file.checksum,
+                                 checksum_algorithm=file.checksum_algorithm) for filename, file in z.files.items() if
+            filename.endswith('.ttl') or filename.endswith('.jsonld')]
+
+
+def _get_metadata_datasets(
+        config_filename: Union[str, pathlib.Path],
+        config_dir: Union[str, pathlib.Path]
+) -> rdflib.Graph:
+    """Parses the configuration file and returns the graph with metadata datasets.
+    The configuration file should contain DCAT descriptions of datasets.
+
+    Parameters
+    ----------
+    config_filename : str or pathlib.Path
+        The path to the configuration file (e.g., config.ttl or config.jsonld).
+    config_dir : str or pathlib.Path
+        The directory where the configuration file will be copied to and parsed from.
+    """
+    config_filename = pathlib.Path(config_filename)
+    if not config_filename.exists():
+        raise FileNotFoundError(f"Configuration file not found: {config_filename}")
+    config_dir = pathlib.Path(config_dir)
+    if not config_dir.exists():
+        raise FileNotFoundError(f"Configuration directory not found: {config_dir}")
+    config_suffix = config_filename.suffix
+    db_dataset_config_filename = config_dir / f"db-dataset-config.{config_suffix}"
+    shutil.copy(config_filename, db_dataset_config_filename)
+
+    logger.debug(f"Parsing database dataset config '{db_dataset_config_filename.resolve().absolute()}'...")
+
+    if config_suffix == '.ttl':
+        fmt = "ttl"
+    elif config_suffix in ('.json', '.jsonld', '.json-ld'):
+        fmt = "json-ld"
+    else:
+        raise ValueError(f"Unsupported config file suffix: {config_suffix}")
+    g = rdflib.Graph()
+    g.parse(source=db_dataset_config_filename, format=fmt)
+    logger.debug("Successfully parsed database dataset config.")
+    return g
+
+
+def _download_metadata_datasets(
+        graph: rdflib.Graph,
+        allowed_media_types=None,
+        download_dir=None,
+        n_threads=4,
+        exist_ok: bool = False) -> List[pathlib.Path]:
+    """Downloads all metadata datasets from the given RDF graph.
+
+    If a dataset is a zenodo record, all ttl and jsonld distributions will be downloaded."""
+    if allowed_media_types is None:
+        allowed_media_types = [None, ]
+    if download_dir is None:
+        download_dir = pathlib.Path.cwd()
+    else:
+        download_dir = pathlib.Path(download_dir)
+
+    logger.debug(f"Downloading metadata datasets to '{download_dir.resolve().absolute()}' ...")
+
+    res = graph.query(f"""
+    PREFIX dcat: <http://www.w3.org/ns/dcat#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+    PREFIX spdx: <http://spdx.org/rdf/terms#>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+    SELECT ?identifier ?downloadURL ?checksumValue ?checksumAlgorithm ?publisherName ?mediaType
+    WHERE {{
+      ?dataset a dcat:Dataset .
+      ?dataset dct:identifier ?identifier .
+      OPTIONAL {{
+        ?dataset dcat:distribution ?distribution .
+        ?distribution dcat:downloadURL ?downloadURL .
+        ?distribution dcat:mediaType ?mediaType .
+        OPTIONAL {{
+          ?distribution dcat:checksum ?checksum .
+          ?checksum spdx:checksumValue ?checksumValue .
+          ?checksum spdx:algorithm ?checksumAlgorithm .
+        }}
+      }}
+      OPTIONAL {{
+        ?dataset dct:publisher ?publisher .
+        ?publisher foaf:Agent ?agent .
+        ?agent foaf:name ?publisherName .
+      }}
+    }}
+    """)
+    checksums = []
+    target_filenames = []
+    return_filenames = []
+    download_urls = []
+    download_flags = []
+    for r in res.bindings:
+        if MediaType.parse(r.get(rdflib.Variable("mediaType"), None)) not in allowed_media_types:
+            logger.info(f"Skipping dataset with media type '{r.get(rdflib.Variable('mediaType'), None)}' ...")
+            continue
+        else:
+            has_distributions = rdflib.Variable("downloadURL") in r
+            if not has_distributions and rdflib.Variable("publisherName") in r:
+                distributions = _get_download_urls_of_metadata_distributions_of_publisher(
+                    str(rdflib.Variable("publisherName")),
+                    r[rdflib.Variable("identifier")])
+            else:
+                _checksum = r.get(rdflib.Variable("checksumValue"), None)
+                _checksum_algorithm = r.get(rdflib.Variable("checksumAlgorithm"), None)
+                if _checksum is None or _checksum_algorithm is None:
+                    _checksum = None
+                    _checksum_algorithm = None
+                    logger.info(f"No checksum information found for dataset '{r[rdflib.Variable('identifier')]}'")
+                distributions = [
+                    DistributionMetadata(
+                        download_url=str(r[rdflib.Variable("downloadURL")]),
+                        checksum=_checksum,
+                        checksum_algorithm=_checksum_algorithm
+                    )
+                ]
+            logger.debug(f"Found {len(distributions)} distributions.")
+
+            for d in distributions:
+                _filename = pathlib.Path(d.download_url.rsplit('/', 1)[-1])
+                _suffix = _filename.suffix
+                _name = _url_hash(d.download_url) + _suffix
+                target_filename = download_dir / _name
+
+                if target_filename in target_filenames:
+                    logger.debug(f"File {target_filename.name} already in download list, skipping duplicate.")
+                    download_flags.append(False)
+                elif target_filename.exists() and not exist_ok:
+                    download_flags.append(False)
+                    logger.debug(f"File {target_filename.name} already exists, skipping download.")
+                else:
+                    download_flags.append(True)
+                target_filenames.append(target_filename)
+                download_urls.append(d.download_url)
+                checksums.append({"checksum": d.checksum, "checksum_algorithm": d.checksum_algorithm})
+
+    if n_threads == 1:
+        for download_url, target_filename, checksum_data, download_flag in zip(download_urls, target_filenames,
+                                                                               checksums, download_flags):
+            if download_flag:
+                checksum = checksum_data.get("checksum", None)
+                checksum_algorithm = checksum_data.get("checksum_algorithm", None)
+                if target_filename.exists() and not exist_ok:
+                    logger.debug(f"File {target_filename.name} already exists, skipping download.")
+                    continue
+                logger.info(f"Downloading file {target_filename.name} ...")
+                return_filenames.append(download_file(
+                    download_url,
+                    target_filename.resolve(),
+                    checksum=checksum,
+                    checksum_algorithm=checksum_algorithm)
+                )
+    else:
+        download_multiple_files(
+            urls=[download_url for download_url, flag in zip(download_urls, download_flags) if flag],
+            target_filenames=[target_filename for target_filename, flag in zip(target_filenames, download_flags) if
+                              flag],
+            max_workers=n_threads,
+            checksums=[checksum for checksum, flag in zip(checksums, download_flags) if flag],
+        )
+    return target_filenames
 
 
 class OpenCeFaDB(GenericLinkedDatabase):
@@ -55,6 +259,9 @@ class OpenCeFaDB(GenericLinkedDatabase):
                 "hdf": hdf_store,
             }
         )
+        config_filename = pathlib.Path(config_filename)
+        if not config_filename.exists():
+            raise FileNotFoundError(f"Config file {config_filename.resolve()} does not exist.")
         self.working_directory = pathlib.Path(working_directory)
         self.working_directory.mkdir(parents=True, exist_ok=True)
         self.cache_directory = self.working_directory / ".opencefadb"
@@ -67,7 +274,7 @@ class OpenCeFaDB(GenericLinkedDatabase):
     def _initialize(self, config_filename: Union[str, pathlib.Path], exist_ok=False):
         download_dir = self.cache_directory
         download_dir.mkdir(parents=True, exist_ok=True)
-        filenames = download_metadata_datasets(
+        filenames = _download_metadata_datasets(
             _get_metadata_datasets(config_filename, self.working_directory),
             download_dir=download_dir,
             exist_ok=exist_ok,
@@ -77,30 +284,30 @@ class OpenCeFaDB(GenericLinkedDatabase):
             print("Uploading", filename)
             self.stores.rdf.upload_file(filename)
 
-    @classmethod
-    def setup_local_default(
-            cls,
-            working_directory: Optional[Union[str, pathlib.Path]] = None,
-            config_filename: Optional[Union[str, pathlib.Path]] = None):
-        from opencefadb.stores import RDFFileStore
-        from opencefadb.stores import HDF5SqlDB
-        if working_directory is not None:
-            working_directory = pathlib.Path(working_directory)
-        else:
-            working_directory = pathlib.Path.cwd()
-        if config_filename is None:
-            config_filename = __this_dir__ / "db-dataset-config.ttl"
-        else:
-            config_filename = pathlib.Path(config_filename)
-            if not config_filename.exists():
-                raise FileNotFoundError(f"Config file {config_filename.resolve()} does not exist.")
-        working_directory.mkdir(parents=True, exist_ok=True)
-        return cls(
-            metadata_store=RDFFileStore(data_dir=working_directory / "metadata"),
-            hdf_store=HDF5SqlDB(),
-            working_directory=working_directory,
-            config_filename=config_filename
-        )
+    # @classmethod
+    # def setup_local_default(
+    #         cls,
+    #         working_directory: Optional[Union[str, pathlib.Path]] = None,
+    #         config_filename: Optional[Union[str, pathlib.Path]] = None):
+    #     from opencefadb.stores import RDFFileStore
+    #     from opencefadb.stores import HDF5SqlDB
+    #     if working_directory is not None:
+    #         working_directory = pathlib.Path(working_directory)
+    #     else:
+    #         working_directory = pathlib.Path.cwd()
+    #     if config_filename is None:
+    #         config_filename = __this_dir__ / "db-dataset-config.ttl"
+    #     else:
+    #         config_filename = pathlib.Path(config_filename)
+    #         if not config_filename.exists():
+    #             raise FileNotFoundError(f"Config file {config_filename.resolve()} does not exist.")
+    #     working_directory.mkdir(parents=True, exist_ok=True)
+    #     return cls(
+    #         metadata_store=RDFFileStore(data_dir=working_directory / "metadata"),
+    #         hdf_store=HDF5SqlDB(),
+    #         working_directory=working_directory,
+    #         config_filename=config_filename
+    #     )
 
     # def download_metadata(self):
     #     """Downloads metadata files from the metadata directory."""
@@ -108,75 +315,44 @@ class OpenCeFaDB(GenericLinkedDatabase):
     #     for file in metadata_store.data_dir.glob("*.ttl"):
     #         print(f"> Downloading metadata file: {file.name} ...")
 
-    def upload_hdf(self, filename: pathlib.Path):
-        """Uploads a file to all stores in the store manager. Not all stores may support this operation.
-        This is then skipped."""
-        filename = pathlib.Path(filename)
-        if not filename.exists():
-            raise FileNotFoundError(f"File {filename} does not exist.")
-        hdf_db_id = self.stores.hdf.upload_file(filename)
-        # get the metadata:
-        import h5rdmtoolbox as h5tbx
-        meta_filename = self.metadata_directory / f"{filename.stem}.ttl"
-        try:
-            with open(meta_filename, "w", encoding="utf-8") as f:
-                f.write(h5tbx.serialize(filename, fmt="turtle", indent=2, file_uri="https://local.org/"))
-        except Exception as e:
-            logger.error(f"Error while generating metadata for {filename}: {e}")
-            meta_filename.unlink(missing_ok=True)
-            raise e
-        self.stores.rdf.upload_file(meta_filename)
-
-        # # now link both items:
-        # g = rdflib.Graph()
-        # g.parse(meta_filename, format="turtle")
-        # sparql = f"""
-        # PREFIX hdf5: <http://purl.allotrope.org/ontologies/hdf5/1.8#>
-        #
-        # SELECT ?h5id
-        # WHERE {{
-        #     ?h5id a hdf5:File .
-        # }}
-        # LIMIT 1
-        # """
-        # result = g.query(sparql)
-        # # print(str(result.bindings[0].get(rdflib.Variable("h5id"))))
-        # # # TODO: link the resources using what? owl: sameAs?
-        # # self.store_manager["rdf_db"].link_resources(hdf_db_id, str(result.bindings[0].get(rdflib.Variable("h5id"))))
-        return hdf_db_id
+    # def upload_hdf(self, filename: pathlib.Path):
+    #     """Uploads a file to all stores in the store manager. Not all stores may support this operation.
+    #     This is then skipped."""
+    #     filename = pathlib.Path(filename)
+    #     if not filename.exists():
+    #         raise FileNotFoundError(f"File {filename} does not exist.")
+    #     hdf_db_id = self.stores.hdf.upload_file(filename)
+    #     # get the metadata:
+    #     meta_filename = self.metadata_directory / f"{filename.stem}.ttl"
+    #     try:
+    #         with open(meta_filename, "w", encoding="utf-8") as f:
+    #             f.write(h5tbx.serialize(filename, fmt="turtle", indent=2, file_uri="https://local.org/"))
+    #     except Exception as e:
+    #         logger.error(f"Error while generating metadata for {filename}: {e}")
+    #         meta_filename.unlink(missing_ok=True)
+    #         raise e
+    #     self.stores.rdf.upload_file(meta_filename)
+    #
+    #     # # now link both items:
+    #     # g = rdflib.Graph()
+    #     # g.parse(meta_filename, format="turtle")
+    #     # sparql = f"""
+    #     # PREFIX hdf5: <http://purl.allotrope.org/ontologies/hdf5/1.8#>
+    #     #
+    #     # SELECT ?h5id
+    #     # WHERE {{
+    #     #     ?h5id a hdf5:File .
+    #     # }}
+    #     # LIMIT 1
+    #     # """
+    #     # result = g.query(sparql)
+    #     # # print(str(result.bindings[0].get(rdflib.Variable("h5id"))))
+    #     # # # TODO: link the resources using what? owl: sameAs?
+    #     # # self.store_manager["rdf_db"].link_resources(hdf_db_id, str(result.bindings[0].get(rdflib.Variable("h5id"))))
+    #     return hdf_db_id
 
     def linked_upload(self, filename: Union[str, pathlib.Path]):
         raise NotImplemented("Linked upload not yet implemented")
-
-    def select_fan_properties(self):
-        def _parse_term(term):
-            if isinstance(term, rdflib.URIRef):
-                return _parse_to_qname(term)
-            if isinstance(term, rdflib.Literal):
-                return term.value
-            return term
-
-        result = self.execute_query("rdf_db", SELECT_FAN_PROPERTIES)
-        result_data = [{str(k): _parse_term(v) for k, v in binding.items()} for binding in result.result.bindings]
-        variables = {}
-        for data in result_data:
-            if data["parameter"] not in variables:
-                variables[data["parameter"]] = {}
-
-            _data = data.copy()
-            if data["property"] in ("m4i:hasStringValue", "m4i:hasNumericalValue"):
-                key = "value"
-            else:
-                key = data["property"]
-
-            if isinstance(data["value"], str) and "/standard_names/" in data["value"]:
-                value = data["value"].split("/standard_names/")[-1]
-            else:
-                value = data["value"]
-            variables[data["parameter"]][key] = value
-        for var in variables.values():
-            var.pop("rdf:type")
-        return pd.DataFrame(variables.values())
 
     def download_cad_file(self, target_dir: Union[str, pathlib.Path], exist_ok=False):
         """Queries the RDF database for the iges cad file"""
@@ -190,9 +366,3 @@ class OpenCeFaDB(GenericLinkedDatabase):
         if target_filename.exists() and exist_ok:
             return target_filename
         return download_file(download_url, target_dir / _guess_filenames)
-
-    def select_all(self) -> QueryResult:
-        return self.execute_query("rdf_db", SELECT_ALL)
-
-    def select_all_operation_points(self):
-        result = self.execute_query("rdf_db", SELECT_ALL_OPERATION_POINTS)
