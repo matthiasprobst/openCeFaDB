@@ -9,7 +9,6 @@
 <https://doi.org/10.5281/zenodo.14055811> a dcat:Dataset ;
     dct:identifier "10.5281/zenodo.14055811" ;
     owl:sameAs <https://zenodo.org/record/14055811> ;
-    dct:publisher [ foaf:Agent [ foaf:name "Zenodo" ] ] ;
     dcat:distribution [ dcat:downloadURL <https://zenodo.org/records/14055811/files/Standard_Name_Table_for_the_Property_Descriptions_of_Centrifugal_Fans.jsonld> ;
             dcat:mediaType <https://www.iana.org/assignments/media-types/application/ld+json> ] ;
     dcat:landingPage <https://zenodo.org/record/14055811> .
@@ -27,7 +26,6 @@
 <https://doi.org/10.5072/zenodo.344192> a dcat:Dataset ;
     dct:identifier "10.5281/zenodo.344192" ;
     dct:license <https://spdx.org/licenses/CC-BY-4.0> ;
-    dct:publisher [ foaf:Agent [ foaf:name "Zenodo" ] ] ;
     dct:title "OpenCeFaDB Test OPM Data"@en ;
     dcat:distribution [ dct:title "CAD Model of the Centrifugal fan assembly (IGES)"@en ;
             dcat:accessURL <https://doi.org/10.5072/zenodo.344192> ;
@@ -51,7 +49,7 @@
             dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ] .
 
 <https://doi.org/10.5281/zenodo.14551649> a dcat:Dataset ;
-    dct:identifier "https://doi.org/10.5281/zenodo.14551649" ;
+    dct:identifier "https://doi.org/10.5072/zenodo.14551649" ;
     dct:license <https://spdx.org/licenses/CC-BY-4.0> ;
     dct:publisher [ foaf:Agent [ foaf:name "Zenodo" ] ] ;
     dct:title "Zenodo record containing the CAD Model of the Centrifugal fan of the open centrifugal fan database"@en ;

@@ -181,3 +181,17 @@ def download_zenodo_dcat_metadata(record_id: int,
     if target_filename:
         return serialized_filename.rename(pathlib.Path(target_filename))
     return serialized_filename
+
+
+def compute_md5(filename: Union[str, pathlib.Path]) -> str:
+    """Compute the MD5 checksum of a file."""
+    import hashlib
+    filename = pathlib.Path(filename)
+    if not filename.exists():
+        raise FileNotFoundError(f"File {filename} does not exist.")
+    hasher = hashlib.md5()
+    with open(filename, 'rb') as f:
+        # Read and update hash string value in blocks of 4K
+        for byte_block in iter(lambda: f.read(4096), b""):
+            hasher.update(byte_block)
+    return hasher.hexdigest()

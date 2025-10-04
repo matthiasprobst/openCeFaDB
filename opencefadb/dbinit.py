@@ -112,6 +112,15 @@ def _url_hash(url: str) -> str:
     return hashlib.sha256(url.encode("utf-8")).hexdigest()
 
 
+def get_download_urls_of_metadata_distributions_of_publisher(
+        publisher: str,
+        identifier: str
+):
+    publisher = str(publisher)
+    if publisher.lower() != "zenodo":
+        raise ValueError(f"Unsupported publisher: {publisher}")
+    return get_download_urls_of_metadata_distributions_of_zenodo_record(identifier)
+
 def get_download_urls_of_metadata_distributions_of_zenodo_record(identifier: str) -> List[DistributionMetadata]:
     _identifier = str(identifier)
     sandbox = "10.5072/zenodo" in _identifier
@@ -193,7 +202,8 @@ def download_metadata_datasets(
         else:
             has_distributions = rdflib.Variable("downloadURL") in r
             if not has_distributions and rdflib.Variable("publisherName") in r:
-                distributions = get_download_urls_of_metadata_distributions_of_zenodo_record(
+                distributions = get_download_urls_of_metadata_distributions_of_publisher(
+                    str(rdflib.Variable("publisherName")),
                     r[rdflib.Variable("identifier")])
             else:
                 _checksum = r.get(rdflib.Variable("checksumValue"), None)
