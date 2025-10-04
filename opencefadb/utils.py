@@ -2,7 +2,7 @@ import enum
 import logging
 import pathlib
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 
 import rdflib
 import requests
@@ -11,8 +11,32 @@ from tqdm import tqdm
 logger = logging.getLogger("opencefadb")
 
 
-def download_file(download_url, target_filename, params=None) -> pathlib.Path:
+def _parse_checksum_algorithm(algorithm: str) -> str:
+    algorithm = str(algorithm)
+    if algorithm in ("sha256", "sha-256", "sha_256"):
+        return "sha256"
+    elif algorithm in ("md5", "md-5", "md_5"):
+        return "md5"
+    elif algorithm in ("sha1", "sha-1", "sha_1"):
+        return "sha1"
+    if "spdx.org/rdf/terms#" in algorithm:
+        return algorithm.rsplit("_", 1)[-1]
+    elif algorithm.startswith("http:"):
+        return algorithm.rsplit('/', 1)[-1].lower()
+    raise ValueError(f"Unsupported checksum algorithm: {algorithm}")
+
+
+def download_file(download_url,
+                  target_filename,
+                  checksum: str = None,
+                  checksum_algorithm: str = None) -> pathlib.Path:
     """Downloads from a URL"""
+    import hashlib
+    if checksum is not None:
+        if checksum_algorithm is None:
+            raise ValueError("If checksum is provided, checksum_algorithm must also be provided.")
+        checksum_algorithm = _parse_checksum_algorithm(checksum_algorithm)
+        checksum = {'value': checksum, 'algorithm': checksum_algorithm}
     target_filename = pathlib.Path(target_filename)
     logger.debug(f"Downloading metadata file from URL {download_url}...")
     response = requests.get(download_url, stream=True)
@@ -21,28 +45,51 @@ def download_file(download_url, target_filename, params=None) -> pathlib.Path:
     total_size = int(response.headers.get('content-length', 0))  # Get total file size
     chunk_size = 1024  # Define chunk size for download
 
+    hasher = None
+    if checksum is not None:
+        try:
+            hasher = hashlib.new(checksum_algorithm)
+        except ValueError:
+            raise ValueError(f"Unsupported checksum algorithm: {checksum_algorithm}")
+
     with tqdm(total=total_size, unit='B', unit_scale=True, desc=target_filename.name, initial=0) as progress:
         with open(target_filename, 'wb') as f:
             for chunk in response.iter_content(chunk_size=chunk_size):
                 if chunk:  # Filter out keep-alive chunks
                     f.write(chunk)
                     progress.update(len(chunk))
+                    if hasher:
+                        hasher.update(chunk)
 
     assert target_filename.exists(), f"File {target_filename} does not exist."
     logger.debug(f"Download successful.")
 
+    if hasher:
+        file_checksum = hasher.hexdigest()
+        if file_checksum != checksum['value']:
+            raise ValueError(
+                f"Checksum mismatch for {target_filename}: expected {checksum['value']}, got {file_checksum}")
+        logger.debug(f"Checksum verification successful.")
+
     return target_filename
 
 
-def download_multiple_files(urls, target_filenames, max_workers=4) -> List[pathlib.Path]:
+def download_multiple_files(
+        urls,
+        target_filenames,
+        max_workers=4,
+        checksums: Optional[List[Dict]] = None) -> List[pathlib.Path]:
     """Download multiple files concurrently."""
     if max_workers == 1:
-        return [download_file(url, target_filename) for url, target_filename in zip(urls, target_filenames)]
+        return [download_file(url, target_filename, **checksum) for url, target_filename, checksum in
+                zip(urls, target_filenames, checksums)]
 
     results = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(download_file, url, target_filename) for url, target_filename in
-                   zip(urls, target_filenames)]
+        futures = [
+            executor.submit(download_file, url, target_filename, checksum["checksum"], checksum["checksum_algorithm"])
+            for url, target_filename, checksum in
+            zip(urls, target_filenames, checksums)]
         for future in futures:
             # Wait for each future to complete (can handle exceptions if needed)
             try:

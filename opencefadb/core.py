@@ -8,7 +8,7 @@ from gldb import GenericLinkedDatabase
 from gldb.query import Query
 from gldb.stores import RDFStore, DataStore
 
-from opencefadb.dbinit import download_metadata_datasets, _get_metadata_datasets
+from opencefadb.dbinit import download_metadata_datasets, _get_metadata_datasets, MediaType
 from opencefadb.query_templates.sparql import (
     SELECT_FAN_PROPERTIES,
     SELECT_ALL,
@@ -70,24 +70,36 @@ class OpenCeFaDB(GenericLinkedDatabase):
         filenames = download_metadata_datasets(
             _get_metadata_datasets(config_filename, self.working_directory),
             download_dir=download_dir,
-            exist_ok=exist_ok
+            exist_ok=exist_ok,
+            allowed_media_types=[MediaType.JSON_LD, MediaType.TURTLE]
         )
         for filename in filenames:
+            print("Uploading", filename)
             self.stores.rdf.upload_file(filename)
 
     @classmethod
-    def setup_local_default(cls, working_directory: Optional[Union[str, pathlib.Path]] = None):
+    def setup_local_default(
+            cls,
+            working_directory: Optional[Union[str, pathlib.Path]] = None,
+            config_filename: Optional[Union[str, pathlib.Path]] = None):
         from opencefadb.stores import RDFFileStore
         from opencefadb.stores import HDF5SqlDB
         if working_directory is not None:
             working_directory = pathlib.Path(working_directory)
         else:
             working_directory = pathlib.Path.cwd()
+        if config_filename is None:
+            config_filename = __this_dir__ / "db-dataset-config.ttl"
+        else:
+            config_filename = pathlib.Path(config_filename)
+            if not config_filename.exists():
+                raise FileNotFoundError(f"Config file {config_filename.resolve()} does not exist.")
+        working_directory.mkdir(parents=True, exist_ok=True)
         return cls(
             metadata_store=RDFFileStore(data_dir=working_directory / "metadata"),
             hdf_store=HDF5SqlDB(),
             working_directory=working_directory,
-            config_filename=__this_dir__ / "db-dataset-config.ttl"
+            config_filename=config_filename
         )
 
     # def download_metadata(self):

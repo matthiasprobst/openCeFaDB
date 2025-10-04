@@ -51,7 +51,7 @@
             dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ] .
 
 <https://doi.org/10.5281/zenodo.14551649> a dcat:Dataset ;
-    dct:identifier "https://doi.org/10.5072/zenodo.14551649" ;
+    dct:identifier "https://doi.org/10.5281/zenodo.14551649" ;
     dct:license <https://spdx.org/licenses/CC-BY-4.0> ;
     dct:publisher [ foaf:Agent [ foaf:name "Zenodo" ] ] ;
     dct:title "Zenodo record containing the CAD Model of the Centrifugal fan of the open centrifugal fan database"@en ;
