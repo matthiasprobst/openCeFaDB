@@ -1,5 +1,4 @@
 import pathlib
-import shutil
 import unittest
 
 import dotenv
@@ -7,10 +6,10 @@ from gldb.query import RemoteSparqlQuery
 from gldb.stores import GraphDB
 
 import opencefadb
+from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
+from opencefadb.stores import RDFFileStore, HDF5SqlDB
 
 __this_dir__ = pathlib.Path(__file__).parent
-
-from opencefadb.stores import RDFFileStore, HDF5SqlDB
 
 
 class TestInitDatabase(unittest.TestCase):
@@ -38,7 +37,7 @@ class TestInitDatabase(unittest.TestCase):
 
         # get size of the graph:
         graph = local_db.stores.rdf.graph
-        self.assertEqual(len(graph), 7752)
+        self.assertEqual(len(graph), 22122)
 
         # also the second time should work (exist_ok=True):
         local_db = opencefadb.OpenCeFaDB(
@@ -48,8 +47,9 @@ class TestInitDatabase(unittest.TestCase):
             config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
         )
         graph = local_db.stores.rdf.graph
-        self.assertEqual(len(graph), 7752)
+        self.assertEqual(len(graph), 22249)
 
+    @unittest.skip("Only test locally with a running GraphDB instance")
     def test_graphdb(self):
         gdb = GraphDB(
             endpoint="http://localhost:7201",
@@ -57,6 +57,7 @@ class TestInitDatabase(unittest.TestCase):
             username="admin",
             password="admin"
         )
+        gdb.delete_repository()
         res = gdb.get_or_create_repository(__this_dir__ / "graphdb-config-sandbox.ttl")
         self.assertTrue(res)
 
@@ -92,3 +93,53 @@ class TestInitDatabase(unittest.TestCase):
         #     working_directory=self.working_dir,
         #     config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
         # )
+
+    def test_db_with_graphdb(self):
+        gdb = GraphDB(
+            endpoint="http://localhost:7201",
+            repository="OpenCeFaDB-Sandbox",
+            username="admin",
+            password="admin"
+        )
+        # reset repository:
+        if gdb.get_repository_info("OpenCeFaDB-Sandbox"):
+            gdb.delete_repository("OpenCeFaDB-Sandbox")
+        res = gdb.get_or_create_repository(__this_dir__ / "graphdb-config-sandbox.ttl")
+        self.assertTrue(res)
+
+        local_db = opencefadb.OpenCeFaDB(
+            metadata_store=gdb,
+            hdf_store=HDF5SqlDB(),
+            working_directory=self.working_dir,
+            config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
+        )
+        res = RemoteSparqlQuery(
+            "SELECT * WHERE { ?s ?p ?o }",
+            description="Selects all triples in the RDF database"
+        ).execute(local_db.stores.rdf)
+
+        count = len(res.data["results"]["bindings"])
+        tripels = gdb.count_triples(key="total")
+        self.assertEqual(count, tripels)
+
+        res = RemoteSparqlQuery(
+            SELECT_FAN_PROPERTIES.query,
+            description="Selects all properties of the fan"
+        ).execute(local_db.stores.rdf)
+
+        res = RemoteSparqlQuery(
+            """
+            PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
+            PREFIX qudt: <http://qudt.org/vocab/unit#>
+            PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
+            
+            SELECT ?value ?unit
+            WHERE {
+              ?variable a m4i:NumericalVariable ;
+                        ssno:hasStandardName <https://doi.org/10.5281/zenodo.14055811/standard_names/hub_diameter> ;
+                        m4i:hasUnit ?unit ;
+                        m4i:hasNumericalValue ?value .
+            }""",
+            description="Selects the hub diameter of the fan"
+        ).execute(local_db.stores.rdf)
+        print(res.data)

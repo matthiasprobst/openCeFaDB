@@ -1,4 +1,5 @@
 import enum
+import hashlib
 import logging
 import pathlib
 from concurrent.futures import ThreadPoolExecutor
@@ -39,7 +40,6 @@ def download_file(download_url,
                   checksum: str = None,
                   checksum_algorithm: str = None) -> pathlib.Path:
     """Downloads from a URL"""
-    import hashlib
     if checksum is not None:
         if checksum_algorithm is None:
             raise ValueError("If checksum is provided, checksum_algorithm must also be provided.")

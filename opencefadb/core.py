@@ -143,28 +143,27 @@ def _download_metadata_datasets(
 
     res = graph.query(f"""
     PREFIX dcat: <http://www.w3.org/ns/dcat#>
-    PREFIX dct: <http://purl.org/dc/terms/>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
     PREFIX spdx: <http://spdx.org/rdf/terms#>
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
     SELECT ?identifier ?downloadURL ?checksumValue ?checksumAlgorithm ?publisherName ?mediaType
     WHERE {{
       ?dataset a dcat:Dataset .
-      ?dataset dct:identifier ?identifier .
+      ?dataset dcterms:identifier ?identifier .
       OPTIONAL {{
         ?dataset dcat:distribution ?distribution .
         ?distribution dcat:downloadURL ?downloadURL .
         ?distribution dcat:mediaType ?mediaType .
         OPTIONAL {{
-          ?distribution dcat:checksum ?checksum .
+          ?distribution spdx:checksum ?checksum .
           ?checksum spdx:checksumValue ?checksumValue .
           ?checksum spdx:algorithm ?checksumAlgorithm .
         }}
       }}
       OPTIONAL {{
-        ?dataset dct:publisher ?publisher .
-        ?publisher foaf:Agent ?agent .
-        ?agent foaf:name ?publisherName .
+        ?dataset dcterms:publisher ?publisher .
+        ?publisher foaf:name ?publisherName .
       }}
     }}
     """)
@@ -174,16 +173,23 @@ def _download_metadata_datasets(
     download_urls = []
     download_flags = []
     for r in res.bindings:
-        if MediaType.parse(r.get(rdflib.Variable("mediaType"), None)) not in allowed_media_types:
-            logger.info(f"Skipping dataset with media type '{r.get(rdflib.Variable('mediaType'), None)}' ...")
+        media_type = MediaType.parse(r.get(rdflib.Variable("mediaType"), None))
+        if media_type is not None and media_type not in allowed_media_types:
+            logger.info(f"Skipping dataset with media type '{media_type}' ...")
             continue
         else:
             has_distributions = rdflib.Variable("downloadURL") in r
             if not has_distributions and rdflib.Variable("publisherName") in r:
+                publisher = str(r[rdflib.Variable("publisherName")])
+                identifier = str(r[rdflib.Variable("identifier")])
+
+                logger.debug(
+                    f"Getting all distributions related to identifier '{identifier}' and publisher '{publisher}' ...")
                 distributions = _get_download_urls_of_metadata_distributions_of_publisher(
-                    str(rdflib.Variable("publisherName")),
-                    r[rdflib.Variable("identifier")])
-            else:
+                    publisher,
+                    identifier
+                )
+            elif has_distributions:
                 _checksum = r.get(rdflib.Variable("checksumValue"), None)
                 _checksum_algorithm = r.get(rdflib.Variable("checksumAlgorithm"), None)
                 if _checksum is None or _checksum_algorithm is None:
@@ -272,14 +278,18 @@ class OpenCeFaDB(GenericLinkedDatabase):
         self._initialize(config_filename)
 
     def _initialize(self, config_filename: Union[str, pathlib.Path], exist_ok=False):
+        """Initializes the database by downloading and uploading metadata files."""
         download_dir = self.cache_directory
         download_dir.mkdir(parents=True, exist_ok=True)
-        filenames = _download_metadata_datasets(
+        ttl_filenames = download_dir.glob("*.ttl")
+        jsonld_filenames = download_dir.glob("*.jsonld")
+        downloaded_filenames = _download_metadata_datasets(
             _get_metadata_datasets(config_filename, self.working_directory),
             download_dir=download_dir,
             exist_ok=exist_ok,
             allowed_media_types=[MediaType.JSON_LD, MediaType.TURTLE]
         )
+        filenames = set(list(ttl_filenames) + list(jsonld_filenames) + downloaded_filenames)
         for filename in filenames:
             print("Uploading", filename)
             self.stores.rdf.upload_file(filename)

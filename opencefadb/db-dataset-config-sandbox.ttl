@@ -1,74 +1,84 @@
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
-@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix spdx: <http://spdx.org/rdf/terms#> .
 @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://doi.org/10.5281/zenodo.14055811> a dcat:Dataset ;
-    dct:identifier "10.5281/zenodo.14055811" ;
-    owl:sameAs <https://zenodo.org/record/14055811> ;
-    dcat:distribution [ dcat:downloadURL <https://zenodo.org/records/14055811/files/Standard_Name_Table_for_the_Property_Descriptions_of_Centrifugal_Fans.jsonld> ;
-            dcat:mediaType <https://www.iana.org/assignments/media-types/application/ld+json> ] ;
-    dcat:landingPage <https://zenodo.org/record/14055811> .
+<https://doi.org/10.5281/zenodo.17271932> a dcat:Dataset ;
+    dcterms:identifier "10.5281/zenodo.17271932" ;
+    owl:sameAs <https://zenodo.org/records/17271932> ;
+    dcterms:publisher [ a foaf:Agent ; foaf:name "Zenodo" ] ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcat:distribution [ dcat:downloadURL <https://zenodo.org/records/17271932/files/Standard_Name_Table_for_the_Property_Descriptions_of_Centrifugal_Fans.ttl> ;
+            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+             spdx:checksum [ a spdx:Checksum ;
+                    spdx:algorithm spdx:checksumAlgorithm_md5 ;
+                    spdx:checksumValue "e23f2b98e4bfebacf5f3818208dcf1b6"
+             ] ;
+             ] ;
+    dcat:landingPage <https://zenodo.org/records/17271932> .
 
 <https://matthiasprobst.github.io/ssno/1.3.0/> a dcat:Dataset ;
-    dct:description "Ontology of standard names for scientific data with a focus on HDF5 files, serialized in Turtle." ;
-    dct:identifier "ssno-130" ;
-    dct:license <https://spdx.org/licenses/CC-BY-4.0> ;
-    dct:title "Scientific Standard Names Ontology (SSNO) 1.3.0"@en ;
+    dcterms:description "Ontology of standard names for scientific data with a focus on HDF5 files, serialized in Turtle." ;
+    dcterms:identifier "ssno-130" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:title "Scientific Standard Names Ontology (SSNO) 1.3.0"@en ;
     dcat:distribution [ dcat:downloadURL <https://matthiasprobst.github.io/ssno/1.3.0/ssno.ttl> ;
-            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ] ;
+            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+            spdx:checksum [ a spdx:Checksum ;
+                    spdx:algorithm spdx:checksumAlgorithm_md5 ;
+                    spdx:checksumValue "499bb117e356b4c0f6777bfa290bce11"
+             ] ;
+             ] ;
     dcat:keyword "ontology"@en,
         "standard names"@en .
 
 <https://doi.org/10.5072/zenodo.344192> a dcat:Dataset ;
-    dct:identifier "10.5281/zenodo.344192" ;
-    dct:license <https://spdx.org/licenses/CC-BY-4.0> ;
-    dct:title "OpenCeFaDB Test OPM Data"@en ;
-    dcat:distribution [ dct:title "CAD Model of the Centrifugal fan assembly (IGES)"@en ;
-            dcat:accessURL <https://doi.org/10.5072/zenodo.344192> ;
-            dcat:byteSize "181080"^^xsd:nonNegativeInteger ;
-            dcat:checksum [ a spdx:Checksum ;
-                    spdx:algorithm spdx:checksumAlgorithm_md5 ;
-                    spdx:checksumValue "0bb2cc28fb7099287f6d51f1b2178920" ] ;
-            dcat:downloadURL <https://sandbox.zenodo.org/records/344192/files/2023-11-07-15-33-03_run.ttl> ;
-            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ] ;
-    dcat:landingPage <https://zenodo.org/record/344192> .
+    dcterms:identifier "10.5072/zenodo.344192" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:publisher [ a foaf:Agent ; foaf:name "Zenodo" ] ;
+    dcterms:title "OpenCeFaDB Test OPM Data"@en ;
+    dcat:landingPage <https://zenodo.org/records/344192> .
 
 <https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl> a dcat:Dataset ;
-    dct:identifier "ALLOTROPE-VOC-ADF-REC-2024-12-HDF" ;
-    dct:license <http://purl.allotrope.org/voc/creative-commons-attribution-license>,
+    dcterms:identifier "ALLOTROPE-VOC-ADF-REC-2024-12-HDF" ;
+    dcterms:license <http://purl.allotrope.org/voc/creative-commons-attribution-license>,
         <http://purl.allotrope.org/voc/hdf-license> ;
-    dct:publisher [ a vcard:Organization ;
+    dcterms:publisher [ a vcard:Organization ;
             vcard:fn "Allotrope Foundation" ;
             vcard:hasURL <https://www.allotrope.org/> ] ;
-    dct:title "The HDF5 data description ontology. (REC/2024/12)"@en ;
+    dcterms:title "The HDF5 data description ontology. (REC/2024/12)"@en ;
     dcat:distribution [ dcat:downloadURL <https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl> ;
-            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ] .
+            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+             spdx:checksum [ a spdx:Checksum ;
+                    spdx:algorithm spdx:checksumAlgorithm_md5 ;
+                    spdx:checksumValue "9f1af487e6a2caa0df5ce25b55ae54d3"
+             ] ;
+             ] .
 
 <https://doi.org/10.5281/zenodo.14551649> a dcat:Dataset ;
-    dct:identifier "https://doi.org/10.5072/zenodo.14551649" ;
-    dct:license <https://spdx.org/licenses/CC-BY-4.0> ;
-    dct:publisher [ foaf:Agent [ foaf:name "Zenodo" ] ] ;
-    dct:title "Zenodo record containing the CAD Model of the Centrifugal fan of the open centrifugal fan database"@en ;
-    owl:sameAs <https://zenodo.org/record/14551649> ;
-    dcat:distribution [ dct:title "CAD Model of the Centrifugal fan assembly (IGES)"@en ;
+    dcterms:identifier "10.5281/zenodo.14551649" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:publisher [ a foaf:Agent ; foaf:name "Zenodo" ] ;
+    dcterms:title "Zenodo record containing the CAD Model of the Centrifugal fan of the open centrifugal fan database"@en ;
+    owl:sameAs <https://zenodo.org/records/14551649> ;
+    dcat:distribution [ dcterms:title "CAD Model of the Centrifugal fan assembly (IGES)"@en ;
             dcat:accessURL <https://doi.org/10.5281/zenodo.14551649> ;
             dcat:byteSize "14278906"^^xsd:nonNegativeInteger ;
-            dcat:checksum [ a spdx:Checksum ;
+            spdx:checksum [ a spdx:Checksum ;
                     spdx:algorithm spdx:checksumAlgorithm_md5 ;
                     spdx:checksumValue "bf846c89a839d2f7126b6b43a1449542" ] ;
             dcat:downloadURL <https://zenodo.org/records/14551649/files/cefa_asm_v1.igs> ;
             dcat:mediaType <https://www.iana.org/assignments/media-types/model/iges> ],
-        [ dct:title "Metadata of the CAD Model of the Centrifugal fan assembly (JSON-LD)"@en ;
+        [ dcterms:title "Metadata of the CAD Model of the Centrifugal fan assembly (JSON-LD)"@en ;
             dcat:accessURL <https://doi.org/10.5281/zenodo.14551649> ;
             dcat:byteSize "15927"^^xsd:nonNegativeInteger ;
-            dcat:checksum [ a spdx:Checksum ;
+            spdx:checksum [ a spdx:Checksum ;
                     spdx:algorithm spdx:checksumAlgorithm_md5 ;
                     spdx:checksumValue "e673b07fb1fbcf15e5ec620e9a8e14dd" ] ;
             dcat:downloadURL <https://zenodo.org/records/14551649/files/metadata.jsonld> ;
             dcat:mediaType <https://www.iana.org/assignments/media-types/application/ld+json> ] ;
-    dcat:landingPage <https://zenodo.org/record/14551649> .
+    dcat:landingPage <https://zenodo.org/records/14551649> .
 
