@@ -4,12 +4,15 @@ import unittest
 import dotenv
 from gldb.query import RemoteSparqlQuery
 from gldb.stores import GraphDB
+from owlrl import DeductiveClosure, RDFS_Semantics  # pip install owlrl
 
 import opencefadb
 from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
 from opencefadb.stores import RDFFileStore, HDF5SqlDB
 
 __this_dir__ = pathlib.Path(__file__).parent
+
+N_M4I_IDENTIFIERS_IN_DB = 7
 
 
 class TestInitDatabase(unittest.TestCase):
@@ -37,7 +40,7 @@ class TestInitDatabase(unittest.TestCase):
 
         # get size of the graph:
         graph = local_db.stores.rdf.graph
-        self.assertEqual(len(graph), 22122)
+        self.assertEqual(25142, len(graph))
 
         # also the second time should work (exist_ok=True):
         local_db = opencefadb.OpenCeFaDB(
@@ -47,7 +50,22 @@ class TestInitDatabase(unittest.TestCase):
             config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
         )
         graph = local_db.stores.rdf.graph
-        self.assertEqual(len(graph), 22249)
+        self.assertEqual(25231, len(graph))
+
+        # Compute RDFS closure (adds entailed triples to the graph)
+        DeductiveClosure(RDFS_Semantics).expand(graph)
+
+        q = """
+        PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
+        SELECT * WHERE {
+          ?s m4i:identifier ?o .
+        } LIMIT 100
+        """
+
+        bindings = graph.query(q)
+        for row in bindings:
+            print(row.s, row.o)
+        # self.assertEqual(len(bindings), N_M4I_IDENTIFIERS_IN_DB)
 
     @unittest.skip("Only test locally with a running GraphDB instance")
     def test_graphdb(self):
@@ -118,7 +136,7 @@ class TestInitDatabase(unittest.TestCase):
             description="Selects all triples in the RDF database"
         ).execute(local_db.stores.rdf)
 
-        count = len(res.data["results"]["bindings"])
+        count = len(res.data)
         tripels = gdb.count_triples(key="total")
         self.assertEqual(count, tripels)
 
@@ -143,3 +161,15 @@ class TestInitDatabase(unittest.TestCase):
             description="Selects the hub diameter of the fan"
         ).execute(local_db.stores.rdf)
         print(res.data)
+
+        q = """PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
+SELECT * WHERE {
+  ?s m4i:identifier ?o .
+} LIMIT 100
+"""
+        res = RemoteSparqlQuery(
+            q,
+            description="Selects identifiers"
+        ).execute(local_db.stores.rdf)
+
+        self.assertEqual(len(res.data), N_M4I_IDENTIFIERS_IN_DB)
