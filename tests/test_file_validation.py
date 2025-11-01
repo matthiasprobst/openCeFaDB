@@ -1,9 +1,9 @@
 import unittest
 
 import h5rdmtoolbox as h5tbx
-from h5rdmtoolbox.ld.shacl import validate_hdf
 
-from opencefadb.shacl.templates import hdf_file_must_have_creator
+from opencefadb.validation import validate_hdf
+from opencefadb.validation.shacl.templates.hdf import SHALL_HAVE_CREATOR
 
 
 class TestFileValidation(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestFileValidation(unittest.TestCase):
 
         res = validate_hdf(
             hdf_source=h5.hdf_filename,
-            shacl_data=hdf_file_must_have_creator
+            shacl_data=SHALL_HAVE_CREATOR
         )
         self.assertFalse(res.conforms)
         self.assertEqual(
@@ -29,6 +29,6 @@ class TestFileValidation(unittest.TestCase):
 
         res = validate_hdf(
             hdf_source=h5.hdf_filename,
-            shacl_data=hdf_file_must_have_creator
+            shacl_data=SHALL_HAVE_CREATOR
         )
         self.assertTrue(res.conforms)

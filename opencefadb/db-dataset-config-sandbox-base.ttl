@@ -1,0 +1,39 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix spdx: <http://spdx.org/rdf/terms#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://matthiasprobst.github.io/ssno/1.3.0/> a dcat:Dataset ;
+    dcterms:description "Ontology of standard names for scientific data with a focus on HDF5 files, serialized in Turtle." ;
+    dcterms:identifier "ssno-130" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:title "Scientific Standard Names Ontology (SSNO) 1.3.0"@en ;
+    dcat:distribution [ dcat:downloadURL <https://matthiasprobst.github.io/ssno/1.3.0/ssno.ttl> ;
+            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+            spdx:checksum [ a spdx:Checksum ;
+                    spdx:algorithm spdx:checksumAlgorithm_md5 ;
+                    spdx:checksumValue "499bb117e356b4c0f6777bfa290bce11"
+             ] ;
+             ] ;
+    dcat:keyword "ontology"@en,
+        "standard names"@en .
+
+
+<https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl> a dcat:Dataset ;
+    dcterms:identifier "ALLOTROPE-VOC-ADF-REC-2024-12-HDF" ;
+    dcterms:license <http://purl.allotrope.org/voc/creative-commons-attribution-license>,
+        <http://purl.allotrope.org/voc/hdf-license> ;
+    dcterms:publisher [ a vcard:Organization ;
+            vcard:fn "Allotrope Foundation" ;
+            vcard:hasURL <https://www.allotrope.org/> ] ;
+    dcterms:title "The HDF5 data description ontology. (REC/2024/12)"@en ;
+    dcat:distribution [ dcat:downloadURL <https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl> ;
+            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+             spdx:checksum [ a spdx:Checksum ;
+                    spdx:algorithm spdx:checksumAlgorithm_md5 ;
+                    spdx:checksumValue "9f1af487e6a2caa0df5ce25b55ae54d3"
+             ] ;
+             ] .

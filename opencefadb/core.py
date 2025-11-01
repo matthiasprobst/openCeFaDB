@@ -27,6 +27,7 @@ _db_instance = None
 @dataclass
 class DistributionMetadata:
     download_url: str
+    media_type: Optional[str]=None
     size: Optional[str] = None
     checksum: Optional[str] = None
     checksum_algorithm: Optional[str] = None
@@ -36,6 +37,12 @@ class MediaType(enum.Enum):
     JSON_LD = "application/ld+json"
     TURTLE = "text/turtle"
     IGES = "model/iges"
+    IGS = "igs"
+    CSV = "text/csv"
+    TXT = "text/plain"
+    XML = "application/rdf+xml"
+    XML2 = "application/xml"
+    HDF5 = "application/x-hdf5"
 
     @classmethod
     def parse(cls, media_type: str):
@@ -50,6 +57,26 @@ class MediaType(enum.Enum):
             return cls(media_type)
         except ValueError:
             return None
+
+    def get_suffix(self):
+        if self == MediaType.JSON_LD:
+            return ".jsonld"
+        elif self == MediaType.HDF5:
+            return ".hdf5"
+        elif self == MediaType.TURTLE:
+            return ".ttl"
+        elif self in (MediaType.IGES, MediaType.IGS):
+            return ".igs"
+        elif self == MediaType.CSV:
+            return ".csv"
+        elif self == MediaType.TXT:
+            return ".txt"
+        elif self == MediaType.XML:
+            return ".xml"
+        elif self == MediaType.XML2:
+            return ".xml"
+        else:
+            return ""
 
 
 def _parse_to_qualified_name(uri: rdflib.URIRef):
@@ -67,22 +94,28 @@ def _get_url_hash(url: str) -> str:
 
 def _get_download_urls_of_metadata_distributions_of_publisher(
         publisher: str,
-        identifier: str
+        doi: str
 ):
     publisher = str(publisher)
     if publisher.lower() != "zenodo":
         raise ValueError(f"Unsupported publisher: {publisher}")
-    return _get_download_urls_of_metadata_distributions_of_zenodo_record(identifier)
+    return _get_download_urls_of_metadata_distributions_of_zenodo_record(doi)
 
 
-def _get_download_urls_of_metadata_distributions_of_zenodo_record(identifier: str) -> List[DistributionMetadata]:
-    _identifier = str(identifier)
-    sandbox = "10.5072/zenodo" in _identifier
-    record_id = _identifier.rsplit('zenodo.', 1)[-1]
+def _get_download_urls_of_metadata_distributions_of_zenodo_record(doi: str) -> List[DistributionMetadata]:
+    _doi = str(doi)
+    sandbox = "10.5072/zenodo" in _doi
+    record_id = _doi.rsplit('zenodo.', 1)[-1]
     z = ZenodoRecord(source=int(record_id), sandbox=sandbox)
-    return [DistributionMetadata(download_url=file.download_url, size=file.size, checksum=file.checksum,
-                                 checksum_algorithm=file.checksum_algorithm or "md5") for filename, file in z.files.items() if
-            filename.endswith('.ttl') or filename.endswith('.jsonld')]
+    return [DistributionMetadata(
+        download_url=file.download_url,
+        size=file.size,
+        media_type=file.media_type,
+        checksum=file.checksum,
+        checksum_algorithm=file.checksum_algorithm or "md5"
+    ) for filename, file in
+        z.files.items() if
+        filename.endswith('.ttl') or filename.endswith('.jsonld')]
 
 
 def _get_metadata_datasets(
@@ -147,10 +180,9 @@ def _download_metadata_datasets(
     PREFIX spdx: <http://spdx.org/rdf/terms#>
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-    SELECT ?identifier ?downloadURL ?checksumValue ?checksumAlgorithm ?publisherName ?mediaType
+    SELECT ?dataset ?downloadURL ?checksumValue ?checksumAlgorithm ?publisherName ?mediaType
     WHERE {{
       ?dataset a dcat:Dataset .
-      ?dataset dcterms:identifier ?identifier .
       OPTIONAL {{
         ?dataset dcat:distribution ?distribution .
         ?distribution dcat:downloadURL ?downloadURL .
@@ -180,17 +212,18 @@ def _download_metadata_datasets(
             continue
         else:
             has_distributions = rdflib.Variable("downloadURL") in r
-            logger.debug(f"Processing dataset '{r[rdflib.Variable('identifier')]}' ...")
+            logger.debug(f"Processing dataset '{r[rdflib.Variable('dataset')]}' ...")
             if not has_distributions and rdflib.Variable("publisherName") in r:
                 publisher = str(r[rdflib.Variable("publisherName")])
-                identifier = str(r[rdflib.Variable("identifier")])
-                logger.debug(f"Getting all distributions related to identifier '{identifier}' and publisher '{publisher}' ...")
+                resource = str(r[rdflib.Variable("ds")])
+                logger.debug(
+                    f"Getting all distributions related to resource '{resource}' and publisher '{publisher}' ...")
 
                 logger.debug(
-                    f"Getting all distributions related to identifier '{identifier}' and publisher '{publisher}' ...")
+                    f"Getting all distributions related to resource '{resource}' and publisher '{publisher}' ...")
                 distributions = _get_download_urls_of_metadata_distributions_of_publisher(
                     publisher,
-                    identifier
+                    resource
                 )
             elif has_distributions:
                 logger.debug(f"Downloading '{r[rdflib.Variable('downloadURL')]}' ...")
@@ -199,10 +232,11 @@ def _download_metadata_datasets(
                 if _checksum is None or _checksum_algorithm is None:
                     _checksum = None
                     _checksum_algorithm = None
-                    logger.info(f"No checksum information found for dataset '{r[rdflib.Variable('identifier')]}'")
+                    logger.info(f"No checksum information found for dataset '{r[rdflib.Variable('dataset')]}'")
                 distributions = [
                     DistributionMetadata(
                         download_url=str(r[rdflib.Variable("downloadURL")]),
+                        media_type=media_type,
                         checksum=_checksum,
                         checksum_algorithm=_checksum_algorithm
                     )
@@ -215,8 +249,12 @@ def _download_metadata_datasets(
                 _url_hash = _get_url_hash(d.download_url)
                 target_dir = download_dir / _url_hash
                 target_dir.mkdir(parents=True, exist_ok=True)
-                target_filename = download_dir /_url_hash / _filename.name
-
+                target_filename = download_dir / _url_hash / _filename.name
+                if target_filename.suffix == "":
+                    print(d.download_url)
+                    print(d.media_type)
+                    if d.media_type is not None:
+                        target_filename = target_filename.with_suffix(d.media_type.get_suffix())
                 if target_filename in target_filenames:
                     logger.debug(f"File {target_filename.name} already in download list, skipping duplicate.")
                     download_flags.append(False)
@@ -254,6 +292,28 @@ def _download_metadata_datasets(
             checksums=[checksum for checksum, flag in zip(checksums, download_flags) if flag],
         )
     return target_filenames
+
+
+def generate_config():
+    zenodo_records = [
+        (17271932, False),
+        (344192, True),
+        (14551649, False),
+    ]
+    g = rdflib.Graph()
+    g.parse(source=__this_dir__ / "db-dataset-config-sandbox-base.ttl", format="ttl")
+
+    for zenodo_record, sandbox in zenodo_records:
+        record = ZenodoRecord(
+            source=zenodo_record,
+            sandbox=sandbox
+        )
+        g2 = rdflib.Graph()
+        g2.parse(data=record.as_dcat_dataset().serialize("ttl"))
+        g += g2
+
+    with open(__this_dir__ / "db-dataset-config-sandbox-3.ttl", "w", encoding="utf-8") as f:
+        f.write(g.serialize(format="ttl"))
 
 
 class OpenCeFaDB(GenericLinkedDatabase):
@@ -296,6 +356,7 @@ class OpenCeFaDB(GenericLinkedDatabase):
             allowed_media_types=[MediaType.JSON_LD, MediaType.TURTLE]
         )
         filenames = set(list(ttl_filenames) + list(jsonld_filenames) + downloaded_filenames)
+        self.stores.rdf.upload_file(config_filename)
         for filename in filenames:
             logger.debug(f"Uploading {filename}")
             self.stores.rdf.upload_file(filename)

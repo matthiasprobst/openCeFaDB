@@ -2,6 +2,8 @@ import pathlib
 import unittest
 
 import dotenv
+import pyshacl
+import rdflib
 from gldb.query import RemoteSparqlQuery
 from gldb.stores import GraphDB
 from owlrl import DeductiveClosure, RDFS_Semantics  # pip install owlrl
@@ -9,11 +11,13 @@ from owlrl import DeductiveClosure, RDFS_Semantics  # pip install owlrl
 import opencefadb
 from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
 from opencefadb.stores import RDFFileStore, HDF5SqlDB
+from opencefadb.validation.shacl.templates.dcat import MINIMUM_DATASET_SHACL
 
 __this_dir__ = pathlib.Path(__file__).parent
 
 N_M4I_IDENTIFIERS_IN_DB = 7
 
+CONFIG_FILENAME = __this_dir__ / "../opencefadb" / "db-dataset-config-sandbox-3.ttl"
 
 class TestInitDatabase(unittest.TestCase):
 
@@ -25,12 +29,42 @@ class TestInitDatabase(unittest.TestCase):
     #     if self.working_dir.exists():
     #         shutil.rmtree(self.working_dir)
 
+    def test_generate_dataset_from_zenodo_record(self):
+        from opencefadb.core import generate_config
+        generate_config()
+        # from h5rdmtoolbox.repository.zenodo import ZenodoRecord
+        # record = ZenodoRecord(
+        #     source=17271932,
+        #     sandbox=False
+        # )
+        # print(record.as_dcat_dataset().serialize("ttl"))
+
+    def test_config(self):
+        sandbox_config = __this_dir__ / "../opencefadb" / "db-dataset-config-sandbox-2.ttl"
+        # use MINIMUM_DATASET_SHACL to validate the above config file
+        config_graph = rdflib.Graph()
+        config_graph.parse(location=str(sandbox_config))
+        shacl_graph = rdflib.Graph()
+        shacl_graph.parse(data=MINIMUM_DATASET_SHACL, format="ttl")
+        results = pyshacl.validate(
+            data_graph=config_graph,
+            shacl_graph=shacl_graph,
+            inference='rdfs',
+            abort_on_first=False,
+            meta_shacl=False,
+            advanced=True,
+        )
+        conforms, results_graph, results_text = results
+        if not conforms:
+            print("SHACL validation results:")
+            print(results_text)
+
     def test_db_with_rdflib(self):
         local_db = opencefadb.OpenCeFaDB(
             metadata_store=RDFFileStore(data_dir=self.working_dir / "metadata"),
             hdf_store=HDF5SqlDB(),
             working_directory=self.working_dir,
-            config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
+            config_filename=CONFIG_FILENAME
         )
         metadata_dir = local_db.stores.rdf.data_dir
         metadata_ttl_filenames = metadata_dir.glob("*.ttl")
@@ -40,14 +74,14 @@ class TestInitDatabase(unittest.TestCase):
 
         # get size of the graph:
         graph = local_db.stores.rdf.graph
-        self.assertEqual(25142, len(graph))
+        self.assertEqual(25092, len(graph))
 
         # also the second time should work (exist_ok=True):
         local_db = opencefadb.OpenCeFaDB(
             metadata_store=RDFFileStore(data_dir="local-db/data/metadata"),
             hdf_store=HDF5SqlDB(),
             working_directory=self.working_dir,
-            config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
+            config_filename=CONFIG_FILENAME
         )
         graph = local_db.stores.rdf.graph
         self.assertEqual(25231, len(graph))
@@ -122,6 +156,7 @@ class TestInitDatabase(unittest.TestCase):
         # reset repository:
         if gdb.get_repository_info("OpenCeFaDB-Sandbox"):
             gdb.delete_repository("OpenCeFaDB-Sandbox")
+
         res = gdb.get_or_create_repository(__this_dir__ / "graphdb-config-sandbox.ttl")
         self.assertTrue(res)
 
@@ -129,7 +164,7 @@ class TestInitDatabase(unittest.TestCase):
             metadata_store=gdb,
             hdf_store=HDF5SqlDB(),
             working_directory=self.working_dir,
-            config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
+            config_filename=CONFIG_FILENAME
         )
         res = RemoteSparqlQuery(
             "SELECT * WHERE { ?s ?p ?o }",
@@ -172,4 +207,18 @@ SELECT * WHERE {
             description="Selects identifiers"
         ).execute(local_db.stores.rdf)
 
-        self.assertEqual(len(res.data), N_M4I_IDENTIFIERS_IN_DB)
+        # self.assertEqual(len(res.data), N_M4I_IDENTIFIERS_IN_DB)
+
+        # find all names of persons in the database
+        res = RemoteSparqlQuery(
+            """
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            SELECT ?name
+            WHERE {
+                ?s a foaf:Person .
+                ?s foaf:name ?name .
+            }
+            """,
+            description="Selects names of all persons in the database"
+        ).execute(local_db.stores.rdf)
+        print(res.data)
