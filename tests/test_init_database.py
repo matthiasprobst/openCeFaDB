@@ -38,7 +38,7 @@ class TestInitDatabase(unittest.TestCase):
                 {"record_id": 344192, "sandbox": True},
                 {"record_id": 14551649, "sandbox": False},
             ],
-            lokal_filenames=[
+            local_filenames=[
                 __this_dir__ / "data" / "test_measurements/2023-11-07-15-33-03_run.jsonld"
             ]
         )

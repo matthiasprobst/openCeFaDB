@@ -303,7 +303,7 @@ class ZenodoRecordInfo:
     sandbox: bool = False
 
 
-def parse_lokal_filenames(filenames: List[Union[str, pathlib.Path]]) -> dcat.Dataset:
+def parse_local_filenames(filenames: List[Union[str, pathlib.Path]]) -> dcat.Dataset:
     def parse_download_url(download_url: Union[str, pathlib.Path]) -> str:
         return f"file:///{pathlib.Path(download_url).resolve().absolute()}"
     dist = [dcat.Distribution(id=f"https://example.org{du.name}", downloadURL=parse_download_url(du), ) for du in filenames]
@@ -312,7 +312,7 @@ def parse_lokal_filenames(filenames: List[Union[str, pathlib.Path]]) -> dcat.Dat
 
 def generate_config(
         zenodo_records: List[Union[ZenodoRecordInfo, Dict]] = None,
-        lokal_filenames: List[Union[str, pathlib.Path]] = None,
+        local_filenames: List[Union[str, pathlib.Path]] = None,
         output_config_filename: Union[str, pathlib.Path] = None,
         root_config_filename: Union[str, pathlib.Path] = None
 ):
@@ -331,8 +331,8 @@ def generate_config(
         g2.parse(data=record.as_dcat_dataset().serialize("ttl"))
         g += g2
 
-    if lokal_filenames is not None:
-        lokal_dataset = parse_lokal_filenames(lokal_filenames)
+    if local_filenames is not None:
+        lokal_dataset = parse_local_filenames(local_filenames)
         g3 = rdflib.Graph()
         g3.parse(data=lokal_dataset.serialize("ttl"))
         g += g3
