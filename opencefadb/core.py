@@ -3,7 +3,7 @@ import hashlib
 import pathlib
 import shutil
 from dataclasses import dataclass
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 
 import rdflib
 from gldb import GenericLinkedDatabase
@@ -27,7 +27,7 @@ _db_instance = None
 @dataclass
 class DistributionMetadata:
     download_url: str
-    media_type: Optional[str]=None
+    media_type: Optional[str] = None
     size: Optional[str] = None
     checksum: Optional[str] = None
     checksum_algorithm: Optional[str] = None
@@ -78,14 +78,14 @@ class MediaType(enum.Enum):
         else:
             return ""
 
-
-def _parse_to_qualified_name(uri: rdflib.URIRef):
-    """Converts a URI to a qualified name using the namespaces defined in RDFFileStore."""
-    uri_str = str(uri)
-    for prefix, namespace in RDFFileStore.namespaces.items():
-        if namespace in uri_str:
-            return f"{prefix}:{uri_str.replace(namespace, '')}"
-    return uri_str
+#
+# def _parse_to_qualified_name(uri: rdflib.URIRef):
+#     """Converts a URI to a qualified name using the namespaces defined in RDFFileStore."""
+#     uri_str = str(uri)
+#     for prefix, namespace in RDFFileStore.namespaces.items():
+#         if namespace in uri_str:
+#             return f"{prefix}:{uri_str.replace(namespace, '')}"
+#     return uri_str
 
 
 def _get_url_hash(url: str) -> str:
@@ -294,26 +294,53 @@ def _download_metadata_datasets(
     return target_filenames
 
 
-def generate_config():
-    zenodo_records = [
-        (17271932, False),
-        (344192, True),
-        (14551649, False),
-    ]
-    g = rdflib.Graph()
-    g.parse(source=__this_dir__ / "db-dataset-config-sandbox-base.ttl", format="ttl")
+from ontolutils.ex import dcat
 
-    for zenodo_record, sandbox in zenodo_records:
+
+@dataclass
+class ZenodoRecordInfo:
+    record_id: int
+    sandbox: bool = False
+
+
+def parse_lokal_filenames(filenames: List[Union[str, pathlib.Path]]) -> dcat.Dataset:
+    def parse_download_url(download_url: Union[str, pathlib.Path]) -> str:
+        return f"file:///{pathlib.Path(download_url).resolve().absolute()}"
+    dist = [dcat.Distribution(id=f"https://example.org{du.name}", downloadURL=parse_download_url(du), ) for du in filenames]
+    return dcat.Dataset(distribution=dist)
+
+
+def generate_config(
+        zenodo_records: List[Union[ZenodoRecordInfo, Dict]] = None,
+        lokal_filenames: List[Union[str, pathlib.Path]] = None,
+        output_config_filename: Union[str, pathlib.Path] = None,
+        root_config_filename: Union[str, pathlib.Path] = None
+):
+    """Generates a database configuration file based on the provided zenodo records."""
+    root_config_filename = root_config_filename or (__this_dir__ / "db-dataset-config-sandbox-base.ttl")
+    output_config_filename = output_config_filename or (__this_dir__ / "db-dataset-config-sandbox-3.ttl")
+    g = rdflib.Graph()
+    g.parse(source=root_config_filename, format="ttl")
+
+    for zenodo_record_info in zenodo_records:
         record = ZenodoRecord(
-            source=zenodo_record,
-            sandbox=sandbox
+            source=zenodo_record_info["record_id"],
+            sandbox=zenodo_record_info["sandbox"]
         )
         g2 = rdflib.Graph()
         g2.parse(data=record.as_dcat_dataset().serialize("ttl"))
         g += g2
 
-    with open(__this_dir__ / "db-dataset-config-sandbox-3.ttl", "w", encoding="utf-8") as f:
+    if lokal_filenames is not None:
+        lokal_dataset = parse_lokal_filenames(lokal_filenames)
+        g3 = rdflib.Graph()
+        g3.parse(data=lokal_dataset.serialize("ttl"))
+        g += g3
+
+    with open(output_config_filename, "w", encoding="utf-8") as f:
         f.write(g.serialize(format="ttl"))
+
+    return output_config_filename
 
 
 class OpenCeFaDB(GenericLinkedDatabase):

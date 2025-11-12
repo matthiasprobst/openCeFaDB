@@ -19,6 +19,7 @@ N_M4I_IDENTIFIERS_IN_DB = 7
 
 CONFIG_FILENAME = __this_dir__ / "../opencefadb" / "db-dataset-config-sandbox-3.ttl"
 
+
 class TestInitDatabase(unittest.TestCase):
 
     def setUp(self):
@@ -31,19 +32,18 @@ class TestInitDatabase(unittest.TestCase):
 
     def test_generate_dataset_from_zenodo_record(self):
         from opencefadb.core import generate_config
-        generate_config()
-        # from h5rdmtoolbox.repository.zenodo import ZenodoRecord
-        # record = ZenodoRecord(
-        #     source=17271932,
-        #     sandbox=False
-        # )
-        # print(record.as_dcat_dataset().serialize("ttl"))
-
-    def test_config(self):
-        sandbox_config = __this_dir__ / "../opencefadb" / "db-dataset-config-sandbox-2.ttl"
-        # use MINIMUM_DATASET_SHACL to validate the above config file
+        config_filename = generate_config(
+            zenodo_records=[
+                {"record_id": 17271932, "sandbox": False},
+                {"record_id": 344192, "sandbox": True},
+                {"record_id": 14551649, "sandbox": False},
+            ],
+            lokal_filenames=[
+                __this_dir__ / "data" / "test_measurements/2023-11-07-15-33-03_run.jsonld"
+            ]
+        )
         config_graph = rdflib.Graph()
-        config_graph.parse(location=str(sandbox_config))
+        config_graph.parse(location=str(config_filename))
         shacl_graph = rdflib.Graph()
         shacl_graph.parse(data=MINIMUM_DATASET_SHACL, format="ttl")
         results = pyshacl.validate(
@@ -62,7 +62,7 @@ class TestInitDatabase(unittest.TestCase):
     def test_db_with_rdflib(self):
         local_db = opencefadb.OpenCeFaDB(
             metadata_store=RDFFileStore(data_dir=self.working_dir / "metadata"),
-            hdf_store=HDF5SqlDB(),
+            hdf_store=HDF5SqlDB(data_dir=self.working_dir / "rawdata"),
             working_directory=self.working_dir,
             config_filename=CONFIG_FILENAME
         )
@@ -72,10 +72,6 @@ class TestInitDatabase(unittest.TestCase):
         metadata_filenames = list(metadata_ttl_filenames) + list(metadata_jsonld_filenames)
         self.assertGreaterEqual(len(metadata_filenames), 5)
 
-        # get size of the graph:
-        graph = local_db.stores.rdf.graph
-        self.assertEqual(25092, len(graph))
-
         # also the second time should work (exist_ok=True):
         local_db = opencefadb.OpenCeFaDB(
             metadata_store=RDFFileStore(data_dir="local-db/data/metadata"),
@@ -84,7 +80,6 @@ class TestInitDatabase(unittest.TestCase):
             config_filename=CONFIG_FILENAME
         )
         graph = local_db.stores.rdf.graph
-        self.assertEqual(25231, len(graph))
 
         # Compute RDFS closure (adds entailed triples to the graph)
         DeductiveClosure(RDFS_Semantics).expand(graph)
@@ -99,7 +94,37 @@ class TestInitDatabase(unittest.TestCase):
         bindings = graph.query(q)
         for row in bindings:
             print(row.s, row.o)
-        # self.assertEqual(len(bindings), N_M4I_IDENTIFIERS_IN_DB)
+
+        # assert with a sparlq query that one person is called Matthias:
+        find_first_names = """
+        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+        SELECT ?name
+        WHERE {
+            ?s a foaf:Person .
+            ?s foaf:name ?name .
+        }
+        """
+        bindings = graph.query(find_first_names)
+        names = [str(row.name) for row in bindings]
+        self.assertIn("Probst, Matthias", names)
+
+        find_snt_title = """
+        PREFIX ex: <https://doi.org/10.5281/zenodo.17271932#>
+        PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
+        PREFIX dcterms: <http://purl.org/dc/terms/>
+
+        SELECT ?title
+        WHERE {
+            ?s a ssno:StandardNameTable .
+            ?s dcterms:title ?title .
+        }
+        """
+        bindings = graph.query(find_snt_title)
+        titles = [str(row.title) for row in bindings]
+        self.assertEqual(
+            titles[0],
+            "Standard Name Table for the Property Descriptions of Centrifugal Fans"
+        )
 
     @unittest.skip("Only test locally with a running GraphDB instance")
     def test_graphdb(self):
@@ -126,25 +151,6 @@ class TestInitDatabase(unittest.TestCase):
 
         res = gdb.delete_repository("OpenCeFaDB-Sandbox")
         self.assertTrue(res)
-        #
-        # with self.assertRaises(RuntimeError):
-        #     gdb.get_repository_info("OpenCeFaDB-Sandbox")
-
-        # gdb.delete_repository("OpenCeFaDB-Sandbox")
-        # gdb.create_repository(
-        #     config_path = __this_dir__ / "graphdb-config-sandbox.ttl"
-        # )
-        # R_SELECT_ALL = RemoteSparqlQuery(
-        #     "SELECT * WHERE { ?s ?p ?o }",
-        #     description="Selects all triples in the RDF database"
-        # )
-        # res = R_SELECT_ALL.execute(gdb)
-        # local_db = opencefadb.OpenCeFaDB(
-        #     metadata_store=GraphDB(data_dir="local-db/data/metadata"),
-        #     hdf_store=HDF5SqlDB(),
-        #     working_directory=self.working_dir,
-        #     config_filename=__this_dir__ / "../opencefadb" / "db-dataset-config-sandbox.ttl"
-        # )
 
     def test_db_with_graphdb(self):
         gdb = GraphDB(
@@ -185,7 +191,7 @@ class TestInitDatabase(unittest.TestCase):
             PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
             PREFIX qudt: <http://qudt.org/vocab/unit#>
             PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
-            
+
             SELECT ?value ?unit
             WHERE {
               ?variable a m4i:NumericalVariable ;

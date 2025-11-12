@@ -8,7 +8,7 @@ from gldb.stores import DataStore
 from gldb.query import DataStoreQuery, QueryResult
 
 from opencefadb.stores.filedb.database_resource import DatabaseResource
-from opencefadb.ontologies import dcat
+from ontolutils.ex import dcat
 
 logger = logging.getLogger("opencefadb")
 
@@ -29,6 +29,7 @@ class HDF5SqlDB(DataStore):
     """
 
     def __init__(self):
+        # TODO: dont use local config, make it explicite during initialization
         from ...configuration import get_config
         cfg = get_config()
         self._hdf5_file_table_name = "hdf5_files"
