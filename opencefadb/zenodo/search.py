@@ -4,7 +4,7 @@ import requests
 from ontolutils.ex import prov
 from ontolutils.ex.dcat import Dataset, Distribution
 from ontolutils.ex.foaf import Agent
-
+from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 ZENODO_API = "https://zenodo.org/api/records"
 
 _EXT_MAP = {
@@ -76,7 +76,6 @@ def zenodo_record_to_dcat(record: dict) -> dict:
     doi = md.get("doi")
     landing = record.get("links", {}).get("self")
 
-    # Map creators to foaf:Person (best-effort)
     dcat_creators = []
     for c in creators:
         name = c.get("name") or c.get("affiliation")
@@ -90,21 +89,6 @@ def zenodo_record_to_dcat(record: dict) -> dict:
             }
         }
         dcat_creators.append(prov.Person.model_validate(person))
-
-    def _parse_license(license: str) -> str:
-        """Returns license http URL if possible."""
-        if not license:
-            return None
-        if license.startswith("http://") or license.startswith("https://"):
-            return license
-        # Map common license IDs to URLs
-        lic_map = {
-            "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
-            "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
-            "MIT": "https://opensource.org/licenses/MIT",
-            "GPL-3.0": "https://www.gnu.org/licenses/gpl-3.0.en.html",
-        }
-        return lic_map.get(license.upper(), license)
 
     def _parse_media_type(filename_suffix: str) -> str:
         ext = filename_suffix.rsplit('.', 1)[-1].lower()
@@ -151,7 +135,7 @@ def zenodo_record_to_dcat(record: dict) -> dict:
         "creator": dcat_creators,
         "keyword": keywords,
         "landingPage": landing,
-        "license": _parse_license(license_),
+        "license": license_,
         "accessRights": md.get("access_right"),
         "version": md.get("version"),
         "distribution": distributions,
