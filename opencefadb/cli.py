@@ -1,185 +1,255 @@
-import logging
+import os
 import pathlib
-import shutil
+import sys
+from textwrap import dedent
+from typing import List
 
 import click
+import dotenv
+import requests
 
-from opencefadb import __version__, paths
-from opencefadb import configuration
-from opencefadb import set_logging_level
-from opencefadb.core import connect_to_database
-from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
-
-logger = logging.getLogger("opencefadb")
-
-_ASCII_ART = r"""
-   ____                    _____     ______    _____  ____  
-  / __ \                  / ____|   |  ____|  |  __ \|  _ \ 
- | |  | |_ __   ___ _ __ | |     ___| |__ __ _| |  | | |_) |
- | |  | | '_ \ / _ \ '_ \| |    / _ \  __/ _` | |  | |  _ < 
- | |__| | |_) |  __/ | | | |___|  __/ | | (_| | |__| | |_) |
-  \____/| .__/ \___|_| |_|\_____\___|_|  \__,_|_____/|____/ 
-        | |                                                 
-        |_|                                                 
-"""
+DEFAULT_GRAPHDB_URL = "http://localhost:7200"
 
 
-@click.group(invoke_without_command=True)
-@click.option('-V', '--version', is_flag=True, help='Show version')
-@click.option('--log-level', help='Set the log level')
-@click.pass_context
-def cli(ctx, version, log_level):
-    click.echo(_ASCII_ART)
-    cfg = configuration.get_config()
-    set_logging_level(cfg.logging_level)
-    if log_level:
-        logger.debug(f"Setting log level to {log_level}...")
-        set_logging_level(log_level)
-        logger.debug(f"Log level set to {logger.level}")
-    if version:
-        click.echo(f'opencefadb version {__version__}')
-        return
+@click.group()
+def main():
+    """OpencefaDB command-line interface."""
+    pass
 
 
-_cfg = configuration.get_config()
+@main.group()
+def graphdb():
+    """GraphDB-related commands."""
+    pass
 
-_available_profiles = ', '.join(f"{section}" for section in _cfg._configparser.sections())
-
-
-@cli.command(help=f"Configure the database. The configuration file is located here: {paths['config']}")
-@click.option('--log-level', help='Set the log level')
-@click.option('--profile', help=f'Select the configuration profile. Available options: {_available_profiles}.')
-def config(log_level, profile):
-    click.echo(f"Configuration file: {pathlib.Path(paths['config']).resolve().absolute()}")
-    cfg = configuration.get_config()
-    if profile:
-        stp = configuration.get_setup()
-        logger.debug(f"Selecting profile {profile}...")
-        cfg.select_profile(profile)
-        stp.profile = profile
-        click.echo(f"Selected profile: {profile}")
-        click.echo(cfg)
-        return
-    if log_level:
-        from opencefadb import set_logging_level
-        logger.debug(f"Setting log level to {log_level}...")
-        cfg.logging_level = log_level
-        set_logging_level(log_level)
-        logger.debug(f"Log level set to {logger.level}")
-        return
-    click.echo(cfg)
+@main.command("init")
+@click.option("config_file", "--config", required=True, type=click.Path(exists=True, file_okay=True), help="Path to configuration file.")
+@click.option("working_directory", "--working-directory", required=False, type=click.Path(exists=True, file_okay=False), help="Working directory.")
+def init(config_file: str, working_directory: str | None = None):
+    """GraphDB-related commands."""
+    from opencefadb import OpenCeFaDB
+    OpenCeFaDB.initialize(
+        working_directory=working_directory,
+        config_filename=config_file
+    )
 
 
-def _initialize_database():
-    stp = configuration.get_setup()
-    cfg = configuration.get_config()
-    cfg.select_profile(stp.profile)
-    click.echo(f' > Selected profile: {stp.profile}')
+@graphdb.command("create")
+@click.option(
+    "--name",
+    "repo_name",
+    required=True,
+    help="Repository ID / name (e.g. 'test-repo').",
+)
+@click.option(
+    "--title",
+    default=None,
+    help="Optional human-readable repository title.",
+)
+@click.option(
+    "--url",
+    "graphdb_url",
+    default=DEFAULT_GRAPHDB_URL,
+    show_default=True,
+    help="Base URL of GraphDB (without trailing slash).",
+)
+@click.option("--env", "env_file", default=None, help="Path to .env file (loads GRAPHDB_USERNAME/PASSWORD).")
+@click.option("--username", default=None, help="GraphDB username (overrides env vars).")
+@click.option("--password", default=None, help="GraphDB password (overrides env vars, prompts if missing).")
+def graphdb_create(repo_name: str, title: str | None, graphdb_url: str, env_file: str | None, username: str | None,
+                   password: str | None):
+    """
+    Create a new GraphDB repository using the REST API.
+    """
+    if title is None:
+        title = repo_name
 
-    file_dir = pathlib.Path(cfg['DEFAULT']['rawdata_dir'])
-    metadata_dir = pathlib.Path(cfg['DEFAULT']['metadata_dir'])
+    # Minimal GraphDB config.ttl (file-based repo, rdfsplus-optimized ruleset).
+    # This follows the standard template used in the GraphDB docs. [web:12]
 
-    file_dir.mkdir(parents=True, exist_ok=True)
-    metadata_dir.mkdir(parents=True, exist_ok=True)
+    _load_env_file(env_file)
 
-    logger.debug("Initialized...")
-    logger.debug(f"Metadata directory: {metadata_dir}")
-    logger.debug(f"File directory: {file_dir}")
+    # CLI args override env vars
+    if username is None:
+        username, password = _get_credentials()
 
-    click.echo(" > Downloading all metadata from zenodo...")
-    logger.debug("Downloading all metadata from zenodo...")
-    from opencefadb.dbinit import initialize_database
-    initialize_database(cfg.metadata_directory)
+    config_ttl = dedent(f"""
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        @prefix rep: <http://www.openrdf.org/config/repository#> .
+        @prefix sr:  <http://www.openrdf.org/config/repository/sail#> .
+        @prefix sail: <http://www.openrdf.org/config/sail#> .
+        @prefix graphdb: <http://www.ontotext.com/trree/graphdb#> .
 
+        [] a rep:Repository ;
+           rep:repositoryID "{repo_name}" ;
+           rdfs:label "{title}" ;
+           rep:repositoryImpl [
+               rep:repositoryType "graphdb:SailRepository" ;
+               sr:sailImpl [
+                   sail:sailType "graphdb:Sail" ;
+                   graphdb:storage-folder "{repo_name}-storage" ;
+                   graphdb:ruleset "rdfsplus-optimized" ;
+                   graphdb:read-only "false" ;
+                   graphdb:disable-sameAs "false"
+               ]
+           ] .
+    """).strip()
 
-@cli.command(help="Initialize the database. This will download all metadata from Zenodo.")
-def init():
-    click.echo('Initializing database...')
-    _initialize_database()
-    click.echo("...done")
+    url = f"{graphdb_url.rstrip('/')}/rest/repositories"  # REST endpoint for repo creation. [web:6][web:9]
+    files = {"config": ("config.ttl", config_ttl, "text/turtle")}
+    auth = _get_auth(graphdb_url, username, password)
 
+    try:
+        response = requests.post(url, files=files, auth=auth)
+    except requests.RequestException as e:
+        click.echo(f"Error: failed to contact GraphDB at {graphdb_url}: {e}", err=True)
+        sys.exit(1)
 
-@cli.command()
-@click.option('-y', is_flag=True, default=False, help="Answer yes to all questions")
-@click.option('--init', is_flag=True, default=False, help="Automatically calls `opencefadb init` afterwards")
-def reset(y, init):
-    if y:
-        reset_answer = True
+    if response.status_code in (200, 201, 204):
+        click.echo(f"Repository '{repo_name}' created on {graphdb_url}")
+    elif response.status_code == 409:
+        click.echo(f"Repository '{repo_name}' already exists on {graphdb_url}", err=True)
+        sys.exit(1)
     else:
-        response = input("Resetting database... This deletes all downloaded files. Are you sure? [y/N]")
-        reset_answer = response.lower() == 'y'
-
-    if reset_answer:
-        logger.debug("Resetting database...")
-        cfg = configuration.get_config()
-        metadata_dir = cfg.metadata_directory
-        rawdata_dir = cfg.rawdata_directory
-        if metadata_dir.exists():
-            shutil.rmtree(metadata_dir)
-        if rawdata_dir.exists():
-            shutil.rmtree(rawdata_dir)
-
-        cfg.delete()
-        stp = configuration.get_setup()
-        stp.delete()
-        logger.debug("Done.")
-        click.echo("Database reset! Call 'opencefadb init' to reinitialize the database")
-        if init:
-            click.echo("Calling 'opencefadb init'...")
-            _initialize_database()
-
-    else:
-        click.echo('Aborted...')
+        click.echo(
+            f"Error: GraphDB responded with {response.status_code}:\n"
+            f"{response.text}",
+            err=True,
+        )
+        sys.exit(1)
 
 
-@cli.command()
-@click.option('--plot', is_flag=True, help='Plots the CAD. Requires special installation. See README.md')
-@click.option('--name', required=False, default="asm", help='name of CAD (asm or fan)')
-@click.option('--download', required=False, type=click.Path(), help='Download the CAD file(s)', show_default=True)
-@click.option('-v', '--verbose', required=False, is_flag=True, help='Prints additional information')
-@click.option('--print-properties', required=False, is_flag=True,
-              help='Prints the Fan Properties to the screen. Requires the database to be initialized')
-def fan(plot, name, download, verbose, print_properties):
-    if download:
-        db = connect_to_database()
-        target_dir = pathlib.Path(download).resolve().absolute()
-        click.echo(f"Downloading CAD file to '{target_dir}'...")
-        filename = db.download_cad_file(target_dir=download)
-        click.echo(f"...finished. File saved as {filename}")
-    if plot:  # experimental!
+@graphdb.command("add")
+@click.option(
+    "--repo",
+    "repo_name",
+    required=True,
+    help="Target repository ID.",
+)
+@click.option(
+    "--dir",
+    "data_dir",
+    required=True,
+    type=click.Path(exists=True, file_okay=False),
+    help="Directory containing RDF files.",
+)
+@click.option(
+    "--suffix",
+    default=".ttl",
+    show_default=True,
+    help="File suffix to match (e.g. '.ttl', '.owl').",
+)
+@click.option(
+    "--recursive",
+    is_flag=True,
+    help="Recursively search subdirectories.",
+)
+@click.option(
+    "--url",
+    "graphdb_url",
+    default=DEFAULT_GRAPHDB_URL,
+    show_default=True,
+    help="Base URL of GraphDB (without trailing slash).",
+)
+@click.option("--env", "env_file", default=None, help="Path to .env file (loads GRAPHDB_USERNAME/PASSWORD).")
+@click.option("--username", default=None, help="GraphDB username (overrides env vars).")
+@click.option("--password", default=None, help="GraphDB password (overrides env vars, prompts if missing).")
+def graphdb_add(repo_name: str, data_dir: str, suffix: str, recursive: bool, graphdb_url: str, env_file: str | None, username: str | None, password: str | None):
+    """
+    Add RDF files from directory to GraphDB repository.
+    """
+    base_url = graphdb_url.rstrip('/')
+    statements_url = f"{base_url}/repositories/{repo_name}/statements"
+
+    _load_env_file(env_file)
+
+    # CLI args override env vars
+    if username is None:
+        username, password = _get_credentials()
+    auth = _get_auth(graphdb_url, username, password)
+
+    # Find all matching files
+    pattern = f"**/*{suffix}" if recursive else f"*{suffix}"
+    rdf_files: List[pathlib.Path] = list(
+        pathlib.Path(data_dir).rglob(pattern) if recursive else pathlib.Path(data_dir).glob(pattern))
+
+    if not rdf_files:
+        click.echo(f"No files found matching '*{suffix}' in {data_dir}", err=True)
+        sys.exit(1)
+
+    click.echo(f"Found {len(rdf_files)} RDF files to upload to '{repo_name}'")
+
+    headers = {
+        'Content-Type': 'text/turtle',
+        'Accept': 'application/json'
+    }
+
+    uploaded = 0
+    for file_path in rdf_files:
         try:
-            from opencefadb.cad import plotting
-        except ImportError as e:
-            click.echo(f"Error: {e}")
-            return
-        plotting.plot(name)
+            with open(file_path, 'rb') as f:
+                response = requests.post(statements_url, headers=headers, data=f, auth=auth)
 
-    if print_properties:
-        logger.debug("Connecting to database...")
-        db = connect_to_database()
+            if response.status_code in (200, 201, 204):
+                click.echo(f"✓ {file_path}")
+                uploaded += 1
+            else:
+                click.echo(f"✗ {file_path}: {response.status_code} - {response.text[:100]}...", err=True)
 
-        properties = db.select_fan_properties()
-        if verbose:
-            click.echo("Query:")
-            click.echo("------")
-            click.echo(SELECT_FAN_PROPERTIES.sparql_query)
-            click.echo("")
-        click.echo("Fan Properties:")
-        click.echo("---------------")
-        click.echo(properties)
+        except Exception as e:
+            click.echo(f"✗ {file_path}: {e}", err=True)
+
+    click.echo(f"\nUploaded {uploaded}/{len(rdf_files)} files successfully to {statements_url}")
 
 
-@cli.command()
-def info():
-    cfg = configuration.get_config()
-    click.echo(f"Configuration:")
-    click.echo("--------------")
-    click.echo(f"[{cfg.profile}]")
-    for k in cfg[cfg.profile]:
-        value = cfg[cfg.profile][k]
-        click.echo(f" > {k}: {value}")
-    click.echo("")
+def _load_env_file(env_file: str | None):
+    """Load .env file if provided."""
+    if env_file and pathlib.Path(env_file).exists():
+        dotenv.load_dotenv(env_file)
+    elif env_file:
+        click.echo(f"Warning: .env file not found: {env_file}", err=True)
 
 
-if __name__ == '__main__':
-    cli()
+def _get_credentials():
+    """Get credentials from env vars with fallbacks."""
+    username = os.getenv('GRAPHDB_USERNAME')
+    password = os.getenv('GRAPHDB_PASSWORD')
+    return username, password
+
+
+def _get_auth(graphdb_url: str, username: str | None, password: str | None):
+    """Get requests.auth for GraphDB (Basic or token)."""
+    if not username:
+        return None
+
+    if not password:
+        password = click.prompt("GraphDB password", hide_input=True)
+
+    # Try GraphDB token auth first
+    token_auth = _get_graphdb_token(graphdb_url, username, password)
+    if token_auth:
+        return token_auth
+
+    click.echo("Token auth failed, falling back to Basic Auth", err=True)
+    return (username, password)
+
+
+def _get_graphdb_token(base_url: str, username: str, password: str):
+    """Get GraphDB JWT token via /rest/login."""
+    login_url = f"{base_url.rstrip('/')}/rest/login"
+
+    try:
+        response = requests.post(
+            login_url,
+            json={"username": username, "password": password},
+            headers={'Content-Type': 'application/json'}
+        )
+
+        if response.status_code == 200:
+            auth_header = response.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Bearer '):
+                return lambda r: r.headers.update({'Authorization': auth_header})
+    except:
+        pass
+
+    return None

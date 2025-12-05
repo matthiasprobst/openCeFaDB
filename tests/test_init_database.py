@@ -31,6 +31,7 @@ class TestInitDatabase(unittest.TestCase):
     #         shutil.rmtree(self.working_dir)
 
     def test_generate_dataset_from_zenodo_record(self):
+        # TODO this is part of the admin repo!
         from opencefadb.core import generate_config
         config_filename = generate_config(
             zenodo_records=[
@@ -42,6 +43,7 @@ class TestInitDatabase(unittest.TestCase):
                 __this_dir__ / "data" / "test_measurements/2023-11-07-15-33-03_run.jsonld"
             ]
         )
+        print(config_filename)
         config_graph = rdflib.Graph()
         config_graph.parse(location=str(config_filename))
         shacl_graph = rdflib.Graph()

@@ -1,60 +1,83 @@
+import enum
 import pathlib
+import time
 
-from gldb.query.rdfstorequery import SparqlQuery
+import matplotlib.pyplot as plt
+import rdflib
+from gldb.stores import GraphDB
 
-from opencefadb import connect_to_database
-from opencefadb.configuration import get_config
-from opencefadb.dbinit import initialize_database
+import opencefadb
+from opencefadb.query_templates.sparql import construct_wikidata_property_search
+from opencefadb.stores import RdflibSPARQLStore, HDF5SqlDB
 
-__this_dir__ = pathlib.Path(__file__).resolve().parent
+__this_dir__ = pathlib.Path(__file__).parent.resolve()
+WORKING_DIR = __this_dir__ / "db-dir"
+(WORKING_DIR / "rawdata").mkdir(parents=True, exist_ok=True)
 
 
-def plot_fan_curve():
-    db = connect_to_database()
+class RDFStoreSelection(enum.Enum):
+    RDFlibSPARQLStore = 1
+    GraphDB = 2
 
-    properties = db.select_fan_properties()
-    print(properties)
 
-    sparql_query = SparqlQuery(
-        """PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
-        
-        SELECT ?property ?value
-        WHERE {
-          ?subject ssno:standardName ?value .
-        }
-        """,
-        description="Selects all properties of the fan"
+def get_database_interface(rdf_store_selection=RDFStoreSelection) -> opencefadb.OpenCeFaDB:
+    if rdf_store_selection == RDFStoreSelection.RDFlibSPARQLStore:
+        metadata_store = RdflibSPARQLStore(endpoint_url="http://localhost:8000")
+    elif rdf_store_selection == RDFStoreSelection.GraphDB:
+        metadata_store = GraphDB(
+            endpoint="http://localhost:7200",
+            repository="opencefadb-sandbox",
+            username="user",
+            password="pass"
+        )
+    else:
+        raise ValueError("Unsupported RDF store selection.")
+
+    raw_store = HDF5SqlDB(data_dir=WORKING_DIR / "rawdata")
+
+    return opencefadb.OpenCeFaDB(
+        metadata_store=metadata_store,
+        hdf_store=raw_store
     )
-    # print(db.execute_query("rdf_db", sparql_query).result.bindings)
-
-    # ops = db.select_all_operation_points()
 
 
-def reset_database():
-    cfg = get_config()
-    cfg.delete()
-    db = connect_to_database(profile="test")
-    db.store_manager["hdf_db"].reset()
-    cfg = get_config()
-    initialize_database(cfg.metadata_directory)
+def query_wikidata_and_add(db: opencefadb.OpenCeFaDB):
+    query = construct_wikidata_property_search("Q131549102")
+    results = query.execute(db.stores.wikidata)
+    print(results.data)
 
 
-_CONTEXT = {
-    "local": "http://local.org/"
-}
+def plot_fan_curves(db):
+    st = time.time()
+    ds600 = db.get_fan_curve(n_rot_speed_rpm=600)
+    ds800 = db.get_fan_curve(n_rot_speed_rpm=800)
+    ds1000 = db.get_fan_curve(n_rot_speed_rpm=1000)
+    ds1200 = db.get_fan_curve(n_rot_speed_rpm=1200)
+    et = time.time()
+    print(f"   - Retrieved fan curves in {et - st:.2f} seconds from the database.")
+
+    zenodo_record_ns = rdflib.namespace.Namespace("https://doi.org/10.5281/zenodo.17572275#")
+    sn_mean_dp_stat = zenodo_record_ns[
+        'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet']
+    sn_mean_vfr = zenodo_record_ns[
+        'standard_name_table/derived_standard_name/arithmetic_mean_of_fan_volume_flow_rate']
+
+    plt.figure()
+    ax = plt.gca()
+    ax = ds600.plot(ax=ax, x_standard_name=sn_mean_vfr, y_standard_name=sn_mean_dp_stat, label="600 rpm", color="blue")
+    ax = ds800.plot(ax=ax, x_standard_name=sn_mean_vfr, y_standard_name=sn_mean_dp_stat, label="800 rpm", color="red")
+    ax = ds1000.plot(ax=ax, x_standard_name=sn_mean_vfr, y_standard_name=sn_mean_dp_stat, label="1000 rpm",
+                     color="yellow")
+    ax = ds1200.plot(ax=ax, x_standard_name=sn_mean_vfr, y_standard_name=sn_mean_dp_stat, label="1200 rpm",
+                     color="purple")
+    ax.set_title("Fan Curve at various speeds")
+    plt.legend()
+    plt.show()
 
 
-def add_opm_files():
-    root_dir = __this_dir__ / "../../data/measurements/processed/opm/main_cases"
-    assert root_dir.is_dir(), f"{root_dir} does not exist."
-    hdf_filenames = sorted(root_dir.rglob('*.hdf'))
-    db = connect_to_database()
-    for hdf_filename in hdf_filenames:
-        identifier = db.upload_hdf(hdf_filename)
-        print(identifier.serialize("json-ld", context=_CONTEXT))
-
-
-if __name__ == '__main__':
-    reset_database()
-    add_opm_files()
-    # plot_fan_curve()
+if __name__ == "__main__":
+    db_interface = get_database_interface(
+        rdf_store_selection=RDFStoreSelection.RDFlibSPARQLStore
+    )
+    plot_fan_curves(db_interface)
+    query_wikidata_and_add(db_interface)

@@ -8,19 +8,27 @@ ex:NumericDatasetsMustHaveUnit
   sh:targetClass hdf:Dataset ;
   sh:sparql [
     a sh:SPARQLConstraint ;
-    sh:message "Numeric hdf:Dataset (H5T_INTEGER or H5T_FLOAT) must have at least one m4i:hasUnit." ;
+    sh:message "Numeric hdf:Dataset (H5T_INTEGER or H5T_FLOAT) must have at least one m4i:hasUnit and the unit must be an IRI." ;
     sh:select """
       SELECT ?this WHERE {
         ?this a hdf:Dataset .
 
-        # Is it numeric? (has at least one numeric datatype)
+        # Only consider numeric datasets
         FILTER EXISTS {
           ?this hdf:datatype ?dt .
           FILTER (?dt IN (hdf:H5T_INTEGER, hdf:H5T_FLOAT))
         }
 
-        # Missing unit?
-        FILTER NOT EXISTS { ?this m4i:hasUnit ?u . }
+        # Violation if:
+        #   - no m4i:hasUnit at all, OR
+        #   - there is a m4i:hasUnit but at least one value is not an IRI
+        FILTER (
+          !EXISTS { ?this m4i:hasUnit ?unitValue . } ||
+          EXISTS {
+            ?this m4i:hasUnit ?unitValue .
+            FILTER ( !isIRI(?unitValue) )
+          }
+        )
       }
     """ ;
   ] .

@@ -2,20 +2,21 @@ import json
 import logging
 import pathlib
 import sqlite3
+from typing import Union
 
 import rdflib
-from gldb.stores import DataStore
 from gldb.query import DataStoreQuery, QueryResult
+from gldb.stores import DataStore
+from ontolutils.ex import dcat
 
 from opencefadb.stores.filedb.database_resource import DatabaseResource
-from ontolutils.ex import dcat
 
 logger = logging.getLogger("opencefadb")
 
 
 class SQLQuery(DataStoreQuery):
 
-    def __init__(self, query: str, description: str = None,filters=None, ):
+    def __init__(self, query: str, description: str = None, filters=None, ):
         super().__init__(query, description)
         self.filters = filters
 
@@ -28,13 +29,25 @@ class HDF5SqlDB(DataStore):
     HDF5SQLDB is a SQL database interface that stores data in HDF5 files.
     """
 
-    def __init__(self):
-        # TODO: dont use local config, make it explicite during initialization
-        from ...configuration import get_config
-        cfg = get_config()
+    def __init__(self, data_dir: Union[str, pathlib.Path], db_path: Union[str, pathlib.Path] = None):
+        if data_dir is not None and db_path is not None:
+            raise ValueError("Specify either data_dir or db_path, not both.")
+        if db_path is not None:
+            db_path = pathlib.Path(db_path).resolve().absolute()
+            if not db_path.exists():
+                db_path.parent.mkdir(parents=True, exist_ok=True)
+                db_path.touch()
+            if not db_path.is_file():
+                raise ValueError(f"Database path {db_path} is not a file.")
+        else:
+            data_dir = pathlib.Path(data_dir).resolve().absolute()
+            assert data_dir.exists(), f"Data directory {data_dir} does not exist."
+            assert data_dir.is_dir(), f"Data directory {data_dir} is not a directory."
+            db_path = data_dir / "hdf5_files.db"
+
         self._hdf5_file_table_name = "hdf5_files"
         self._sql_base_uri = "http://local.org/sqlite3/"
-        self._db_path = str((cfg.rawdata_directory / "hdf5sql.db").resolve().absolute()).replace('\\', '/')
+        self._db_path = db_path
         self._endpointURL = rf"file://{self._db_path}"
         self._connection = self._initialize_database(self._db_path)
         self._filenames = {}
@@ -59,7 +72,7 @@ class HDF5SqlDB(DataStore):
         cursor.execute(query.sql_query, params)
         return cursor.fetchall()
 
-    def _initialize_database(self, db_path="hdf5_files.db"):
+    def _initialize_database(self, db_path: Union[str, pathlib.Path] = "hdf5_files.db"):
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 

@@ -7,8 +7,8 @@ This is the Python package to interface and work with the database.
 
 ## Installation
 
-Most features work for all Python versions higher than 3.8. However, due to limits in some dependencies,
-the opencefadb is designed to work with Python 3.8 until 3.10.
+Most features work for all Python versions higher than 3.9. However, due to limits in some dependencies,
+the opencefadb is designed to work with Python 3.9 until 3.13.
 
 We recommend using an Anaconda environment.
 

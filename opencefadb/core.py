@@ -2,24 +2,27 @@ import enum
 import hashlib
 import pathlib
 import shutil
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Union, Optional, Dict
+from typing import List, Union, Optional
 
 import rdflib
 from gldb import GenericLinkedDatabase
-from gldb.stores import RDFStore, DataStore
+from gldb.stores import RDFStore, DataStore, RemoteSparqlStore
 from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 
 from opencefadb import logger
+from opencefadb.models import Value, DataSet, DataSeries
+from opencefadb.models.utils import remove_none
 from opencefadb.query_templates.sparql import (
     SELECT_FAN_CAD_FILE
 )
-from opencefadb.stores.rdf_stores.rdffiledb.rdffilestore import RDFFileStore
+from opencefadb.query_templates.sparql import construct_data_based_on_standard_name_based_search_and_range_condition
 from opencefadb.utils import download_file
 from opencefadb.utils import download_multiple_files
 
 __this_dir__ = pathlib.Path(__file__).parent
-CONFIG_DIR = __this_dir__
+
 
 _db_instance = None
 
@@ -77,15 +80,6 @@ class MediaType(enum.Enum):
             return ".xml"
         else:
             return ""
-
-#
-# def _parse_to_qualified_name(uri: rdflib.URIRef):
-#     """Converts a URI to a qualified name using the namespaces defined in RDFFileStore."""
-#     uri_str = str(uri)
-#     for prefix, namespace in RDFFileStore.namespaces.items():
-#         if namespace in uri_str:
-#             return f"{prefix}:{uri_str.replace(namespace, '')}"
-#     return uri_str
 
 
 def _get_url_hash(url: str) -> str:
@@ -281,7 +275,8 @@ def _download_metadata_datasets(
                     download_url,
                     target_filename.resolve(),
                     checksum=checksum,
-                    checksum_algorithm=checksum_algorithm)
+                    checksum_algorithm=checksum_algorithm
+                )
                 )
     else:
         download_multiple_files(
@@ -294,99 +289,43 @@ def _download_metadata_datasets(
     return target_filenames
 
 
-from ontolutils.ex import dcat
-
-
-@dataclass
-class ZenodoRecordInfo:
-    record_id: int
-    sandbox: bool = False
-
-
-def parse_local_filenames(filenames: List[Union[str, pathlib.Path]]) -> dcat.Dataset:
-    def parse_download_url(download_url: Union[str, pathlib.Path]) -> str:
-        return f"file:///{pathlib.Path(download_url).resolve().absolute()}"
-    dist = [dcat.Distribution(id=f"https://example.org{du.name}", downloadURL=parse_download_url(du), ) for du in filenames]
-    return dcat.Dataset(distribution=dist)
-
-
-def generate_config(
-        zenodo_records: List[Union[ZenodoRecordInfo, Dict]] = None,
-        local_filenames: List[Union[str, pathlib.Path]] = None,
-        output_config_filename: Union[str, pathlib.Path] = None,
-        root_config_filename: Union[str, pathlib.Path] = None
-):
-    """Generates a database configuration file based on the provided zenodo records."""
-    root_config_filename = root_config_filename or (__this_dir__ / "db-dataset-config-sandbox-base.ttl")
-    output_config_filename = output_config_filename or (__this_dir__ / "db-dataset-config-sandbox-3.ttl")
-    g = rdflib.Graph()
-    g.parse(source=root_config_filename, format="ttl")
-
-    for zenodo_record_info in zenodo_records:
-        record = ZenodoRecord(
-            source=zenodo_record_info["record_id"],
-            sandbox=zenodo_record_info["sandbox"]
-        )
-        g2 = rdflib.Graph()
-        g2.parse(data=record.as_dcat_dataset().serialize("ttl"))
-        g += g2
-
-    if local_filenames is not None:
-        lokal_dataset = parse_local_filenames(local_filenames)
-        g3 = rdflib.Graph()
-        g3.parse(data=lokal_dataset.serialize("ttl"))
-        g += g3
-
-    with open(output_config_filename, "w", encoding="utf-8") as f:
-        f.write(g.serialize(format="ttl"))
-
-    return output_config_filename
-
-
 class OpenCeFaDB(GenericLinkedDatabase):
 
     def __init__(
             self,
             metadata_store: RDFStore,
-            hdf_store: DataStore,
-            working_directory: Union[str, pathlib.Path],
-            config_filename: Union[str, pathlib.Path]
+            hdf_store: DataStore
     ):
+        wikidata_store = RemoteSparqlStore(endpoint_url="https://query.wikidata.org/sparql", return_format="json")
         super().__init__(
             stores={
                 "rdf": metadata_store,
+                "wikidata": wikidata_store,
                 "hdf": hdf_store,
             }
         )
-        config_filename = pathlib.Path(config_filename)
-        if not config_filename.exists():
-            raise FileNotFoundError(f"Config file {config_filename.resolve()} does not exist.")
-        self.working_directory = pathlib.Path(working_directory)
-        self.working_directory.mkdir(parents=True, exist_ok=True)
-        self.cache_directory = self.working_directory / ".opencefadb"
-        # self.metadata_directory = self.working_directory / "metadata"
-        # self.rawdata_directory = self.working_directory / "rawdata"
-        # self.working_directory.mkdir(parents=True, exist_ok=True)
-        # self.metadata_directory.mkdir(parents=True, exist_ok=True)
-        self._initialize(config_filename)
 
-    def _initialize(self, config_filename: Union[str, pathlib.Path], exist_ok=False):
-        """Initializes the database by downloading and uploading metadata files."""
-        download_dir = self.cache_directory
-        download_dir.mkdir(parents=True, exist_ok=True)
-        ttl_filenames = download_dir.glob("*.ttl")
-        jsonld_filenames = download_dir.glob("*.jsonld")
-        downloaded_filenames = _download_metadata_datasets(
-            _get_metadata_datasets(config_filename, self.working_directory),
-            download_dir=download_dir,
-            exist_ok=exist_ok,
-            allowed_media_types=[MediaType.JSON_LD, MediaType.TURTLE]
+    @classmethod
+    def initialize(
+            cls,
+            config_filename: Union[str, pathlib.Path],
+            working_directory: Union[str, pathlib.Path] = None
+    ):
+        from ._database_initialization import database_initialization
+        if working_directory is None:
+            working_directory = pathlib.Path.cwd()
+        download_directory = pathlib.Path(working_directory) / "metadata"
+        download_directory.mkdir(parents=True, exist_ok=True)
+        return database_initialization(
+            config_filename=config_filename,
+            download_directory=download_directory
         )
-        filenames = set(list(ttl_filenames) + list(jsonld_filenames) + downloaded_filenames)
-        self.stores.rdf.upload_file(config_filename)
-        for filename in filenames:
-            logger.debug(f"Uploading {filename}")
-            self.stores.rdf.upload_file(filename)
+
+    @classmethod
+    def get_config(cls, sandbox=False) -> pathlib.Path:
+        if sandbox:
+            return __this_dir__ / "data/opencefadb-config-sandbox.ttl"
+        return __this_dir__ / "data/opencefadb-config.ttl"
 
     # @classmethod
     # def setup_local_default(
@@ -470,3 +409,88 @@ class OpenCeFaDB(GenericLinkedDatabase):
         if target_filename.exists() and exist_ok:
             return target_filename
         return download_file(download_url, target_dir / _guess_filenames)
+
+    def get_fan_curve(
+            self,
+            n_rot_speed_rpm: float,
+            n_rot_tolerance: float = 0.05
+    ):
+        """Gets the fan curve data for the given rotational speed (in rpm) with the given tolerance."""
+        return get_fan_curve_dataseries(
+            self.stores.rdf,
+            n_rot_speed_rpm=n_rot_speed_rpm,
+            n_rot_tolerance=n_rot_tolerance
+        )
+
+
+def get_fan_curve_dataseries(
+        metadata_store: RDFStore,
+        n_rot_speed_rpm: float,
+        n_rot_tolerance: float = 0.05
+) -> DataSeries:
+    zenodo_record_ns = rdflib.namespace.Namespace("https://doi.org/10.5281/zenodo.17572275#")
+    sn_mean_dp_stat = zenodo_record_ns[
+        'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet']
+    sn_mean_vfr = zenodo_record_ns[
+        'standard_name_table/derived_standard_name/arithmetic_mean_of_fan_volume_flow_rate']
+    sn_mean_nrot = zenodo_record_ns['standard_name_table/derived_standard_name/arithmetic_mean_of_fan_rotational_speed']
+
+    n_rot_range = tuple(
+        [((1 - n_rot_tolerance) * n_rot_speed_rpm) / 60, ((1 + n_rot_tolerance) * n_rot_speed_rpm) / 60])
+
+    query = construct_data_based_on_standard_name_based_search_and_range_condition(
+        target_standard_name_uris=[sn_mean_vfr, sn_mean_dp_stat, sn_mean_nrot],
+        conditional_standard_name_uri=sn_mean_nrot,
+        condition_range=n_rot_range
+    )
+
+    print(" > Executing query (may take a few moments)...")
+    result = query.execute(metadata_store)
+    print(f"   - Found {len(result.data)} results.")
+
+    data = defaultdict(dict)
+
+    df = result.data
+    for index, row in df.iterrows():
+        hdf_file = str(row["hdfFile"])
+        # unterstütze beide Varianten: ?standardName oder ?dataset (je nach gespeicherter Query)
+        standard_term = row.get("standardName") or row.get("dataset")
+        standard_name = str(standard_term) if standard_term is not None else None
+
+        val_term = row.get("value")
+        units_term = row.get("units")
+
+        try:
+            value = val_term.toPython() if val_term is not None else None
+        except Exception:
+            value = str(val_term) if val_term is not None else None
+
+        try:
+            units = units_term.toPython() if units_term is not None else None
+        except Exception:
+            units = str(units_term) if units_term is not None else None
+
+        if standard_name is not None:
+            data[hdf_file][standard_name] = {"value": value, "units": units}
+
+    def safe(v):
+        if isinstance(v, (str, int, float, bool)) or v is None:
+            return v
+        return str(v)
+
+    serializable = {
+        hf: {sn.rsplit("/", 1)[-1]: {"standardName": sn, "value": safe(item["value"]), "units": safe(item["units"])} for
+             sn, item in sn_map.items()}
+        for hf, sn_map in data.items()
+    }
+
+    data = []
+    for k, v in serializable.items():
+        _dataset = []
+        for sn, value in v.items():
+            _dataset.append(Value.model_validate(remove_none(value)))
+        data.append(
+            DataSet.model_validate(dict(data=_dataset))
+        )
+    dc = DataSeries.model_validate(dict(datasets=data))
+    return dc
