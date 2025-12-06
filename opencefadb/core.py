@@ -23,7 +23,6 @@ from opencefadb.utils import download_multiple_files
 
 __this_dir__ = pathlib.Path(__file__).parent
 
-
 _db_instance = None
 
 
@@ -293,16 +292,19 @@ class OpenCeFaDB(GenericLinkedDatabase):
 
     def __init__(
             self,
-            metadata_store: RDFStore,
-            hdf_store: DataStore
+            metadata_store: RDFStore = None,
+            hdf_store: DataStore = None
     ):
         wikidata_store = RemoteSparqlStore(endpoint_url="https://query.wikidata.org/sparql", return_format="json")
+        stores = {
+            "wikidata": wikidata_store
+        }
+        if metadata_store is not None:
+            stores["rdf"] = metadata_store
+        if hdf_store is not None:
+            stores["hdf"] = hdf_store
         super().__init__(
-            stores={
-                "rdf": metadata_store,
-                "wikidata": wikidata_store,
-                "hdf": hdf_store,
-            }
+            stores=stores
         )
 
     @classmethod
