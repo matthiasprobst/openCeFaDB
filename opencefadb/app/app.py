@@ -2,6 +2,7 @@
 import base64
 import json
 import re
+from typing import Optional
 
 import rdflib
 import streamlit as st
@@ -36,7 +37,7 @@ def get_root_node_iris(graph: rdflib.Graph) -> list[URIRef]:
     return sorted(roots)
 
 
-def get_root_node_iri(graph: rdflib.Graph) -> URIRef | None:
+def get_root_node_iri(graph: rdflib.Graph) -> Optional[URIRef]:
     roots = get_root_node_iris(graph)
     return roots[0] if roots else None
 
@@ -70,10 +71,10 @@ def load_graph_from_rdflib_endpoint(endpoint_url: str, limit: int = 5000) -> Gra
 
 def load_graph_from_sparql_endpoint(
         endpoint_url: str,
-        roots: list[str] | None = None,
+        roots: Optional[list[str]] = None,
         limit: int = 5000,
-        username: str | None = None,
-        password: str | None = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
 ) -> Graph:
     """
     Fetch a bounded subgraph from a SPARQL endpoint into a local Graph via CONSTRUCT.

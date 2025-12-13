@@ -2,7 +2,7 @@ import os
 import pathlib
 import sys
 from textwrap import dedent
-from typing import List
+from typing import List, Optional
 
 import click
 import dotenv
@@ -31,7 +31,7 @@ def graphdb():
 @click.option("target_dir", "--target-dir", required=False, type=click.Path(exists=False, file_okay=False),
               help="Target directory to save the config file (default: current working directory).")
 @click.option("sandbox", "--sandbox", is_flag=True, help="Use the Zenodo sandbox (for testing; requires access token).")
-def pull(version: str | None = None, target_dir: str | None = None, sandbox: bool = False):
+def pull(version: Optional[str] = None, target_dir: Optional[str] = None, sandbox: bool = False):
     """downloads the latest OpenCeFaDB config file from zenodo."""
     config_filename = OpenCeFaDB.pull(version=version, target_directory=target_dir, sandbox=sandbox)
     click.echo(f"Downloaded config file to: {config_filename}")
@@ -42,7 +42,7 @@ def pull(version: str | None = None, target_dir: str | None = None, sandbox: boo
               help="Path to configuration file.")
 @click.option("working_directory", "--working-directory", required=False, type=click.Path(exists=True, file_okay=False),
               help="Working directory.")
-def init(config_file: str, working_directory: str | None = None):
+def init(config_file: str, working_directory: Optional[str] = None):
     """Database initialization commands."""
     from opencefadb import OpenCeFaDB
     OpenCeFaDB.initialize(
@@ -82,10 +82,10 @@ def init(config_file: str, working_directory: str | None = None):
 def graphdb_create(repo_name: str = None,
                    title: str = None,
                    graphdb_url: str = None,
-                   config_file: str | None = None,
-                   env_file: str | None = None,
-                   username: str | None = None,
-                   password: str | None = None):
+                   config_file: Optional[str] = None,
+                   env_file: Optional[str] = None,
+                   username: Optional[str] = None,
+                   password: Optional[str] = None):
     """
     Create a new GraphDB repository using the REST API.
     """
@@ -247,9 +247,10 @@ def graphdb_add(repo_name: str,
                 data_dir: str,
                 suffix: str,
                 recursive: bool,
-                env_file: str | None,
-                username: str | None,
-                password: str | None):
+                graphdb_url: str,
+                env_file: Optional[str],
+                username: Optional[str],
+                password: Optional[str]):
     """
     Add RDF files from directory to GraphDB repository.
     """
@@ -297,7 +298,7 @@ def graphdb_add(repo_name: str,
     click.echo(f"\nUploaded {uploaded}/{len(rdf_files)} files successfully to {statements_url}")
 
 
-def _load_env_file(env_file: str | None):
+def _load_env_file(env_file: Optional[str]):
     """Load .env file if provided."""
     if env_file and pathlib.Path(env_file).exists():
         dotenv.load_dotenv(env_file)
@@ -312,7 +313,7 @@ def _get_credentials():
     return username, password
 
 
-def _get_auth(graphdb_url: str, username: str | None, password: str | None):
+def _get_auth(graphdb_url: str, username: Optional[str], password: Optional[str]):
     """Get requests.auth for GraphDB (Basic or token)."""
     if not username:
         return None

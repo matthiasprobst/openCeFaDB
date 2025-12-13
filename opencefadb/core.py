@@ -339,7 +339,7 @@ class OpenCeFaDB(GenericLinkedDatabase):
             print(results_text)
 
     @classmethod
-    def pull(cls, version: str | None = None, target_directory: Union[str, pathlib.Path] | None = None,
+    def pull(cls, version: Optional[str] = None, target_directory: Optional[Union[str, pathlib.Path]] = None,
              sandbox: bool = False):
         return _pull(version, target_directory, sandbox)
 
@@ -541,8 +541,8 @@ def get_fan_curve_dataseries(
 
 
 def _pull(
-        version: str | None = None,
-        target_directory: str | None = None,
+        version: Optional[str] = None,
+        target_directory: Optional[Union[str, pathlib.Path]] = None,
         sandbox: bool = False) -> Optional[pathlib.Path]:
     """download initial config"""
     if target_directory is None:
