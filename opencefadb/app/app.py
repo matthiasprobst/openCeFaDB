@@ -36,7 +36,7 @@ def get_root_node_iris(graph: rdflib.Graph) -> list[URIRef]:
     return sorted(roots)
 
 
-def get_root_node_ri(graph: rdflib.Graph) -> URIRef | None:
+def get_root_node_iri(graph: rdflib.Graph) -> URIRef | None:
     roots = get_root_node_iris(graph)
     return roots[0] if roots else None
 
@@ -183,6 +183,7 @@ GRAPH_HTML = """
   <div class="status" id="status">🖕 Double-click roots to expand</div>
   <div class="toolbar">
     <button id="cleanupBtn" title="Remove nodes without any edges">Cleanup</button>
+    <button id="expandAllBtn" title="Expand all nodes in current subgraph">Expand All</button>
   </div>
   <div id="payload">
     <h4>Node details</h4>
@@ -435,6 +436,33 @@ GRAPH_HTML = """
       }
     }
 
+    function expandAll() {
+      try {
+        const st = document.getElementById('status');
+        if (st) st.innerHTML = '⏳ Expanding all nodes...';
+
+        let prevCount = nodes.length ? nodes.length : (nodes.getIds ? nodes.getIds().length : nodes.get().length);
+        let iterations = 0;
+        const maxIterations = 20; // safety to avoid runaway expansion
+        while (iterations < maxIterations) {
+          iterations++;
+          const ids = nodes.getIds ? nodes.getIds() : nodes.get().map(n => n.id);
+          ids.forEach(id => {
+            try { expandNode(id); } catch(e) {}
+          });
+          const curCount = nodes.length ? nodes.length : (nodes.getIds ? nodes.getIds().length : nodes.get().length);
+          if (curCount <= prevCount) break; // no new nodes added
+          prevCount = curCount;
+        }
+        network.fit();
+        if (st) st.innerHTML = `✅ Expand All done (iterations: ${iterations}, nodes: ${prevCount})`;
+      } catch (e) {
+        console.log('expandAll error', e);
+        const st = document.getElementById('status');
+        if (st) st.innerHTML = '⚠️ Expand All failed';
+      }
+    }
+
     try {
       network = new vis.Network(container, data, options);
 
@@ -482,6 +510,8 @@ GRAPH_HTML = """
     try {
       const cleanupBtn = document.getElementById('cleanupBtn');
       if (cleanupBtn) cleanupBtn.addEventListener('click', cleanupIsolatedNodes);
+      const expandAllBtn = document.getElementById('expandAllBtn');
+      if (expandAllBtn) expandAllBtn.addEventListener('click', expandAll);
     } catch (e) { console.log('toolbar binding error', e); }
   </script>
 </body>
