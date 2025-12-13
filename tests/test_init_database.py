@@ -18,10 +18,6 @@ from opencefadb.validation.shacl.templates.person import PERSON_SHACL
 
 __this_dir__ = pathlib.Path(__file__).parent
 
-N_M4I_IDENTIFIERS_IN_DB = 7
-
-CONFIG_FILENAME = __this_dir__ / "../opencefadb" / "db-dataset-config-sandbox-3.ttl"
-
 
 class TestInitDatabase(unittest.TestCase):
 
@@ -41,7 +37,7 @@ class TestInitDatabase(unittest.TestCase):
         )
         self.assertTrue(config_filename.exists())
         self.assertTrue(config_filename.is_file())
-        self.assertEqual("opencefadb-config-sandbox-1-0-0.ttl", config_filename.name)
+        self.assertEqual("opencefadb-config-sandbox-1-2-0.ttl", config_filename.name)
 
         out = OpenCeFaDB.initialize(
             working_directory=self.working_dir,
@@ -49,11 +45,11 @@ class TestInitDatabase(unittest.TestCase):
         )
         filenames = ([pathlib.Path(o[1]) for o in out])
         self.assertEqual(
-            114,
+            115,  # number of files that are downloaded
             len([f for f in filenames if f.suffix == ".ttl"])
         )
         self.assertEqual(
-            114,
+            117,  # the config file is also in the metadata folder
             len(list((self.working_dir / "metadata").rglob("*.ttl")))
         )
 
@@ -113,16 +109,24 @@ class TestInitDatabase(unittest.TestCase):
 
     def test_db_with_rdflib(self):
         database_interface = opencefadb.OpenCeFaDB(
-            metadata_store=RDFFileStore(data_dir=self.working_dir / "metadata"),
+            metadata_store=RDFFileStore(
+                data_dir=self.working_dir / "metadata",
+                formats="ttl",
+                recursive_exploration=True
+            ),
             hdf_store=HDF5SqlDB(data_dir=self.working_dir)
         )
         metadata_dir = database_interface.metadata_store.data_dir
         metadata_ttl_filenames = list(metadata_dir.rglob("*.ttl"))
-        self.assertEqual(114, len(metadata_ttl_filenames))
+        self.assertEqual(116, len(metadata_ttl_filenames))
 
         # also the second time should work (exist_ok=True):
         database_interface = opencefadb.OpenCeFaDB(
-            metadata_store=RDFFileStore(data_dir="local-db/data/metadata"),
+            metadata_store=RDFFileStore(
+                data_dir=self.working_dir / "metadata",
+                formats="ttl",
+                recursive_exploration=True
+            ),
             hdf_store=HDF5SqlDB(data_dir=self.working_dir)
         )
         graph = database_interface.metadata_store.graph
@@ -134,7 +138,7 @@ class TestInitDatabase(unittest.TestCase):
         PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
         SELECT * WHERE {
           ?s m4i:identifier ?o .
-        } LIMIT 100
+        } LIMIT 10
         """
 
         bindings = graph.query(q)
@@ -144,15 +148,16 @@ class TestInitDatabase(unittest.TestCase):
         # assert with a SPARQL query that one person is called Matthias:
         find_first_names = """
         PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-        SELECT ?name
+        SELECT ?firstName
         WHERE {
-            ?s a foaf:Person .
-            ?s foaf:name ?name .
+            ?s a prov:Person .
+            ?s foaf:firstName ?firstName .
         }
         """
-        bindings = graph.query(find_first_names)
-        names = [str(row.name) for row in bindings]
-        self.assertIn("Probst, Matthias", names)
+        bindings = database_interface.metadata_store.graph.query(find_first_names).bindings
+        names = [str(row[rdflib.Variable("firstName")]) for row in bindings]
+        self.assertIn("Matthias", names)
+        self.assertIn("Balazs", names)
 
         find_snt_title = """
         PREFIX ex: <https://doi.org/10.5281/zenodo.17271932#>
@@ -165,8 +170,8 @@ class TestInitDatabase(unittest.TestCase):
             ?s dcterms:title ?title .
         }
         """
-        bindings = graph.query(find_snt_title)
-        titles = [str(row.title) for row in bindings]
+        bindings = database_interface.metadata_store.graph.query(find_snt_title).bindings
+        titles = [str(row[rdflib.Variable("title")]) for row in bindings]
         self.assertEqual(
             titles[0],
             "Standard Name Table for the Property Descriptions of Centrifugal Fans"
@@ -247,7 +252,7 @@ class TestInitDatabase(unittest.TestCase):
                 meta_shacl=False,
                 advanced=True,
             )
-            conforms, results_graph, results_text = results
+            conforms, results_graph, results_text = results  # self.assertTrue(conforms)
             if not conforms:
                 print("SHACL validation results:")
                 print(results_text)
@@ -314,4 +319,3 @@ SELECT * WHERE {
             description="Selects names of all persons in the database"
         ).execute(database_interface.metadata_store)
         self.assertEqual(2, len(res.data))
-

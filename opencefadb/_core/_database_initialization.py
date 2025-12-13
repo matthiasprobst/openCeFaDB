@@ -189,9 +189,18 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
         title = str(web_resource.title) if web_resource.title is not None else ""
 
         # determine filename: prefer title, else last segment of URL
-        filename = sanitize_filename(title) if title else pathlib.Path(url.split("?", 1)[0]).name
-        if not filename:
-            filename = "download.bin"
+        if url.endswith("/content"):
+            _url = url.rsplit("/", 2)[-2]  # remove trailing /content for Zenodo URLs
+            _fname = _url.rsplit("/", 1)[-1]
+        else:
+            _fname = url.rsplit("/", 1)[-1]
+        if pathlib.Path(_fname).suffix == "":
+            if title != "":
+                filename = sanitize_filename(title)
+            else:
+                filename = "download.bin"
+        else:
+            filename = sanitize_filename(_fname)
         dest_path = record_dir / filename
 
         expected_algo, expected_val = parse_checksum(web_resource.checksum)
@@ -311,14 +320,16 @@ def database_initialization(
             ?dataset a dcat:Dataset ;
                      dcterms:identifier ?doi ;
                      dcat:distribution ?dist .
-
+        
             ?dist dcat:downloadURL ?download ;
                   dcterms:title ?title ;
-                  dcat:mediaType ?media ;
-                  spdx:checksum ?ck .
-
-            ?ck spdx:checksumValue ?checksumValue .
-
+                  dcat:mediaType ?media .
+        
+            OPTIONAL {
+                ?dist spdx:checksum ?ck .
+                ?ck spdx:checksumValue ?checksumValue .
+            }
+        
             FILTER(
                 CONTAINS(LCASE(STR(?media)), "text/turtle") ||
                 CONTAINS(LCASE(STR(?media)), "application/ld+json")

@@ -34,12 +34,12 @@ ex:DistributionShape
     sh:minCount 1 ;
     sh:nodeKind sh:IRI ;
     sh:message "A dcat:Distribution must have at least one dcat:mediaType (IRI)." ;
-  ] ;
-
-  # Require at least one checksum (without structural validation)
-  sh:property [
-    sh:path spdx:checksum ;
-    sh:minCount 1 ;
-    sh:message "A dcat:Distribution must have at least one spdx:checksum." ;
   ] .
+
+  # # Require at least one checksum (without structural validation)
+  # sh:property [
+  #   sh:path spdx:checksum ;
+  #   sh:minCount 1 ;
+  #   sh:message "A dcat:Distribution must have at least one spdx:checksum." ;
+  # ] .
 """

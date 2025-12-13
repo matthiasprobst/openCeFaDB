@@ -354,6 +354,10 @@ class OpenCeFaDB(GenericLinkedDatabase):
             working_directory = pathlib.Path.cwd()
         download_directory = pathlib.Path(working_directory) / "metadata"
         download_directory.mkdir(parents=True, exist_ok=True)
+        shutil.copy(
+            config_filename,
+            download_directory / pathlib.Path(config_filename).name
+        )
         return database_initialization(
             config_filename=config_filename,
             download_directory=download_directory

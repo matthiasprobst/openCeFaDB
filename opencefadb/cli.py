@@ -6,6 +6,7 @@ from typing import List
 
 import click
 import dotenv
+import rdflib
 import requests
 
 from opencefadb import OpenCeFaDB
@@ -54,7 +55,7 @@ def init(config_file: str, working_directory: str | None = None):
 @click.option(
     "--name",
     "repo_name",
-    required=True,
+    required=False,
     help="Repository ID / name (e.g. 'test-repo').",
 )
 @click.option(
@@ -67,16 +68,88 @@ def init(config_file: str, working_directory: str | None = None):
     "graphdb_url",
     default=DEFAULT_GRAPHDB_URL,
     show_default=True,
-    help="Base URL of GraphDB (without trailing slash).",
+    help="Base URL of GraphDB (without trailing slash, default is http://localhost:7200).",
+)
+@click.option(
+    "--config-file",
+    "config_file",
+    default=None,
+    help="Path to custom config.ttl file. Other options are ignored if provided.",
 )
 @click.option("--env", "env_file", default=None, help="Path to .env file (loads GRAPHDB_USERNAME/PASSWORD).")
 @click.option("--username", default=None, help="GraphDB username (overrides env vars).")
 @click.option("--password", default=None, help="GraphDB password (overrides env vars, prompts if missing).")
-def graphdb_create(repo_name: str, title: str | None, graphdb_url: str, env_file: str | None, username: str | None,
-                   password: str | None):
+def graphdb_create(repo_name: str = None,
+                   title: str = None,
+                   graphdb_url: str = None,
+                   config_file: str | None = None,
+                   env_file: str | None = None,
+                   username: str | None = None,
+                   password: str | None = None):
     """
     Create a new GraphDB repository using the REST API.
     """
+    if config_file:
+        click.echo("Using custom config file, other options will be ignored.")
+        # Load custom config.ttl
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config_ttl = f.read()
+        except Exception as e:
+            click.echo(f"Error: failed to read config file {config_file}: {e}", err=True)
+            sys.exit(1)
+
+        url = f"{graphdb_url.rstrip('/')}/rest/repositories"  # REST endpoint for repo creation. [web:6][web:9]
+        files = {"config": (pathlib.Path(config_file).name, config_ttl, "text/turtle")}
+        _load_env_file(env_file)
+
+        # CLI args override env vars
+        if username is None:
+            username, password = _get_credentials()
+
+        auth = _get_auth(graphdb_url, username, password)
+
+        try:
+            response = requests.post(url, files=files, auth=auth)
+        except requests.RequestException as e:
+            click.echo(f"Error: failed to contact GraphDB at {graphdb_url}: {e}", err=True)
+            sys.exit(1)
+
+        # get repo_name from config_ttl if not provided
+        if repo_name is None:
+            graphdb_config_graph = rdflib.Graph()
+            graphdb_config_graph.parse(data=config_ttl, format='turtle')
+            qres = graphdb_config_graph.query(
+                """
+                PREFIX rep: <http://www.openrdf.org/config/repository#>
+                SELECT ?repoID WHERE {
+                    ?repo a rep:Repository ;
+                          rep:repositoryID ?repoID .
+                } LIMIT 1
+                """
+            )
+            for row in qres:
+                repo_name = str(row.repoID)
+                break
+
+        if response.status_code in (200, 201, 204):
+            click.echo(f"Repository '{repo_name}' created on {graphdb_url}")
+        elif response.status_code == 409:
+            click.echo(f"Repository '{repo_name}' already exists on {graphdb_url}", err=True)
+            sys.exit(1)
+        else:
+            click.echo(
+                f"Error: GraphDB responded with {response.status_code}:\n"
+                f"{response.text}",
+                err=True,
+            )
+            sys.exit(1)
+        return
+
+    if repo_name is None:
+        click.echo("Error: --name is required if --config-file is not provided.", err=True)
+        sys.exit(1)
+
     if title is None:
         title = repo_name
 
@@ -170,8 +243,13 @@ def graphdb_create(repo_name: str, title: str | None, graphdb_url: str, env_file
 @click.option("--env", "env_file", default=None, help="Path to .env file (loads GRAPHDB_USERNAME/PASSWORD).")
 @click.option("--username", default=None, help="GraphDB username (overrides env vars).")
 @click.option("--password", default=None, help="GraphDB password (overrides env vars, prompts if missing).")
-def graphdb_add(repo_name: str, data_dir: str, suffix: str, recursive: bool, graphdb_url: str, env_file: str | None,
-                username: str | None, password: str | None):
+def graphdb_add(repo_name: str,
+                data_dir: str,
+                suffix: str,
+                recursive: bool,
+                env_file: str | None,
+                username: str | None,
+                password: str | None):
     """
     Add RDF files from directory to GraphDB repository.
     """
