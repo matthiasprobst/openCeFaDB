@@ -5,14 +5,14 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import h5py
-from gldb import RawDataStore
-from gldb.query import Query
+from gldb import DataStore
+from gldb.query.query import AbstractQuery
 from h5rdmtoolbox.database.hdfdb import FilesDB
 
 logger = logging.getLogger("opencefadb")
 
 
-class HDF5FileQuery(Query, ABC):
+class HDF5FileQuery(AbstractQuery, ABC):
 
     def __init__(self, filter, objfilter=None, recursive=True, **kwargs):
         self._filter = filter
@@ -40,7 +40,7 @@ class FindManyLazyHDFObject(HDF5FileQuery):
                                        recursive=self._recursive, **kwargs)
 
 
-class HDF5FileDB(RawDataStore):
+class HDF5FileDB(DataStore):
 
     def __init__(self):
         self._filenames = {}

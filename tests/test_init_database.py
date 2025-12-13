@@ -4,14 +4,17 @@ import unittest
 import dotenv
 import pyshacl
 import rdflib
-from gldb.query import RemoteSparqlQuery
+import requests.exceptions
+from gldb.query import RemoteSparqlQuery, SparqlQuery
 from gldb.stores import GraphDB
 from owlrl import DeductiveClosure, RDFS_Semantics  # pip install owlrl
 
 import opencefadb
+from opencefadb import OpenCeFaDB
 from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
 from opencefadb.stores import RDFFileStore, HDF5SqlDB
 from opencefadb.validation.shacl.templates.dcat import MINIMUM_DATASET_SHACL
+from opencefadb.validation.shacl.templates.person import PERSON_SHACL
 
 __this_dir__ = pathlib.Path(__file__).parent
 
@@ -30,22 +33,69 @@ class TestInitDatabase(unittest.TestCase):
     #     if self.working_dir.exists():
     #         shutil.rmtree(self.working_dir)
 
-    def test_generate_dataset_from_zenodo_record(self):
-        # TODO this is part of the admin repo!
-        from opencefadb.core import generate_config
-        config_filename = generate_config(
-            zenodo_records=[
-                {"record_id": 17271932, "sandbox": False},
-                {"record_id": 344192, "sandbox": True},
-                {"record_id": 14551649, "sandbox": False},
-            ],
-            local_filenames=[
-                __this_dir__ / "data" / "test_measurements/2023-11-07-15-33-03_run.jsonld"
-            ]
+    def test_database(self):
+        config_filename = OpenCeFaDB.pull(
+            version="latest",
+            target_directory=self.working_dir,
+            sandbox=True
         )
-        print(config_filename)
+        self.assertTrue(config_filename.exists())
+        self.assertTrue(config_filename.is_file())
+        self.assertEqual("opencefadb-config-sandbox-1-0-0.ttl", config_filename.name)
+
+        out = OpenCeFaDB.initialize(
+            working_directory=self.working_dir,
+            config_filename=config_filename
+        )
+        filenames = ([pathlib.Path(o[1]) for o in out])
+        self.assertEqual(
+            114,
+            len([f for f in filenames if f.suffix == ".ttl"])
+        )
+        self.assertEqual(
+            114,
+            len(list((self.working_dir / "metadata").rglob("*.ttl")))
+        )
+
+        RDFFileStore._expected_file_extensions = {".ttl", }
+        metadata_store = RDFFileStore(
+            data_dir=self.working_dir / "metadata",
+            recursive_exploration=True,
+            formats="ttl"
+        )
+
+        raw_store = HDF5SqlDB(data_dir=self.working_dir)
+
+        db_interface = opencefadb.OpenCeFaDB(
+            metadata_store=metadata_store,
+            hdf_store=raw_store
+        )
+        res = SELECT_FAN_PROPERTIES.execute(db_interface.metadata_store)
+        self.assertEqual(88, len(res.data))
+
+        query_d1_value = """PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
+        SELECT ?value
+        WHERE {
+            <https://doi.org/10.5281/zenodo.17871736#D1> m4i:hasNumericalValue ?value  .
+        }
+        """
+        new_sparql = SparqlQuery(
+            query_d1_value,
+            description="Selects all properties of a specific dataset"
+        )
+        res = new_sparql.execute(db_interface.metadata_store)
+        self.assertTrue(138.0, res.data["value"][0])
+
+    def test_config_validation(self):
+        config_filename = OpenCeFaDB.pull(
+            version="latest",
+            target_directory=self.working_dir,
+            sandbox=True
+        )
+        # validate the configuration file
         config_graph = rdflib.Graph()
-        config_graph.parse(location=str(config_filename))
+        config_graph.parse(source=config_filename, format="ttl")
+
         shacl_graph = rdflib.Graph()
         shacl_graph.parse(data=MINIMUM_DATASET_SHACL, format="ttl")
         results = pyshacl.validate(
@@ -62,26 +112,20 @@ class TestInitDatabase(unittest.TestCase):
             print(results_text)
 
     def test_db_with_rdflib(self):
-        local_db = opencefadb.OpenCeFaDB(
+        database_interface = opencefadb.OpenCeFaDB(
             metadata_store=RDFFileStore(data_dir=self.working_dir / "metadata"),
-            hdf_store=HDF5SqlDB(data_dir=self.working_dir / "rawdata"),
-            working_directory=self.working_dir,
-            config_filename=CONFIG_FILENAME
+            hdf_store=HDF5SqlDB(data_dir=self.working_dir)
         )
-        metadata_dir = local_db.stores.rdf.data_dir
-        metadata_ttl_filenames = metadata_dir.glob("*.ttl")
-        metadata_jsonld_filenames = metadata_dir.glob("*.jsonld")
-        metadata_filenames = list(metadata_ttl_filenames) + list(metadata_jsonld_filenames)
-        self.assertGreaterEqual(len(metadata_filenames), 5)
+        metadata_dir = database_interface.metadata_store.data_dir
+        metadata_ttl_filenames = list(metadata_dir.rglob("*.ttl"))
+        self.assertEqual(114, len(metadata_ttl_filenames))
 
         # also the second time should work (exist_ok=True):
-        local_db = opencefadb.OpenCeFaDB(
+        database_interface = opencefadb.OpenCeFaDB(
             metadata_store=RDFFileStore(data_dir="local-db/data/metadata"),
-            hdf_store=HDF5SqlDB(),
-            working_directory=self.working_dir,
-            config_filename=CONFIG_FILENAME
+            hdf_store=HDF5SqlDB(data_dir=self.working_dir)
         )
-        graph = local_db.stores.rdf.graph
+        graph = database_interface.metadata_store.graph
 
         # Compute RDFS closure (adds entailed triples to the graph)
         DeductiveClosure(RDFS_Semantics).expand(graph)
@@ -97,7 +141,7 @@ class TestInitDatabase(unittest.TestCase):
         for row in bindings:
             print(row.s, row.o)
 
-        # assert with a sparlq query that one person is called Matthias:
+        # assert with a SPARQL query that one person is called Matthias:
         find_first_names = """
         PREFIX foaf: <http://xmlns.com/foaf/0.1/>
         SELECT ?name
@@ -128,8 +172,17 @@ class TestInitDatabase(unittest.TestCase):
             "Standard Name Table for the Property Descriptions of Centrifugal Fans"
         )
 
-    @unittest.skip("Only test locally with a running GraphDB instance")
     def test_graphdb(self):
+        try:
+            gdb = GraphDB(
+                endpoint="http://localhost:7201",
+                repository="OpenCeFaDB-Sandbox",
+                username="admin",
+                password="admin"
+            )
+            gdb.get_repository_info("OpenCeFaDB-Sandbox")
+        except requests.exceptions.ConnectionError as e:
+            self.skipTest(f"GraphDB not available: {e}")
         gdb = GraphDB(
             endpoint="http://localhost:7201",
             repository="OpenCeFaDB-Sandbox",
@@ -147,7 +200,7 @@ class TestInitDatabase(unittest.TestCase):
             "SELECT * WHERE { ?s ?p ?o }",
             description="Selects all triples in the RDF database"
         ).execute(gdb)
-        count = len(res.data["results"]["bindings"])
+        count = len(res.data)
         tripels = gdb.count_triples(key="total")
         self.assertEqual(count, tripels)
 
@@ -155,6 +208,17 @@ class TestInitDatabase(unittest.TestCase):
         self.assertTrue(res)
 
     def test_db_with_graphdb(self):
+        try:
+            gdb = GraphDB(
+                endpoint="http://localhost:7201",
+                repository="OpenCeFaDB-Sandbox",
+                username="admin",
+                password="admin"
+            )
+            gdb.get_repository_info("OpenCeFaDB-Sandbox")
+        except requests.exceptions.ConnectionError as e:
+            self.skipTest(f"GraphDB not available: {e}")
+
         gdb = GraphDB(
             endpoint="http://localhost:7201",
             repository="OpenCeFaDB-Sandbox",
@@ -168,25 +232,45 @@ class TestInitDatabase(unittest.TestCase):
         res = gdb.get_or_create_repository(__this_dir__ / "graphdb-config-sandbox.ttl")
         self.assertTrue(res)
 
-        local_db = opencefadb.OpenCeFaDB(
+        for filename in (self.working_dir / "metadata").rglob("*.ttl"):
+
+            target_graph = rdflib.Graph()
+            target_graph.parse(source=filename, format="ttl")
+
+            shacl_graph = rdflib.Graph()
+            shacl_graph.parse(data=PERSON_SHACL, format="ttl")
+            results = pyshacl.validate(
+                data_graph=target_graph,
+                shacl_graph=shacl_graph,
+                inference='rdfs',
+                abort_on_first=False,
+                meta_shacl=False,
+                advanced=True,
+            )
+            conforms, results_graph, results_text = results
+            if not conforms:
+                print("SHACL validation results:")
+                print(results_text)
+
+            gdb.upload_file(filename)
+
+        database_interface = opencefadb.OpenCeFaDB(
             metadata_store=gdb,
-            hdf_store=HDF5SqlDB(),
-            working_directory=self.working_dir,
-            config_filename=CONFIG_FILENAME
+            hdf_store=HDF5SqlDB(data_dir=self.working_dir)
         )
         res = RemoteSparqlQuery(
             "SELECT * WHERE { ?s ?p ?o }",
             description="Selects all triples in the RDF database"
-        ).execute(local_db.stores.rdf)
+        ).execute(database_interface.metadata_store)
 
         count = len(res.data)
         tripels = gdb.count_triples(key="total")
         self.assertEqual(count, tripels)
 
-        res = RemoteSparqlQuery(
+        _ = RemoteSparqlQuery(
             SELECT_FAN_PROPERTIES.query,
             description="Selects all properties of the fan"
-        ).execute(local_db.stores.rdf)
+        ).execute(database_interface.metadata_store)
 
         res = RemoteSparqlQuery(
             """
@@ -202,31 +286,32 @@ class TestInitDatabase(unittest.TestCase):
                         m4i:hasNumericalValue ?value .
             }""",
             description="Selects the hub diameter of the fan"
-        ).execute(local_db.stores.rdf)
-        print(res.data)
+        ).execute(database_interface.metadata_store)
 
         q = """PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
 SELECT * WHERE {
-  ?s m4i:identifier ?o .
+  ?s m4i:hasEmployedTool ?o .
 } LIMIT 100
 """
         res = RemoteSparqlQuery(
             q,
             description="Selects identifiers"
-        ).execute(local_db.stores.rdf)
+        ).execute(database_interface.metadata_store)
 
-        # self.assertEqual(len(res.data), N_M4I_IDENTIFIERS_IN_DB)
+        self.assertEqual(100, len(res.data))
 
         # find all names of persons in the database
         res = RemoteSparqlQuery(
             """
             PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-            SELECT ?name
+            PREFIX prov: <http://www.w3.org/ns/prov#>
+            
+            SELECT ?s
             WHERE {
-                ?s a foaf:Person .
-                ?s foaf:name ?name .
+                ?s a prov:Person .
             }
             """,
             description="Selects names of all persons in the database"
-        ).execute(local_db.stores.rdf)
-        print(res.data)
+        ).execute(database_interface.metadata_store)
+        self.assertEqual(2, len(res.data))
+

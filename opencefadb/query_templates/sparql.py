@@ -8,7 +8,10 @@ WHERE {
   <https://www.wikidata.org/wiki/Q131549102> m4i:hasParameter ?parameter .
   ?parameter a ?type .
   ?parameter ?property ?value .
-}""",
+}
+
+ORDER BY ?parameter ?property
+""",
     description="Selects all properties of the fan")
 
 SELECT_FAN_CAD_FILE = SparqlQuery(
@@ -17,12 +20,15 @@ PREFIX schema: <http://schema.org/>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
 
-SELECT ?downloadURL
+SELECT DISTINCT ?downloadURL
 WHERE {
   <https://www.wikidata.org/wiki/Q131549102> dcterms:hasPart ?part .
-  ?part dcat:distribution ?distribution .
-  ?distribution dcat:downloadURL ?downloadURL .
+  ?part (dcat:distribution|schema:distribution|dcterms:hasPart) ?distribution .
+  ?distribution (dcat:downloadURL|schema:downloadUrl|dcterms:identifier) ?downloadURL .
+  FILTER(BOUND(?downloadURL))
 }
+
+LIMIT 10
 """,
     description="Selects the CAD file for the fan")
 

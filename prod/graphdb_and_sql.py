@@ -1,5 +1,5 @@
 from opencefadb import connect_to_database
-from opencefadb.configuration import get_config
+from _depr.configuration import get_config
 
 
 def main():

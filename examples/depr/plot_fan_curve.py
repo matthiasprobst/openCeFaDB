@@ -3,7 +3,7 @@ import pathlib
 from gldb.query.rdfstorequery import SparqlQuery
 
 from opencefadb import connect_to_database
-from opencefadb.configuration import get_config
+from _depr.configuration import get_config
 from opencefadb.dbinit import initialize_database
 
 __this_dir__ = pathlib.Path(__file__).resolve().parent

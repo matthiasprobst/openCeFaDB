@@ -35,7 +35,7 @@ ex:NumericDatasetsMustHaveUnit
 
 '''
 
-SHALL_HAVE_CREATOR = '''@prefix sh: <http://www.w3.org/ns/shacl#> .
+SHALL_HAVE_CREATED_DATE = '''@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix hdf: <http://purl.allotrope.org/ontologies/hdf5/1.8#> .
@@ -54,4 +54,34 @@ ex:HDFFileCreatedShape
         sh:maxCount 1 ;                      # optional but recommended
         sh:message "Each hdf:File must have exactly one dcterms:created value of type xsd:date." ;
     ] .
+'''
+
+SHALL_HAVE_CREATOR = '''@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix hdf: <http://purl.allotrope.org/ontologies/hdf5/1.8#> .
+@prefix ex: <http://example.org/ns#> .
+
+ex:HDFFileCreatorShape
+    a sh:NodeShape ;
+    sh:targetClass hdf:File ;
+    sh:property [
+        sh:path dcterms:creator ;
+        sh:minCount 1 ;
+        sh:message "Each hdf:File must have at least one dcterms:creator which is either an IRI or a prov:Person." ;
+        sh:sparql [
+            a sh:SPARQLConstraint ;
+            sh:message "Each dcterms:creator must be either an IRI or a prov:Person." ;
+            sh:select """
+                SELECT ?this WHERE {
+                  ?this dcterms:creator ?creator .
+
+                  FILTER (
+                    !isIRI(?creator) &&
+                    NOT EXISTS { ?creator a prov:Person . }
+                  )
+                }
+            """ ;
+        ] ;
+    ] .
+    
 '''

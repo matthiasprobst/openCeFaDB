@@ -8,13 +8,14 @@ import click
 import dotenv
 import requests
 
+from opencefadb import OpenCeFaDB
+
 DEFAULT_GRAPHDB_URL = "http://localhost:7200"
 
 
 @click.group()
 def main():
-    """OpencefaDB command-line interface."""
-    pass
+    """OpenCeFaDB command-line interface."""
 
 
 @main.group()
@@ -22,11 +23,26 @@ def graphdb():
     """GraphDB-related commands."""
     pass
 
+
+@main.command("pull")
+@click.option("version", "--version", required=False, type=str,
+              help="Version of the config file, hence the zenodo record to download (default: latest).")
+@click.option("target_dir", "--target-dir", required=False, type=click.Path(exists=False, file_okay=False),
+              help="Target directory to save the config file (default: current working directory).")
+@click.option("sandbox", "--sandbox", is_flag=True, help="Use the Zenodo sandbox (for testing; requires access token).")
+def pull(version: str | None = None, target_dir: str | None = None, sandbox: bool = False):
+    """downloads the latest OpenCeFaDB config file from zenodo."""
+    config_filename = OpenCeFaDB.pull(version=version, target_directory=target_dir, sandbox=sandbox)
+    click.echo(f"Downloaded config file to: {config_filename}")
+
+
 @main.command("init")
-@click.option("config_file", "--config", required=True, type=click.Path(exists=True, file_okay=True), help="Path to configuration file.")
-@click.option("working_directory", "--working-directory", required=False, type=click.Path(exists=True, file_okay=False), help="Working directory.")
+@click.option("config_file", "--config", required=True, type=click.Path(exists=True, file_okay=True),
+              help="Path to configuration file.")
+@click.option("working_directory", "--working-directory", required=False, type=click.Path(exists=True, file_okay=False),
+              help="Working directory.")
 def init(config_file: str, working_directory: str | None = None):
-    """GraphDB-related commands."""
+    """Database initialization commands."""
     from opencefadb import OpenCeFaDB
     OpenCeFaDB.initialize(
         working_directory=working_directory,
@@ -154,7 +170,8 @@ def graphdb_create(repo_name: str, title: str | None, graphdb_url: str, env_file
 @click.option("--env", "env_file", default=None, help="Path to .env file (loads GRAPHDB_USERNAME/PASSWORD).")
 @click.option("--username", default=None, help="GraphDB username (overrides env vars).")
 @click.option("--password", default=None, help="GraphDB password (overrides env vars, prompts if missing).")
-def graphdb_add(repo_name: str, data_dir: str, suffix: str, recursive: bool, graphdb_url: str, env_file: str | None, username: str | None, password: str | None):
+def graphdb_add(repo_name: str, data_dir: str, suffix: str, recursive: bool, graphdb_url: str, env_file: str | None,
+                username: str | None, password: str | None):
     """
     Add RDF files from directory to GraphDB repository.
     """

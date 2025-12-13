@@ -5,7 +5,6 @@ import pathlib
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Union, Optional, Dict
 
-import rdflib
 import requests
 from tqdm import tqdm
 
@@ -107,6 +106,9 @@ def download_multiple_files(
     return results
 
 
+def compute_sha256(data: str) -> str:
+    """Compute the SHA256 checksum of a string."""
+    return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
 def compute_md5(filename: Union[str, pathlib.Path]) -> str:
@@ -121,3 +123,11 @@ def compute_md5(filename: Union[str, pathlib.Path]) -> str:
         for byte_block in iter(lambda: f.read(4096), b""):
             hasher.update(byte_block)
     return hasher.hexdigest()
+
+
+def remove_none(obj):
+    if isinstance(obj, dict):
+        return {k: remove_none(v) for k, v in obj.items() if v is not None}
+    if isinstance(obj, list):
+        return [remove_none(v) for v in obj if v is not None]
+    return obj

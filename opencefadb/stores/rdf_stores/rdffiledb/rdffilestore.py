@@ -5,6 +5,7 @@ import rdflib
 from gldb.stores import InMemoryRDFStore
 from gldb.stores import RDFStore
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
+
 from .._abstracts import OpenCeFaDBRDFStore
 
 logger = logging.getLogger("opencefadb")

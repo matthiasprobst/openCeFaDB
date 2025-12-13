@@ -5,7 +5,7 @@ import rdflib
 from ontolutils import Thing, urirefs, namespaces
 from pydantic import Field
 
-from .utils import remove_none
+from ..utils import remove_none
 
 
 @namespaces(

@@ -1,27 +1,34 @@
 import enum
-import hashlib
+import os
 import pathlib
 import shutil
+import sys
+import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Union, Optional
 
+import dotenv
+import pyshacl
 import rdflib
+import requests
 from gldb import GenericLinkedDatabase
-from gldb.stores import RDFStore, DataStore, RemoteSparqlStore
+from gldb.stores import RDFStore, DataStore, RemoteSparqlStore, MetadataStore
 from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 
 from opencefadb import logger
 from opencefadb.models import Value, DataSet, DataSeries
-from opencefadb.models.utils import remove_none
 from opencefadb.query_templates.sparql import (
     SELECT_FAN_CAD_FILE
 )
 from opencefadb.query_templates.sparql import construct_data_based_on_standard_name_based_search_and_range_condition
-from opencefadb.utils import download_file
+from opencefadb.utils import download_file, compute_sha256
 from opencefadb.utils import download_multiple_files
+from opencefadb.utils import remove_none
 
 __this_dir__ = pathlib.Path(__file__).parent
+
+from opencefadb.validation.shacl.templates.dcat import MINIMUM_DATASET_SHACL
 
 _db_instance = None
 
@@ -79,10 +86,6 @@ class MediaType(enum.Enum):
             return ".xml"
         else:
             return ""
-
-
-def _get_url_hash(url: str) -> str:
-    return hashlib.sha256(url.encode("utf-8")).hexdigest()
 
 
 def _get_download_urls_of_metadata_distributions_of_publisher(
@@ -239,9 +242,9 @@ def _download_metadata_datasets(
             for d in distributions:
                 _filename = pathlib.Path(d.download_url.rsplit('/', 1)[-1])
                 _suffix = _filename.suffix
-                _url_hash = _get_url_hash(d.download_url)
-                target_dir = download_dir / _url_hash
-                target_dir.mkdir(parents=True, exist_ok=True)
+                _url_hash = compute_sha256(d.download_url)
+                target_directory = download_dir / _url_hash
+                target_directory.mkdir(parents=True, exist_ok=True)
                 target_filename = download_dir / _url_hash / _filename.name
                 if target_filename.suffix == "":
                     print(d.download_url)
@@ -292,7 +295,7 @@ class OpenCeFaDB(GenericLinkedDatabase):
 
     def __init__(
             self,
-            metadata_store: RDFStore = None,
+            metadata_store: MetadataStore = None,
             hdf_store: DataStore = None
     ):
         wikidata_store = RemoteSparqlStore(endpoint_url="https://query.wikidata.org/sparql", return_format="json")
@@ -307,13 +310,46 @@ class OpenCeFaDB(GenericLinkedDatabase):
             stores=stores
         )
 
+    @property
+    def metadata_store(self):
+        return self.stores.rdf
+
+    @property
+    def hdf_store(self):
+        return self.stores.hdf
+
+    @classmethod
+    def validate_config(cls, config_filename: Union[str, pathlib.Path]) -> bool:
+        config_graph = rdflib.Graph()
+        config_graph.parse(source=config_filename, format="ttl")
+        shacl_graph = rdflib.Graph()
+        shacl_graph.parse(data=MINIMUM_DATASET_SHACL, format="ttl")
+        results = pyshacl.validate(
+            data_graph=config_graph,
+            shacl_graph=shacl_graph,
+            inference='rdfs',
+            abort_on_first=False,
+            meta_shacl=False,
+            advanced=True,
+        )
+        conforms, results_graph, results_text = results
+        if not conforms:
+            warnings.warn("Configuration file does not conform to SHACL shapes.")
+            print("SHACL validation results:")
+            print(results_text)
+
+    @classmethod
+    def pull(cls, version: str | None = None, target_directory: Union[str, pathlib.Path] | None = None,
+             sandbox: bool = False):
+        return _pull(version, target_directory, sandbox)
+
     @classmethod
     def initialize(
             cls,
             config_filename: Union[str, pathlib.Path],
             working_directory: Union[str, pathlib.Path] = None
     ):
-        from ._database_initialization import database_initialization
+        from opencefadb._core._database_initialization import database_initialization
         if working_directory is None:
             working_directory = pathlib.Path.cwd()
         download_directory = pathlib.Path(working_directory) / "metadata"
@@ -399,24 +435,26 @@ class OpenCeFaDB(GenericLinkedDatabase):
     def linked_upload(self, filename: Union[str, pathlib.Path]):
         raise NotImplemented("Linked upload not yet implemented")
 
-    def download_cad_file(self, target_dir: Union[str, pathlib.Path], exist_ok=False):
+    def download_cad_file(self, target_directory: Union[str, pathlib.Path], exist_ok=False):
         """Queries the RDF database for the iges cad file"""
         query_result = SELECT_FAN_CAD_FILE.execute(self.stores.rdf)
         bindings = query_result.data
-        assert len(bindings) == 1, f"Expected one CAD file, got {len(bindings)}"
+        n_bindings = len(bindings)
+        if n_bindings != 1:
+            raise ValueError(f"Expected one CAD file, got {n_bindings}")
         download_url = bindings["downloadURL"][0]
         _guess_filenames = download_url.rsplit("/", 1)[-1]
-        target_dir = pathlib.Path(target_dir)
-        target_filename = target_dir / _guess_filenames
+        target_directory = pathlib.Path(target_directory)
+        target_filename = target_directory / _guess_filenames
         if target_filename.exists() and exist_ok:
             return target_filename
-        return download_file(download_url, target_dir / _guess_filenames)
+        return download_file(download_url, target_directory / _guess_filenames)
 
     def get_fan_curve(
             self,
             n_rot_speed_rpm: float,
             n_rot_tolerance: float = 0.05
-    ):
+    ) -> DataSeries:
         """Gets the fan curve data for the given rotational speed (in rpm) with the given tolerance."""
         return get_fan_curve_dataseries(
             self.stores.rdf,
@@ -496,3 +534,98 @@ def get_fan_curve_dataseries(
         )
     dc = DataSeries.model_validate(dict(datasets=data))
     return dc
+
+
+def _pull(
+        version: str | None = None,
+        target_directory: str | None = None,
+        sandbox: bool = False) -> Optional[pathlib.Path]:
+    """download initial config"""
+    if target_directory is None:
+        target_directory = pathlib.Path.cwd()
+
+    if sandbox:
+        base_url = "https://sandbox.zenodo.org/api/records/414371"
+        dotenv.load_dotenv(pathlib.Path.cwd() / ".env", override=True)
+        access_token = os.getenv("ZENODO_SANDBOX_API_TOKEN", None)
+        config_filename = "opencefadb-config-sandbox.ttl"
+    else:
+        access_token = None
+        base_url = "https://zenodo.org/api/records/14551649"
+        config_filename = "opencefadb-config.ttl"
+    pathlib.Path(target_directory).mkdir(parents=True, exist_ok=True)
+
+    if version is not None and version.lower().strip() == "latest":
+        version = None
+    if version:
+        print(f"Downloading OpenCeFaDB config file version {version} from Zenodo...")
+    else:
+        print("Downloading the latest OpenCeFaDB config file from Zenodo...")
+
+    # if version is None, get the latest version of the zenodo record and download the file test.ttl, else get the specific version of the record:
+    res = requests.get(base_url, params={'access_token': access_token} if sandbox else {})
+    if res.status_code != 200:
+        print(f"Error: could not retrieve Zenodo record: {res.status_code}")
+        sys.exit(1)
+
+    if version is None:
+        links = res.json().get("links", {})
+        latest_version_url = links.get("latest", None)
+        if latest_version_url is None:
+            print("Error: could not retrieve latest version URL from Zenodo record.")
+            sys.exit(1)
+        res = requests.get(latest_version_url, params={'access_token': access_token} if sandbox else {})
+        if res.status_code != 200:
+            print(f"Error: could not retrieve latest version record from Zenodo: {res.status_code}")
+            sys.exit(1)
+        detected_version = res.json()["metadata"]["version"]
+
+        if sandbox:
+            target_filename = pathlib.Path(
+                target_directory) / f"opencefadb-config-sandbox-{detected_version.replace('.', '-')}.ttl"
+        else:
+            target_filename = pathlib.Path(
+                target_directory) / f"opencefadb-config-{detected_version.replace('.', '-')}.ttl"
+
+        for file in res.json().get("files", []):
+            if file["key"] == config_filename:
+                print(f"downloading version {detected_version}...")
+                file_res = requests.get(file["links"]["self"], params={'access_token': access_token} if sandbox else {})
+                with open(target_filename, "wb") as f:
+                    f.write(file_res.content)
+                print(f"Downloaded latest OpenCeFaDB config file to '{target_filename}'.")
+                return target_filename
+        print("Error: could not find config file in the latest version of the Zenodo record.")
+        sys.exit(1)
+
+    # a specific version is given:
+    found_hit = None
+    version_hits = \
+        requests.get(res.json()["links"]["versions"], params={'access_token': access_token} if sandbox else {}).json()[
+            "hits"]["hits"]
+    for hit in version_hits:
+        if hit["metadata"]["version"] == version:
+            found_hit = hit
+            break
+    if not found_hit:
+        print(f"Error: could not find version {version} in Zenodo record.")
+        sys.exit(1)
+    res_version = requests.get(found_hit["links"]["self"], params={'access_token': access_token} if sandbox else {})
+    for file in res_version.json()["files"]:
+        if file["key"] == config_filename:
+            print(f"downloading version {version}...")
+            file_res = requests.get(file["links"]["self"], params={'access_token': access_token} if sandbox else {})
+
+            if sandbox:
+                target_filename = pathlib.Path(
+                    target_directory) / f"opencefadb-config-sandbox-{version.replace('.', '-')}.ttl"
+            else:
+                target_filename = pathlib.Path(
+                    target_directory) / f"opencefadb-config-{version.replace('.', '-')}.ttl"
+
+            with open(target_filename, "wb") as f:
+                f.write(file_res.content)
+            print(f"Downloaded OpenCeFaDB config file version {version} to '{target_filename}'.")
+            return target_filename
+    print(f"Error: could not find {config_filename} in the specified version.")
+    return None

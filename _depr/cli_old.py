@@ -4,8 +4,8 @@ import shutil
 
 import click
 
-from opencefadb import __version__, paths
-from opencefadb import configuration
+from opencefadb import __version__
+from _depr import configuration
 from opencefadb import set_logging_level
 # from opencefadb.core import connect_to_database
 from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
