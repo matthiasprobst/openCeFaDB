@@ -476,7 +476,7 @@ if source_mode == "Upload file":
     )
 
 elif source_mode == "SPARQL endpoint (GraphDB etc.)":
-    st.sidebar.caption("GraphDB example: https://HOST/repositories/REPO")
+    st.sidebar.caption("GraphDB example: https://localhost:7200/repositories/REPO")
     sparql_endpoint_url = st.sidebar.text_input("SPARQL endpoint URL", value="")
     sparql_limit = st.sidebar.number_input(
         "Max triples to fetch (CONSTRUCT LIMIT)",
