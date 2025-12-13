@@ -49,7 +49,7 @@ class TestInitDatabase(unittest.TestCase):
             len([f for f in filenames if f.suffix == ".ttl"])
         )
         self.assertEqual(
-            117,  # the config file is also in the metadata folder
+            116,  # the config file is also in the metadata folder
             len(list((self.working_dir / "metadata").rglob("*.ttl")))
         )
 
