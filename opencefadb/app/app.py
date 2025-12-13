@@ -37,7 +37,7 @@ def get_root_node_iris(graph: rdflib.Graph) -> list[URIRef]:
     return sorted(roots)
 
 
-def get_root_node_iri(graph: rdflib.Graph) -> URIRef | None:
+def get_root_node_ri(graph: rdflib.Graph) -> URIRef | None:
     roots = get_root_node_iris(graph)
     return roots[0] if roots else None
 
@@ -148,32 +148,34 @@ GRAPH_HTML = """
   <script src="https://cdn.jsdelivr.net/npm/vis-network/standalone/umd/vis-network.min.js"></script>
   <style>
     body { margin: 0; font-family: Arial; background: #f8f9fa; }
-    #graph { position: absolute; top: 0; left: 0; right: 0; bottom: 220px; border: none; }
+    /* Graph area now leaves space on the right for the details panel */
+    #graph { position: absolute; top: 0; left: 0; right: 320px; bottom: 0; border: none; }
     .status { position: absolute; top: 10px; left: 10px; background: white; padding: 10px;
               border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-weight: bold; z-index: 200; }
-    .toolbar { position:absolute; top:10px; right:10px; z-index:210; display:flex; gap:8px; }
+    .toolbar { position:absolute; top:10px; right:330px; z-index:210; display:flex; gap:8px; }
     .toolbar button { padding:4px 8px; font-size:11px; cursor:pointer; border-radius:4px;
                       border:1px solid #ccc; background:#fff; }
     .toolbar button:hover { background:#f0f0f0; }
+    /* Node details panel on the right side */
     #payload {
       position:absolute;
-      bottom:10px;
-      left:10px;
-      right:10px;
-      max-height:200px;
+      top:0;
+      right:0;
+      bottom:0;
+      width:320px;
       overflow:auto;
       background:#fff;
-      border:1px solid #ddd;
+      border-left:1px solid #ddd;
       padding:10px;
       z-index:100;
       opacity:0.97;
       font-size:12px;
       color:#222;
     }
-    #payload h4 { margin:0 0 4px 0; font-size:13px; }
-    #payload .section-title { font-weight:bold; margin-top:6px; margin-bottom:2px; }
-    #payload ul { margin:2px 0 4px 16px; padding:0; }
-    #payload li { margin-bottom:2px; }
+    #payload h4 { margin:0 0 8px 0; font-size:13px; }
+    #payload .section-title { font-weight:bold; margin-top:10px; margin-bottom:4px; }
+    #payload ul { margin:4px 0 8px 16px; padding:0; }
+    #payload li { margin-bottom:4px; }
     #payload code { font-size:11px; }
   </style>
 </head>
@@ -193,6 +195,8 @@ GRAPH_HTML = """
     const edges = new vis.DataSet([]);
     const outgoing = {outgoing_json};
     const nodeMeta = {node_meta_json};
+
+    let lastSelectedIri = null;
 
     // secondary index by local name -> list of children
     const outgoingByLocal = {};
@@ -237,6 +241,7 @@ GRAPH_HTML = """
 
         const label = n ? n.label : shortName(id);
         const iri = n ? n.title : String(id);
+        lastSelectedIri = iri;
 
         const metaKeys = Object.keys(meta);
         let metaHtml = '';
@@ -263,15 +268,18 @@ GRAPH_HTML = """
 
         const html = `
           <h4>Node details</h4>
-          <div style="margin-bottom:6px;">
-            <div><strong>Label:</strong> ${escapeHtml(label)}</div>
-            <div><strong>IRI:</strong>
-              <code>
-                <a href="${iri}" target="_blank" rel="noopener noreferrer">
-                  ${escapeHtml(iri)}
-                </a>
-              </code>
+          <div style="margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+            <div style="flex:1 1 auto;">
+              <div><strong>Label:</strong> ${escapeHtml(label)}</div>
+              <div><strong>IRI:</strong>
+                <code>
+                  <a href="${iri}" target="_blank" rel="noopener noreferrer">
+                    ${escapeHtml(iri)}
+                  </a>
+                </code>
+              </div>
             </div>
+            <button id="copyBtn" title="Copy IRI" style="padding:4px 8px; font-size:11px; cursor:pointer; border-radius:4px; border:1px solid #ccc; background:#fff;">Copy</button>
           </div>
           <div style="margin-bottom:6px;">
             <div class="section-title">Properties</div>
@@ -283,6 +291,35 @@ GRAPH_HTML = """
           </div>
         `;
         payloadEl.innerHTML = html;
+
+        // Attach copy handler
+        const copyBtn = document.getElementById('copyBtn');
+        if (copyBtn) {
+          copyBtn.onclick = async () => {
+            const textToCopy = lastSelectedIri || iri;
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(textToCopy);
+              } else {
+                const ta = document.createElement('textarea');
+                ta.value = textToCopy;
+                ta.style.position = 'fixed';
+                ta.style.top = '-1000px';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+              }
+              const st = document.getElementById('status');
+              if (st) st.innerHTML = '📋 Copied IRI to clipboard';
+            } catch (e) {
+              const st = document.getElementById('status');
+              if (st) st.innerHTML = '⚠️ Failed to copy';
+              console.log('copy error', e);
+            }
+          };
+        }
       } catch (e) {
         console.log('showNodeDetails error', e);
       }
@@ -668,9 +705,7 @@ components.html(html, height=750, scrolling=False)
 
 # Summary
 st.subheader("Graph summary")
-st.write(
-    f"Triples: {len(g)} — Nodes: {len(all_nodes)} — Roots shown: {len(initial_nodes)} — Outgoing entries: {len(outgoing_triples)}"
-)
+st.write(f"Triples: {len(g)} — Nodes: {len(all_nodes)} — Roots shown: {len(initial_nodes)} — Outgoing entries: {len(outgoing_triples)}")
 
 st.markdown("---")
 st.caption("🐍 RDFLib + Vis.js | `pip install streamlit rdflib` | 🔬 Hierarchical RDF exploration")
