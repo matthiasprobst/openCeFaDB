@@ -13,7 +13,6 @@ from rdflib.plugins.stores.sparqlstore import SPARQLStore
 st.set_page_config(page_title="RDF Graph Explorer", layout="wide")
 
 st.title("🔬 RDF Graph Explorer")
-st.markdown("**Roots → Double-click expand → Hierarchical RDF exploration**")
 
 
 def find_root_nodes(graph: rdflib.Graph, *, uris_only: bool = True) -> set[URIRef]:
@@ -539,26 +538,72 @@ elif source_mode == "Remote RDF URL":
 
 # Root selection (shared for all modes; especially important for SPARQL)
 st.sidebar.header("Root IRI (optional)")
-root_input = st.sidebar.text_area(
-    "Root IRI(s) — comma or newline separated",
-    value="",
-    help="If using a SPARQL endpoint, provide roots to fetch a small subgraph around them.",
-)
 
-root_iris_from_input: list[str] = []
-if root_input and root_input.strip():
-    root_iris_from_input = [p.strip() for p in re.split(r"[,\n\r]+", root_input) if p.strip()]
+# Initialize session state for root IRIs list
+if 'root_iris' not in st.session_state:
+    st.session_state['root_iris'] = []
 
-
-# helper: local name using namespace manager
-def local_name(uri, graph):
+# Helper to normalize/prefix display using a temporary Graph namespace manager
+def iri_to_prefixed(iri: str) -> str:
     try:
-        prefix, namespace, lname = graph.namespace_manager.compute_qname(URIRef(uri))
-        return lname
+        tmpg = Graph()
+        # reuse some common prefixes if available in loaded data later; for now rdflib defaults
+        q = tmpg.namespace_manager.compute_qname(URIRef(iri))
+        if q and len(q) == 3:
+            prefix, namespace, lname = q
+            return f"{prefix}:{lname}"
     except Exception:
-        return str(uri).split("/")[-1].split("#")[-1]
+        pass
+    # fallback to local name
+    try:
+        return str(iri).split('/')[-1].split('#')[-1]
+    except Exception:
+        return iri
 
+# Input field for a single IRI paste; add on Enter
+def _on_add_iri():
+    v = st.session_state.get('root_iri_input', '').strip()
+    if v:
+        # strip optional angle brackets
+        if v.startswith('<') and v.endswith('>'):
+            v = v[1:-1]
+        # avoid duplicates
+        if v not in st.session_state['root_iris']:
+            st.session_state['root_iris'].append(v)
+        st.session_state['root_iri_input'] = ''
 
+st.sidebar.text_input(
+    "Paste a Root IRI",
+    key='root_iri_input',
+    placeholder='https://example.org/resource#Thing',
+    on_change=_on_add_iri
+)
+col_add, col_clear = st.sidebar.columns([1,1])
+with col_add:
+    if st.button("Add"):
+        _on_add_iri()
+with col_clear:
+    if st.button("Clear"):
+        st.session_state['root_iris'] = []
+
+# Render current list with prefixed view and remove buttons
+if st.session_state['root_iris']:
+    st.sidebar.markdown("Current Roots:")
+    for idx, iri in enumerate(st.session_state['root_iris']):
+        pref = iri_to_prefixed(iri)
+        # inline text + remove button, same line
+        c_text, c_btn = st.sidebar.columns([8,1])
+        with c_text:
+            st.markdown(f"- `{pref}`", help=iri)
+        with c_btn:
+            if st.button("✕", key=f"rm_{idx}", help="Remove"):
+                st.session_state['root_iris'].pop(idx)
+                st.rerun()
+else:
+    st.sidebar.caption("No roots added yet. Paste an IRI above and press Enter or Add.")
+
+# Use session roots downstream
+root_iris_from_input: list[str] = st.session_state['root_iris'][:]
 # ---------- Main: Graph Visualization ----------
 st.subheader("Graph Visualization")
 
@@ -615,6 +660,14 @@ if len(g) == 0:
     st.warning("Loaded graph has 0 triples. Try increasing the LIMIT or providing Root IRIs (for SPARQL).")
     st.stop()
 
+# helper: local name using namespace manager
+def local_name(uri, graph):
+    try:
+        prefix, namespace, lname = graph.namespace_manager.compute_qname(URIRef(uri))
+        return lname
+    except Exception:
+        return str(uri).split("/")[-1].split("#")[-1]
+
 # Build nodes and outgoing mapping
 all_nodes: dict[str, dict] = {}
 outgoing_triples: dict[str, list[dict]] = {}
@@ -652,15 +705,15 @@ for s, p, o in g:
 
         try:
             if URIRef(p_str) == RDF.type:
-                outgoing_triples.setdefault(o_str, []).append({"to": s_str, "label": "instance"})
+                outgoing_triples.setdefault(o_str, []).append({"to": s_str, "label": "instance"});
         except Exception:
             pass
 
     else:
         try:
             pred_name = local_name(p_str, g)[:40]
-            meta = all_nodes[s_str].setdefault("meta", {})
-            meta.setdefault(pred_name, []).append(o_str)
+            meta = all_nodes[s_str].setdefault("meta", {});
+            meta.setdefault(pred_name, []).append(o_str);
         except Exception:
             pass
 
@@ -688,10 +741,10 @@ node_meta = {k: v.get("meta", {}) for k, v in all_nodes.items()}
 node_meta_json = json.dumps(node_meta)
 
 if not initial_nodes:
-    st.warning("No nodes found — check parsing / endpoint query.")
+    st.warning("No nodes found — check parsing / endpoint query.");
     if ttl_content:
-        st.markdown("**TTL (first 2000 chars)**")
-        st.code(ttl_content[:2000])
+        st.markdown("**TTL (first 2000 chars)**");
+        st.code(ttl_content[:2000]);
     st.stop()
 
 # Render Vis.js graph
