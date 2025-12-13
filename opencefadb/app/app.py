@@ -603,8 +603,30 @@ if uploaded_file is not None:
 
     # Decide initial nodes to show: show roots (nodes without incoming edges) or all classes
     # roots = [str(n) for n in get_root_node_iris(g)]
-    roots = ["https://doi.org/10.5281/zenodo.410121#2023-11-07-15-20-03_run.hdf"]
-    if not roots:
+    # roots = ["https://doi.org/10.5281/zenodo.410121#2023-11-07-15-20-03_run.hdf"]
+    # Sidebar input: allow the user to provide one or more root IRIs (comma- or newline-separated).
+    st.sidebar.header("Root IRI (optional)")
+    root_input = st.sidebar.text_area(
+        "Root IRI(s) — comma or newline separated",
+        value="",
+        help="Gib eine oder mehrere Root-IRIs ein (z.B. https://example.org/node). Wenn leer, werden Standard-Wurzeln verwendet."
+    )
+
+    # Parse user input into a list of IRIs
+    import re
+    roots = []
+    if root_input and root_input.strip():
+        parts = [p.strip() for p in re.split(r"[,\n\r]+", root_input) if p.strip()]
+        # Keep only IRIs that exist in the parsed graph
+        matched = [p for p in parts if p in all_nodes]
+        if matched:
+            roots = matched
+        else:
+            st.warning(
+                "Keine der eingegebenen Root-IRIs wurden im Graphen gefunden. Zeige stattdessen die ersten Knoten."
+            )
+            roots = list(all_nodes.keys())[:20]
+    else:
         roots = list(all_nodes.keys())[:20]
 
     initial_nodes: list[dict] = []
