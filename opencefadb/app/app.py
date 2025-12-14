@@ -637,8 +637,8 @@ else:
 root_iris_from_input: list[str] = st.session_state['root_iris'][:]
 # ---------- Main: Graph Visualization ----------
 
-g: Graph | None = None
-ttl_content: str | None = None  # only for debug display when uploading
+g: Optional[Graph] = None
+ttl_content: Optional[str] = None  # only for debug display when uploading
 
 if source_mode == "Upload file":
     if uploaded_file is None:
