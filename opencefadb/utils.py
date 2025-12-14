@@ -35,7 +35,7 @@ def _parse_checksum_algorithm(algorithm: str) -> str:
 
 
 def download_file(download_url,
-                  target_filename,
+                  target_filename=None,
                   checksum: str = None,
                   checksum_algorithm: str = None) -> pathlib.Path:
     """Downloads from a URL"""
@@ -44,6 +44,11 @@ def download_file(download_url,
             raise ValueError("If checksum is provided, checksum_algorithm must also be provided.")
         checksum_algorithm = _parse_checksum_algorithm(checksum_algorithm)
         checksum = {'value': checksum, 'algorithm': checksum_algorithm}
+    if target_filename is None:
+        if str(download_url).endswith("/content"):
+            target_filename = download_url.rsplit("/", 2)[-2]
+        else:
+            target_filename = download_url.split("/")[-1]
     target_filename = pathlib.Path(target_filename)
     logger.debug(f"Downloading metadata file from URL {download_url}...")
     response = requests.get(download_url, stream=True)

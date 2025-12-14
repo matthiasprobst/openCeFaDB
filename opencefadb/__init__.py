@@ -15,6 +15,7 @@ from typing import Union
 
 import appdirs
 
+from .plotting import plot
 
 __this_dir__ = pathlib.Path(__file__).parent
 
@@ -22,7 +23,6 @@ from ._version import __version__
 
 USER_LOG_DIR = pathlib.Path(appdirs.user_log_dir('opencefadb', version=__version__))
 USER_LOG_DIR.mkdir(parents=True, exist_ok=True)
-
 
 DEFAULT_LOGGING_LEVEL = logging.INFO
 _formatter = logging.Formatter(
@@ -55,6 +55,6 @@ def set_logging_level(level: Union[int, str]):
 
 GRAPH_DB_CONFIG_FILENAME = __this_dir__ / "../data/graphdb-config.ttl"
 
-
 from .core import OpenCeFaDB
-__all__ = ["set_logging_level", "OpenCeFaDB"]
+
+__all__ = ["set_logging_level", "OpenCeFaDB", "plot"]

@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import rdflib
 from ontolutils import Thing, urirefs, namespaces
 from pydantic import Field
-
+from ssnolib import StandardName
+from ontolutils.typing import ResourceType
+from ontolutils.ex.qudt import Unit
 from ..utils import remove_none
 
 
@@ -12,29 +14,31 @@ from ..utils import remove_none
     ex="http://example.org/",
 )
 @urirefs(
-    Value='ex:Value',
+    DataPoint='ex:DataPoint',
     label='ex:label',  # closeMatch rdfs:label
     value='ex:value',  # closeMatch hdf:value
-    units="ex:hasUnit",  # closeMatch m4i:hasUnit
+    unit="ex:hasUnit",  # closeMatch m4i:hasUnit
     hasStandardName="ex:hasStandardName",  # closeMatch ssno:hasStandardName
-    symbol="ex:hasSymbol"
+    symbol="ex:symbol",
+    latexSymbol="ex:latexSymbol"
 )
-class Value(Thing):
+class DataPoint(Thing):
     """A data point with metadata such as value, units, standard name and symbol."""
     label: str = Field(default=None)
-    hasStandardName: str = Field(default=None)
-    value: float
-    units: str = Field(default=None)
+    hasStandardName: Union[ResourceType, StandardName] = Field(default=None)
+    value: Union[int, float] = Field(..., description="The numerical value.")
+    unit: Union[ResourceType, Unit] = Field(default=None)
     symbol: str = Field(default=None)
+    latexSymbol: str = Field(default=None, alias="latex_symbol")
 
 
 @namespaces(ex="https://example.org/")
 @urirefs(
     DataSet='ex:DataSet,',
-    data='ex:data'
+    dataPoints='ex:dataPoints'
 )
 class DataSet(Thing):
-    data: List[Value] = Field(alias='values')
+    dataPoints: List[DataPoint] = Field(alias='values')
 
     def plot(self,
              x_standard_name: Union[rdflib.URIRef, str] = None,
@@ -125,16 +129,19 @@ class DataSeries(Thing):
         )
         if x[0].label:
             xlabel = x[0].label
-        elif x[0].hasStandardName:
-            xlabel = x[0].hasStandardName
+        elif x[0].standardName:
+            xlabel = x[0].standardName.rsplit("/")[-1]
         else:
             xlabel = "x"
         if y[0].label:
             ylabel = y[0].label
-        elif y[0].hasStandardName:
-            ylabel = y[0].hasStandardName
+        elif y[0].standardName:
+            ylabel = y[0].standardName.rsplit("/")[-1]
         else:
             ylabel = "y"
+
+        print(x[0])
+
         ax.set_xlabel(f"{xlabel} [{x[0].units}]")
         ax.set_ylabel(f"{ylabel} [{y[0].units}]")
         return ax
@@ -175,8 +182,8 @@ class DataSeries(Thing):
             symbol=da.attrs.get("symbol", None)
         )
         dp = cls(
-            coordinates=Value.model_validate(remove_none(_coordinate)),
-            data=Value.model_validate(remove_none(_data))
+            coordinates=DataPoint.model_validate(remove_none(_coordinate)),
+            data=DataPoint.model_validate(remove_none(_data))
         )
         return dp
 

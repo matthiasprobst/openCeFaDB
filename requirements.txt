@@ -1,6 +1,7 @@
 setuptools>=80.0.0
 gldb==2.1.1
 appdirs~=1.4.4
+ontolutils>=0.23.0,<1.0.0
 click~=8.1.7
 rdflib~=7.1.1
 requests~=2.32.4

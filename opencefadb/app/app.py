@@ -636,7 +636,6 @@ else:
 # Use session roots downstream
 root_iris_from_input: list[str] = st.session_state['root_iris'][:]
 # ---------- Main: Graph Visualization ----------
-st.subheader("Graph Visualization")
 
 g: Graph | None = None
 ttl_content: str | None = None  # only for debug display when uploading

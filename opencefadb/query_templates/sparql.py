@@ -1,4 +1,7 @@
+from typing import Union
+
 from gldb.query import SparqlQuery, RemoteSparqlQuery
+from pydantic import HttpUrl
 
 SELECT_FAN_PROPERTIES = SparqlQuery(
     query="""PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
@@ -98,6 +101,40 @@ PREFIX qudt: <http://qudt.org/vocab/unit#>
 #         description=f"Selects datasets with standard name {target_standard_name_uri} within range "
 #                     f"{condition_range} of datasets with standard name {conditional_standard_name_uri}"
 #     )
+def get_properties(
+        subject_uri: Union[str, HttpUrl],
+        cls_uri: Union[str, HttpUrl] = None,
+        limit: int = None
+):
+    """Returns all properties of the given subject URI."""
+    subject_uri = str(HttpUrl(subject_uri))
+    if cls_uri is None:
+        query_str = f"""
+    PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
+    
+    SELECT ?property ?value
+    WHERE {{
+        <{subject_uri}> ?property ?value .
+    }}
+    ORDER BY ?property
+    """
+    else:
+        query_str = f"""
+    SELECT ?property ?value
+    WHERE {{
+        <{subject_uri}> a {cls_uri} .
+        <{subject_uri}> ?property ?value .
+    }}
+    ORDER BY ?property
+    """
+    if limit is not None:
+        query_str += f"LIMIT {limit}\n"
+
+    return SparqlQuery(
+        query=query_str,
+        description=f"Selects all properties of the target URI {subject_uri}"
+    )
+
 
 def construct_data_based_on_standard_name_based_search_and_range_condition(
         target_standard_name_uris: list[str],

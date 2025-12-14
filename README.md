@@ -129,3 +129,17 @@ rdflib-endpoint serve .\metadata\**\*.ttl
 ## Database Analysis
 
 The further analysis should be made in Python scripts or Jupyter Notebooks.
+
+## Viewer
+
+The package also provides a simple viewer to explore the metadata in a streamlit app:
+
+The viewer provides an easy-to-use interface to explore the metadata and identify relevant data files for further analysis. 
+Upload options are provided to load the metadata from a local RDF store (GraphDB) or a SPARQL endpoint.
+
+```bash
+opencefadb viewer
+```
+
+
+![streamlit viewer screenshot](docs/viewer-screenshot.png)

@@ -1,7 +1,7 @@
-from ._data import Value, DataSet, DataSeries
+from ._data import DataPoint, DataSet, DataSeries
 
 __all__ = [
-    "Value",
+    "DataPoint",
     "DataSet",
     "DataSeries",
 ]

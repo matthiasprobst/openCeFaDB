@@ -6,7 +6,7 @@ import sys
 import warnings
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Type, Dict
 
 import dotenv
 import pyshacl
@@ -15,22 +15,66 @@ import requests
 from gldb import GenericLinkedDatabase
 from gldb.stores import RDFStore, DataStore, RemoteSparqlStore, MetadataStore
 from h5rdmtoolbox.repository.zenodo import ZenodoRecord
+from ontolutils import Thing
+from ontolutils.ex.qudt import Unit
+from rdflib.namespace import split_uri
+from ssnolib import StandardName
+from ssnolib.m4i import NumericalVariable
 
 from opencefadb import logger
-from opencefadb.models import Value, DataSet, DataSeries
+from opencefadb.models import DataSeries
 from opencefadb.query_templates.sparql import (
     SELECT_FAN_CAD_FILE
 )
-from opencefadb.query_templates.sparql import construct_data_based_on_standard_name_based_search_and_range_condition
+from opencefadb.query_templates.sparql import construct_data_based_on_standard_name_based_search_and_range_condition, \
+    get_properties
 from opencefadb.utils import download_file, compute_sha256
 from opencefadb.utils import download_multiple_files
 from opencefadb.utils import remove_none
+from opencefadb.validation.shacl.templates.dcat import MINIMUM_DATASET_SHACL
 
 __this_dir__ = pathlib.Path(__file__).parent
 
-from opencefadb.validation.shacl.templates.dcat import MINIMUM_DATASET_SHACL
-
 _db_instance = None
+
+unit_entities = {
+    "http://qudt.org/vocab/unit/PA": Unit(
+        id="http://qudt.org/vocab/unit/PA",
+        name="Pascal",
+        symbol="Pa",
+        conversionMultiplier=1.0,
+    )
+}
+
+
+def get_and_unpack_property_value_query(uri: str, entity: Type[Thing], metadata_store: RDFStore):
+    """Evaluates a SPARQL query against the metadata store to retrieve the unit entity for the given unit URI."""
+    sparql_query = get_properties(uri)
+    res = sparql_query.execute(metadata_store)
+    if not res:
+        return entity(id=uri)
+    df = res.data
+    _grouped_dict = df.groupby("property")["value"].apply(list).to_dict()
+    # extract the value from the uri, which is in the key
+    _data_dict = {
+        "id": uri
+    }
+    for k, v in _grouped_dict.items():
+        _, key = split_uri(k)
+        if len(v) == 1:
+            _data_dict[key] = v[0]
+        else:
+            _data_dict[key] = v
+    return entity.model_validate(_data_dict)
+
+
+def get_unit_entity(unit_uri: str, metadata_store: RDFStore) -> Optional[Unit]:
+    """Evaluates a SPARQL query against the metadata store to retrieve the unit entity for the given unit URI."""
+    return get_and_unpack_property_value_query(unit_uri, Unit, metadata_store)
+
+
+def get_standard_name_entity(standard_name_uri: str, metadata_store: RDFStore) -> Optional[StandardName]:
+    return get_and_unpack_property_value_query(standard_name_uri, StandardName, metadata_store)
 
 
 @dataclass
@@ -339,7 +383,7 @@ class OpenCeFaDB(GenericLinkedDatabase):
             print(results_text)
 
     @classmethod
-    def pull(cls, version: Optional[str] = None, target_directory: Optional[Union[str, pathlib.Path]] = None,
+    def pull(cls, version: str | None = None, target_directory: Optional[Union[str, pathlib.Path]] = None,
              sandbox: bool = False):
         return _pull(version, target_directory, sandbox)
 
@@ -458,10 +502,10 @@ class OpenCeFaDB(GenericLinkedDatabase):
             self,
             n_rot_speed_rpm: float,
             n_rot_tolerance: float = 0.05
-    ) -> DataSeries:
+    ) -> Dict:
         """Gets the fan curve data for the given rotational speed (in rpm) with the given tolerance."""
         return get_fan_curve_dataseries(
-            self.stores.rdf,
+            self.metadata_store,
             n_rot_speed_rpm=n_rot_speed_rpm,
             n_rot_tolerance=n_rot_tolerance
         )
@@ -471,8 +515,9 @@ def get_fan_curve_dataseries(
         metadata_store: RDFStore,
         n_rot_speed_rpm: float,
         n_rot_tolerance: float = 0.05
-) -> DataSeries:
-    zenodo_record_ns = rdflib.namespace.Namespace("https://doi.org/10.5281/zenodo.17572275#")
+) -> Dict:
+    zenodo_record_ns = rdflib.namespace.Namespace(
+        "https://doi.org/10.5281/zenodo.17572275#")  # TODO dont hardcode this!
     sn_mean_dp_stat = zenodo_record_ns[
         'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet']
     sn_mean_vfr = zenodo_record_ns[
@@ -497,7 +542,7 @@ def get_fan_curve_dataseries(
     df = result.data
     for index, row in df.iterrows():
         hdf_file = str(row["hdfFile"])
-        # unterstütze beide Varianten: ?standardName oder ?dataset (je nach gespeicherter Query)
+
         standard_term = row.get("standardName") or row.get("dataset")
         standard_name = str(standard_term) if standard_term is not None else None
 
@@ -515,34 +560,44 @@ def get_fan_curve_dataseries(
             units = str(units_term) if units_term is not None else None
 
         if standard_name is not None:
-            data[hdf_file][standard_name] = {"value": value, "units": units}
-
-    def safe(v):
-        if isinstance(v, (str, int, float, bool)) or v is None:
-            return v
-        return str(v)
-
-    serializable = {
-        hf: {sn.rsplit("/", 1)[-1]: {"standardName": sn, "value": safe(item["value"]), "units": safe(item["units"])} for
-             sn, item in sn_map.items()}
-        for hf, sn_map in data.items()
-    }
-
-    data = []
-    for k, v in serializable.items():
-        _dataset = []
-        for sn, value in v.items():
-            _dataset.append(Value.model_validate(remove_none(value)))
-        data.append(
-            DataSet.model_validate(dict(data=_dataset))
-        )
-    dc = DataSeries.model_validate(dict(datasets=data))
-    return dc
+            unit_entity = get_unit_entity(units, metadata_store)
+            standard_name_entity = get_standard_name_entity(standard_name, metadata_store)
+            _data = {
+                "hasNumericalValue": value,
+                "hasUnit": unit_entity,
+                "hasStandardName": standard_name_entity,
+                "hasSymbol": None
+            }
+            data[hdf_file][standard_name] = NumericalVariable.model_validate(remove_none(_data))
+    return dict(data)
+    # def safe(v):
+    #     if isinstance(v, (str, int, float, bool)) or v is None:
+    #         return v
+    #     return str(v)
+    #
+    # serializable = {
+    #     hf: {sn.rsplit("/", 1)[-1]: {"hasStandardName": sn,
+    #                                  "hasNumericalValue": safe(item["value"]),
+    #                                  "hasUnit": safe(item["units"])} for
+    #          sn, item in sn_map.items()}
+    #     for hf, sn_map in data.items()
+    # }
+    #
+    # _data = []
+    # for k, v in serializable.items():
+    #     _dataset = []
+    #     for sn, value in v.items():
+    #         _dataset.append(NumericalVariable.model_validate(remove_none(value)))
+    #     _data.append(
+    #         NumericalVariable.model_validate(dict(data=_dataset))
+    #     )
+    # dc = DataSeries.model_validate(dict(datasets=_data))
+    # return dc
 
 
 def _pull(
-        version: Optional[str] = None,
-        target_directory: Optional[Union[str, pathlib.Path]] = None,
+        version: str | None = None,
+        target_directory: str | None = None,
         sandbox: bool = False) -> Optional[pathlib.Path]:
     """download initial config"""
     if target_directory is None:

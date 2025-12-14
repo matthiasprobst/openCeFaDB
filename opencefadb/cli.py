@@ -12,6 +12,7 @@ import requests
 from opencefadb import OpenCeFaDB
 
 DEFAULT_GRAPHDB_URL = "http://localhost:7200"
+__this_dir__ = pathlib.Path(__file__).parent
 
 
 @click.group()
@@ -296,6 +297,27 @@ def graphdb_add(repo_name: str,
             click.echo(f"✗ {file_path}: {e}", err=True)
 
     click.echo(f"\nUploaded {uploaded}/{len(rdf_files)} files successfully to {statements_url}")
+
+
+@main.command("viewer")
+@click.option("--port", default=8501, show_default=True, help="Port to run the Graph Viewer on.")
+@click.option("--host", default="0.0.0.0", show_default=True, help="Host address to bind the Graph Viewer to.")
+def graph_viewer(port: int = 8501, host: str = "0.0.0.0"):
+    """Launch the OpenCeFaDB Graph Viewer."""
+    import subprocess
+    app_path = __this_dir__ / "app/app.py"
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
+        str(app_path),
+        "--server.port", str(port),
+        "--server.address", host,
+    ]
+
+    subprocess.run(cmd, check=True)
 
 
 def _load_env_file(env_file: Optional[str]):

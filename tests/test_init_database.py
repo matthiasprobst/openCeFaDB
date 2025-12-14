@@ -82,6 +82,7 @@ class TestInitDatabase(unittest.TestCase):
         res = new_sparql.execute(db_interface.metadata_store)
         self.assertTrue(138.0, res.data["value"][0])
 
+
     def test_config_validation(self):
         config_filename = OpenCeFaDB.pull(
             version="latest",
@@ -252,7 +253,8 @@ class TestInitDatabase(unittest.TestCase):
                 meta_shacl=False,
                 advanced=True,
             )
-            conforms, results_graph, results_text = results  # self.assertTrue(conforms)
+            conforms, results_graph, results_text = results
+            self.assertTrue(conforms)
             if not conforms:
                 print("SHACL validation results:")
                 print(results_text)

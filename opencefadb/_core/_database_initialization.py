@@ -124,7 +124,8 @@ class WebResource:
     download_url: HttpUrl
     checksum: str
     title: str
-    doi: str
+    identifier: str
+    mediaType: str
 
 
 def compute_md5_of_file(path: pathlib.Path) -> str:
@@ -171,7 +172,7 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
     download_directory.mkdir(parents=True, exist_ok=True)
 
     for web_resource in web_resources:
-        doi = web_resource.doi
+        doi = web_resource.identifier
         # normalize DOI-like URLs
         if isinstance(doi, str) and (doi.startswith("http://doi.org/") or doi.startswith("https://doi.org/")):
             doi = doi.split("doi.org/", 1)[-1]
@@ -187,6 +188,19 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
 
         url = str(web_resource.download_url)
         title = str(web_resource.title) if web_resource.title is not None else ""
+        title = title.replace(".", "_")
+        if web_resource.mediaType == "text/turtle":
+            expected_suffix = ".ttl"
+        elif web_resource.mediaType == "application/ld+json":
+            expected_suffix = ".jsonld"
+        elif web_resource.mediaType == "application/json":
+            expected_suffix = ".json"
+        elif web_resource.mediaType == "application/rdf+xml":
+            expected_suffix = ".rdf"
+        elif web_resource.mediaType == "application/x+hdf5":
+            expected_suffix = ".hdf"
+        else:
+            expected_suffix = None
 
         # determine filename: prefer title, else last segment of URL
         if url.endswith("/content"):
@@ -194,14 +208,21 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
             _fname = _url.rsplit("/", 1)[-1]
         else:
             _fname = url.rsplit("/", 1)[-1]
+
         if pathlib.Path(_fname).suffix == "":
             if title != "":
                 filename = sanitize_filename(title)
             else:
-                filename = "download.bin"
+                if expected_suffix:
+                    filename = f"download{expected_suffix}"
+                else:
+                    filename = "download.bin"
         else:
             filename = sanitize_filename(_fname)
+        filename = filename.replace(" ", "_")
         dest_path = record_dir / filename
+        if dest_path.suffix == "" and expected_suffix:
+            dest_path = dest_path.with_suffix(expected_suffix)
 
         expected_algo, expected_val = parse_checksum(web_resource.checksum)
 
@@ -316,9 +337,9 @@ def database_initialization(
         PREFIX dcterms: <http://purl.org/dc/terms/>
         PREFIX spdx: <http://spdx.org/rdf/terms#>
 
-        SELECT ?dataset ?doi ?download ?title ?checksumValue WHERE {
+        SELECT ?dataset ?identifier ?download ?title ?checksumValue WHERE {
             ?dataset a dcat:Dataset ;
-                     dcterms:identifier ?doi ;
+                     dcterms:identifier ?identifier ;
                      dcat:distribution ?dist .
         
             ?dist dcat:downloadURL ?download ;
@@ -341,7 +362,8 @@ def database_initialization(
         download_url=row.download,
         checksum=row.checksumValue,
         title=row.title,
-        doi=row.doi,
+        identifier=row.identifier,
+        mediaType="text/turtle"
     ) for row in results]
 
     return download(
