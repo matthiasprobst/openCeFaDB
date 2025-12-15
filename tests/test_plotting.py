@@ -96,4 +96,4 @@ class TestPlotting(unittest.TestCase):
                         )
         plt.legend()
         plt.draw()
-        plt.clos()
+        plt.close()
