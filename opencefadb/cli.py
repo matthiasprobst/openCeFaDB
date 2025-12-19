@@ -75,7 +75,7 @@ def init(config_file: str, working_directory: Optional[str] = None):
     "--config-file",
     "config_file",
     default=None,
-    help="Path to custom config.ttl file. Other options are ignored if provided.",
+    help="Path to custom config.ttl file. Other options except the url are ignored if provided.",
 )
 @click.option("--env", "env_file", default=None, help="Path to .env file (loads GRAPHDB_USERNAME/PASSWORD).")
 @click.option("--username", default=None, help="GraphDB username (overrides env vars).")

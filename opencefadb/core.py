@@ -22,7 +22,6 @@ from ssnolib import StandardName
 from ssnolib.m4i import NumericalVariable
 
 from opencefadb import logger
-from opencefadb.models import DataSeries
 from opencefadb.query_templates.sparql import (
     SELECT_FAN_CAD_FILE
 )
@@ -383,7 +382,9 @@ class OpenCeFaDB(GenericLinkedDatabase):
             print(results_text)
 
     @classmethod
-    def pull(cls, version: Optional[str] = None, target_directory: Optional[Union[str, pathlib.Path]] = None,
+    def pull(cls,
+             version: Optional[str] = None,
+             target_directory: Optional[Union[str, pathlib.Path]] = None,
              sandbox: bool = False):
         return _pull(version, target_directory, sandbox)
 
@@ -616,10 +617,6 @@ def _pull(
 
     if version is not None and version.lower().strip() == "latest":
         version = None
-    if version:
-        print(f"Downloading OpenCeFaDB config file version {version} from Zenodo...")
-    else:
-        print("Downloading the latest OpenCeFaDB config file from Zenodo...")
 
     # if version is None, get the latest version of the zenodo record and download the file test.ttl, else get the specific version of the record:
     res = requests.get(base_url, params={'access_token': access_token} if sandbox else {})
@@ -628,6 +625,7 @@ def _pull(
         sys.exit(1)
 
     if version is None:
+        print("Searching for the latest version...")
         links = res.json().get("links", {})
         latest_version_url = links.get("latest", None)
         if latest_version_url is None:
@@ -654,9 +652,10 @@ def _pull(
                     f.write(file_res.content)
                 print(f"Downloaded latest OpenCeFaDB config file to '{target_filename}'.")
                 return target_filename
-        print("Error: could not find config file in the latest version of the Zenodo record.")
+        print(f"Error: Could not find config the file {config_filename} in the latest version of the Zenodo record.")
         sys.exit(1)
 
+    print(f"Searching for version {version}...")
     # a specific version is given:
     found_hit = None
     version_hits = \

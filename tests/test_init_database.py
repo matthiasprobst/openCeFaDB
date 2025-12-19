@@ -37,7 +37,7 @@ class TestInitDatabase(unittest.TestCase):
         )
         self.assertTrue(config_filename.exists())
         self.assertTrue(config_filename.is_file())
-        self.assertEqual("opencefadb-config-sandbox-1-2-0.ttl", config_filename.name)
+        self.assertEqual("opencefadb-config-sandbox-1-3-0.ttl", config_filename.name)
 
         out = OpenCeFaDB.initialize(
             working_directory=self.working_dir,
@@ -47,10 +47,6 @@ class TestInitDatabase(unittest.TestCase):
         self.assertEqual(
             115,  # number of files that are downloaded
             len([f for f in filenames if f.suffix == ".ttl"])
-        )
-        self.assertEqual(
-            116,  # the config file is also in the metadata folder
-            len(list((self.working_dir / "metadata").rglob("*.ttl")))
         )
 
         RDFFileStore._expected_file_extensions = {".ttl", }
@@ -81,7 +77,6 @@ class TestInitDatabase(unittest.TestCase):
         )
         res = new_sparql.execute(db_interface.metadata_store)
         self.assertTrue(138.0, res.data["value"][0])
-
 
     def test_config_validation(self):
         config_filename = OpenCeFaDB.pull(
@@ -119,7 +114,7 @@ class TestInitDatabase(unittest.TestCase):
         )
         metadata_dir = database_interface.metadata_store.data_dir
         metadata_ttl_filenames = list(metadata_dir.rglob("*.ttl"))
-        self.assertEqual(116, len(metadata_ttl_filenames))
+        self.assertEqual(117, len(metadata_ttl_filenames))
 
         # also the second time should work (exist_ok=True):
         database_interface = opencefadb.OpenCeFaDB(
