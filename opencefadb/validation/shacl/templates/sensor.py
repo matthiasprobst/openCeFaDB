@@ -2,10 +2,10 @@ SHALL_HAVE_WELL_DESCRIBED_SSN_SENSOR = '''@prefix ex: <https://example.org/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix schema1: <http://schema.org/> .
+@prefix schema: <http://schema.org/> .
 @prefix sosa: <http://www.w3.org/ns/sosa/> .
 @prefix ssn: <http://www.w3.org/ns/ssn/> .
-@prefix ssnsystem: <http://www.w3.org/ns/ssn/systems/> .
+@prefix ssn_system: <http://www.w3.org/ns/ssn/systems/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 #################################################################
@@ -31,10 +31,10 @@ ex:SensorMetadataShape
   ] ;
 
   sh:property [
-    sh:path ssnsystem:hasSystemCapability ;
+    sh:path ssn_system:hasSystemCapability ;
     sh:minCount 1 ;
     sh:node ex:SystemCapabilityShape ;
-    sh:message "Sensor must have at least one ssnsystem:SystemCapability." ;
+    sh:message "Sensor must have at least one ssn_system:SystemCapability." ;
   ] .
 
 #################################################################
@@ -43,7 +43,7 @@ ex:SensorMetadataShape
 
 ex:SystemCapabilityShape
   a sh:NodeShape ;
-  sh:class ssnsystem:SystemCapability ;
+  sh:class ssn_system:SystemCapability ;
 
   sh:property [
     sh:path ssn:forProperty ;
@@ -55,20 +55,20 @@ ex:SystemCapabilityShape
 
   # Exactly one MeasurementRange per capability
   sh:property [
-    sh:path ssnsystem:hasSystemProperty ;
+    sh:path ssn_system:hasSystemProperty ;
     sh:qualifiedValueShape ex:MeasurementRangeShape ;
     sh:qualifiedMinCount 1 ;
     sh:qualifiedMaxCount 1 ;
-    sh:message "Each SystemCapability must have exactly one ssnsystem:MeasurementRange as a system property." ;
+    sh:message "Each SystemCapability must have exactly one ssn_system:MeasurementRange as a system property." ;
   ] ;
 
   # Optional Accuracy per capability (0..1), numeric or textual spec allowed
   sh:property [
-    sh:path ssnsystem:hasSystemProperty ;
+    sh:path ssn_system:hasSystemProperty ;
     sh:qualifiedValueShape ex:AccuracyShape ;
     sh:qualifiedMinCount 0 ;
     sh:qualifiedMaxCount 1 ;
-    sh:message "Each SystemCapability may have at most one ssnsystem:Accuracy as a system property." ;
+    sh:message "Each SystemCapability may have at most one ssn_system:Accuracy as a system property." ;
   ] ;
 
   # Ensure forProperty is among the sensor's observed properties
@@ -78,7 +78,7 @@ ex:SystemCapabilityShape
     sh:select """
       SELECT $this
       WHERE {
-        ?sensor ssnsystem:hasSystemCapability $this ;
+        ?sensor ssn_system:hasSystemCapability $this ;
                 sosa:observes ?obs .
         $this ssn:forProperty ?p .
         FILTER NOT EXISTS { ?sensor sosa:observes ?p }
@@ -92,10 +92,10 @@ ex:SystemCapabilityShape
 
 ex:MeasurementRangeShape
   a sh:NodeShape ;
-  sh:class ssnsystem:MeasurementRange ;
+  sh:class ssn_system:MeasurementRange ;
 
   sh:property [
-    sh:path schema1:minValue ;
+    sh:path schema:minValue ;
     sh:minCount 1 ;
     sh:maxCount 1 ;
     sh:datatype xsd:double ;
@@ -103,7 +103,7 @@ ex:MeasurementRangeShape
   ] ;
 
   sh:property [
-    sh:path schema1:maxValue ;
+    sh:path schema:maxValue ;
     sh:minCount 1 ;
     sh:maxCount 1 ;
     sh:datatype xsd:double ;
@@ -111,7 +111,7 @@ ex:MeasurementRangeShape
   ] ;
 
   sh:property [
-    sh:path schema1:unitCode ;
+    sh:path schema:unitCode ;
     sh:minCount 1 ;
     sh:maxCount 1 ;
     sh:nodeKind sh:IRI ;
@@ -125,8 +125,8 @@ ex:MeasurementRangeShape
     sh:select """
       SELECT $this
       WHERE {
-        $this schema1:minValue ?min ;
-              schema1:maxValue ?max .
+        $this schema:minValue ?min ;
+              schema:maxValue ?max .
         FILTER (?min >= ?max)
       }
     """ ;
@@ -138,20 +138,20 @@ ex:MeasurementRangeShape
 
 ex:AccuracyShape
   a sh:NodeShape ;
-  sh:class ssnsystem:Accuracy ;
+  sh:class ssn_system:Accuracy ;
 
   # Either numeric accuracy...
   sh:or (
     [
       sh:property [
-        sh:path schema1:value ;
+        sh:path schema:value ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
         sh:message "If using numeric accuracy, provide schema:value as xsd:double." ;
       ] ;
       sh:property [
-        sh:path schema1:unitCode ;
+        sh:path schema:unitCode ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:nodeKind sh:IRI ;
@@ -169,7 +169,7 @@ ex:AccuracyShape
     ]
     [
       sh:property [
-        sh:path schema1:description ;
+        sh:path schema:description ;
         sh:minCount 1 ;
         sh:datatype rdf:langString ;
         sh:message "If using textual accuracy spec, provide schema:description with a language tag." ;
