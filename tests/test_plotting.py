@@ -95,5 +95,4 @@ class TestPlotting(unittest.TestCase):
                         marker="o",
                         )
         plt.legend()
-        plt.draw()
         plt.close()

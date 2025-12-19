@@ -66,20 +66,21 @@ class TestFanCurve(unittest.TestCase):
         x_values = [v[sn_mean_vfr] for k, v in ds.items()]
         y_values = [v[mean_dp_stat] for k, v in ds.items()]
 
-        import matplotlib.pyplot as plt
-        plt.figure()
-        ax = plt.gca()
-        opencefadb.plot(y=y_values,
-                        x=x_values,
-                        ax=ax,
-                        use_standard_names_over_labels=False,
-                        # xunit=u_minute,
-                        # yunit=u_kelvin,
-                        label="test data",
-                        marker="o",
-                        xsort=True,
-                        )
-        plt.legend()
-        plt.show()
+        if False:
+            import matplotlib.pyplot as plt
+            plt.figure()
+            ax = plt.gca()
+            opencefadb.plot(y=y_values,
+                            x=x_values,
+                            ax=ax,
+                            use_standard_names_over_labels=False,
+                            # xunit=u_minute,
+                            # yunit=u_kelvin,
+                            label="test data",
+                            marker="o",
+                            xsort=True,
+                            )
+            plt.legend()
+            plt.show()
 
-        # self.assertEqual(11, ds.sizes["points"])
+            # self.assertEqual(11, ds.sizes["points"])
