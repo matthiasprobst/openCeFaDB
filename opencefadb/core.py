@@ -3,41 +3,40 @@ import os
 import pathlib
 import shutil
 import sys
-import warnings
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Union, Optional, Type, Dict
+from typing import List, Union, Optional, Type
 
 import dotenv
-import pyshacl
 import rdflib
 import requests
-from gldb import GenericLinkedDatabase
-from gldb.stores import RDFStore, DataStore, RemoteSparqlStore, MetadataStore
+from h5rdmtoolbox import catalog as h5cat
+from h5rdmtoolbox.catalog.profiles import IS_VALID_CATALOG_SHACL
 from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 from ontolutils import Thing
-from ontolutils.ex.qudt import Unit
+from ontolutils.ex import dcat, hdf5, qudt, sosa, ssn
 from rdflib.namespace import split_uri
 from ssnolib import StandardName
 from ssnolib.m4i import NumericalVariable
 
 from opencefadb import logger
-from opencefadb.query_templates.sparql import (
-    SELECT_FAN_CAD_FILE
-)
+from opencefadb._core._database_initialization import DownloadStatus, database_initialization
+from opencefadb.query_templates import sparql
 from opencefadb.query_templates.sparql import construct_data_based_on_standard_name_based_search_and_range_condition, \
     get_properties
 from opencefadb.utils import download_file, compute_sha256
 from opencefadb.utils import download_multiple_files
 from opencefadb.utils import remove_none
-from opencefadb.validation.shacl.templates.dcat import MINIMUM_DATASET_SHACL
+from .models import Observation
+from .models.wikidata import FAN_OPERATING_POINT
+from .utils import opencefadb_print
 
 __this_dir__ = pathlib.Path(__file__).parent
 
 _db_instance = None
 
 unit_entities = {
-    "http://qudt.org/vocab/unit/PA": Unit(
+    "http://qudt.org/vocab/unit/PA": qudt.Unit(
         id="http://qudt.org/vocab/unit/PA",
         name="Pascal",
         symbol="Pa",
@@ -46,13 +45,10 @@ unit_entities = {
 }
 
 
-def get_and_unpack_property_value_query(uri: str, entity: Type[Thing], metadata_store: RDFStore):
-    """Evaluates a SPARQL query against the metadata store to retrieve the unit entity for the given unit URI."""
-    sparql_query = get_properties(uri)
-    res = sparql_query.execute(metadata_store)
-    if not res:
-        return entity(id=uri)
-    df = res.data
+def parse_to_entity(df, uri, entity: Type[Thing]):
+    # check if columns are "property" and "value":
+    if "property" not in df.columns or "value" not in df.columns:
+        raise ValueError("DataFrame must contain 'property' and 'value' columns.")
     _grouped_dict = df.groupby("property")["value"].apply(list).to_dict()
     # extract the value from the uri, which is in the key
     _data_dict = {
@@ -67,12 +63,22 @@ def get_and_unpack_property_value_query(uri: str, entity: Type[Thing], metadata_
     return entity.model_validate(_data_dict)
 
 
-def get_unit_entity(unit_uri: str, metadata_store: RDFStore) -> Optional[Unit]:
+def get_and_unpack_property_value_query(uri: str, entity: Type[Thing], metadata_store: h5cat.RDFStore):
     """Evaluates a SPARQL query against the metadata store to retrieve the unit entity for the given unit URI."""
-    return get_and_unpack_property_value_query(unit_uri, Unit, metadata_store)
+    sparql_query = get_properties(uri)
+    res = sparql_query.execute(metadata_store)
+    if not res:
+        return entity(id=uri)
+    df = res.data
+    return parse_to_entity(df, uri, entity)
 
 
-def get_standard_name_entity(standard_name_uri: str, metadata_store: RDFStore) -> Optional[StandardName]:
+def get_unit_entity(unit_uri: str, metadata_store: h5cat.RDFStore) -> Optional[qudt.Unit]:
+    """Evaluates a SPARQL query against the metadata store to retrieve the unit entity for the given unit URI."""
+    return get_and_unpack_property_value_query(unit_uri, qudt.Unit, metadata_store)
+
+
+def get_standard_name_entity(standard_name_uri: str, metadata_store: h5cat.RDFStore) -> Optional[StandardName]:
     return get_and_unpack_property_value_query(standard_name_uri, StandardName, metadata_store)
 
 
@@ -247,7 +253,7 @@ def _download_metadata_datasets(
     for r in res.bindings:
         media_type = MediaType.parse(r.get(rdflib.Variable("mediaType"), None))
         if media_type is not None and media_type not in allowed_media_types:
-            logger.info(f"Skipping dataset with media type '{media_type}' ...")
+            opencefadb_print(f"Skipping dataset with media type '{media_type}' ...")
             continue
         else:
             has_distributions = rdflib.Variable("downloadURL") in r
@@ -271,7 +277,7 @@ def _download_metadata_datasets(
                 if _checksum is None or _checksum_algorithm is None:
                     _checksum = None
                     _checksum_algorithm = None
-                    logger.info(f"No checksum information found for dataset '{r[rdflib.Variable('dataset')]}'")
+                    opencefadb_print(f"No checksum information found for dataset '{r[rdflib.Variable('dataset')]}'")
                 distributions = [
                     DistributionMetadata(
                         download_url=str(r[rdflib.Variable("downloadURL")]),
@@ -280,7 +286,7 @@ def _download_metadata_datasets(
                         checksum_algorithm=_checksum_algorithm
                     )
                 ]
-            logger.debug(f"Found {len(distributions)} distributions.")
+            opencefadb_print(f"Found {len(distributions)} distributions.")
 
             for d in distributions:
                 _filename = pathlib.Path(d.download_url.rsplit('/', 1)[-1])
@@ -290,8 +296,8 @@ def _download_metadata_datasets(
                 target_directory.mkdir(parents=True, exist_ok=True)
                 target_filename = download_dir / _url_hash / _filename.name
                 if target_filename.suffix == "":
-                    print(d.download_url)
-                    print(d.media_type)
+                    opencefadb_print(d.download_url)
+                    opencefadb_print(d.media_type)
                     if d.media_type is not None:
                         target_filename = target_filename.with_suffix(d.media_type.get_suffix())
                 if target_filename in target_filenames:
@@ -315,7 +321,7 @@ def _download_metadata_datasets(
                 if target_filename.exists() and not exist_ok:
                     logger.debug(f"File {target_filename.name} already exists, skipping download.")
                     continue
-                logger.info(f"Downloading file {target_filename.name} ...")
+                opencefadb_print(f"Downloading file {target_filename.name} ...")
                 return_filenames.append(download_file(
                     download_url,
                     target_filename.resolve(),
@@ -334,71 +340,94 @@ def _download_metadata_datasets(
     return target_filenames
 
 
-class OpenCeFaDB(GenericLinkedDatabase):
+class OpenCeFaDB(h5cat.CatalogManager):
 
     def __init__(
             self,
-            metadata_store: MetadataStore = None,
-            hdf_store: DataStore = None
+            working_directory: Union[str, pathlib.Path],
+            version: str = "latest",
+            sandbox: bool = False
     ):
-        wikidata_store = RemoteSparqlStore(endpoint_url="https://query.wikidata.org/sparql", return_format="json")
-        stores = {
-            "wikidata": wikidata_store
-        }
-        if metadata_store is not None:
-            stores["rdf"] = metadata_store
-        if hdf_store is not None:
-            stores["hdf"] = hdf_store
+        catalog = self.__class__.download(version, sandbox=sandbox, target_directory=working_directory)
         super().__init__(
-            stores=stores
+            catalog=catalog,
+            working_directory=working_directory
         )
 
-    @property
-    def metadata_store(self):
-        return self.stores.rdf
+    # def __init__(
+    #         self,
+    #         metadata_store: MetadataStore = None,
+    #         hdf_store: DataStore = None
+    # ):
+    #     wikidata_store = RemoteSparqlStore(endpoint_url="https://query.wikidata.org/sparql", return_format="json")
+    #     stores = {
+    #         "wikidata": wikidata_store
+    #     }
+    #     if metadata_store is not None:
+    #         stores["rdf"] = metadata_store
+    #     if hdf_store is not None:
+    #         stores["hdf"] = hdf_store
+    #     super().__init__(
+    #         stores=stores
+    #     )
 
-    @property
-    def hdf_store(self):
-        return self.stores.hdf
+    # def __repr__(self):
+    #     return f"{self.__class__.__name__}(stores={self.stores})"
+
+    # @property
+    # def metadata_store(self):
+    #     return self.stores.rdf
+
+    # @property
+    # def hdf_store(self):
+    #     return self.stores.hdf
+
+    # @classmethod
+    # def validate_config(cls, config_filename: Union[str, pathlib.Path]) -> bool:
+    #     config_graph = rdflib.Graph()
+    #     config_graph.parse(source=config_filename, format="ttl")
+    #     shacl_graph = rdflib.Graph()
+    #     shacl_graph.parse(data=MINIMUM_DATASET_SHACL, format="ttl")
+    #     results = pyshacl.validate(
+    #         data_graph=config_graph,
+    #         shacl_graph=shacl_graph,
+    #         inference='rdfs',
+    #         abort_on_first=False,
+    #         meta_shacl=False,
+    #         advanced=True,
+    #     )
+    #     conforms, results_graph, results_text = results
+    #     if not conforms:
+    #         warnings.warn("Configuration file does not conform to SHACL shapes.")
+    #         opencefadb_print("SHACL validation results:")
+    #         opencefadb_print(results_text)
 
     @classmethod
-    def validate_config(cls, config_filename: Union[str, pathlib.Path]) -> bool:
-        config_graph = rdflib.Graph()
-        config_graph.parse(source=config_filename, format="ttl")
-        shacl_graph = rdflib.Graph()
-        shacl_graph.parse(data=MINIMUM_DATASET_SHACL, format="ttl")
-        results = pyshacl.validate(
-            data_graph=config_graph,
-            shacl_graph=shacl_graph,
-            inference='rdfs',
-            abort_on_first=False,
-            meta_shacl=False,
-            advanced=True,
-        )
-        conforms, results_graph, results_text = results
-        if not conforms:
-            warnings.warn("Configuration file does not conform to SHACL shapes.")
-            print("SHACL validation results:")
-            print(results_text)
-
-    @classmethod
-    def pull(cls,
-             version: Optional[str] = None,
-             target_directory: Optional[Union[str, pathlib.Path]] = None,
-             sandbox: bool = False):
-        return _pull(version, target_directory, sandbox)
+    def download(cls,
+                 version: Optional[str] = None,
+                 target_directory: Optional[Union[str, pathlib.Path]] = None,
+                 sandbox: bool = False,
+                 validate=True) -> dcat.Catalog:
+        """Download the catalog (dcat:Catalog)"""
+        catalog_filename = _download_catalog(version, target_directory, sandbox)
+        catalog = dcat.Catalog.from_file(source=catalog_filename)[0]
+        if validate:
+            catalog.validate(shacl_data=IS_VALID_CATALOG_SHACL, raise_on_error=True)
+        return catalog
 
     @classmethod
     def initialize(
             cls,
             config_filename: Union[str, pathlib.Path],
             working_directory: Union[str, pathlib.Path] = None
-    ):
-        from opencefadb._core._database_initialization import database_initialization
+    ) -> List[DownloadStatus]:
         if working_directory is None:
             working_directory = pathlib.Path.cwd()
         download_directory = pathlib.Path(working_directory) / "metadata"
         download_directory.mkdir(parents=True, exist_ok=True)
+        opencefadb_print(
+            f"Copying the config file {config_filename} to the target directory {download_directory.resolve()} ..."
+        )
         shutil.copy(
             config_filename,
             download_directory / pathlib.Path(config_filename).name
@@ -443,7 +472,7 @@ class OpenCeFaDB(GenericLinkedDatabase):
     #     """Downloads metadata files from the metadata directory."""
     #     metadata_store: InMemoryRDFStore = self.stores.rdf
     #     for file in metadata_store.data_dir.glob("*.ttl"):
-    #         print(f"> Downloading metadata file: {file.name} ...")
+    #         opencefadb_print(f"> Downloading metadata file: {file.name} ...")
 
     # def upload_hdf(self, filename: pathlib.Path):
     #     """Uploads a file to all stores in the store manager. Not all stores may support this operation.
@@ -476,17 +505,17 @@ class OpenCeFaDB(GenericLinkedDatabase):
     #     # LIMIT 1
     #     # """
     #     # result = g.query(sparql)
-    #     # # print(str(result.bindings[0].get(rdflib.Variable("h5id"))))
+    #     # # opencefadb_print(str(result.bindings[0].get(rdflib.Variable("h5id"))))
     #     # # # TODO: link the resources using what? owl: sameAs?
     #     # # self.store_manager["rdf_db"].link_resources(hdf_db_id, str(result.bindings[0].get(rdflib.Variable("h5id"))))
     #     return hdf_db_id
 
-    def linked_upload(self, filename: Union[str, pathlib.Path]):
-        raise NotImplemented("Linked upload not yet implemented")
+    # def linked_upload(self, filename: Union[str, pathlib.Path]):
+    #     raise NotImplemented("Linked upload not yet implemented")
 
     def download_cad_file(self, target_directory: Union[str, pathlib.Path], exist_ok=False):
         """Queries the RDF database for the iges cad file"""
-        query_result = SELECT_FAN_CAD_FILE.execute(self.stores.rdf)
+        query_result = sparql.SELECT_FAN_CAD_FILE.execute(self.stores.rdf)
         bindings = query_result.data
         n_bindings = len(bindings)
         if n_bindings != 1:
@@ -499,28 +528,50 @@ class OpenCeFaDB(GenericLinkedDatabase):
             return target_filename
         return download_file(download_url, target_directory / _guess_filenames)
 
-    def get_fan_curve(
+    def get_operating_points(
             self,
             n_rot_speed_rpm: float,
             n_rot_tolerance: float = 0.05
-    ) -> Dict:
-        """Gets the fan curve data for the given rotational speed (in rpm) with the given tolerance."""
-        return get_fan_curve_dataseries(
-            self.metadata_store,
+    ) -> List["SemanticOperatingPoint"]:
+        """Gets the fan curve data for the given rotational speed (in rpm) with the given tolerance
+        and infer the OperatingPoint (SemanticOperatingPoint) objects from it
+
+        ."""
+        observations = get_fan_curve_observations(
+            self.main_rdf_store,
             n_rot_speed_rpm=n_rot_speed_rpm,
             n_rot_tolerance=n_rot_tolerance
         )
+        return [SemanticOperatingPoint.from_observation(obs) for obs in observations]
 
 
-def get_fan_curve_dataseries(
-        metadata_store: RDFStore,
+def get_fan_curve_observations(
+        rdf_store: h5cat.RDFStore,
         n_rot_speed_rpm: float,
         n_rot_tolerance: float = 0.05
-) -> Dict:
+) -> List[Observation]:
+    """This function will make a SPARQL query to get the fan curve data for the given rotational speed (in rpm) considering
+    a certain tolerance.
+
+    The SPARQL query identifies alls HDF5 Files (hdf:File) that contain datasets with standard names for:
+    - arithmetic_mean_of_fan_rotational_speed
+    - arithmetic_mean_of_fan_volume_flow_rate
+    - arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet
+
+    and where the value of the arithmetic_mean_of_fan_rotational_speed is within the given tolerance of the
+    specified n_rot_speed_rpm.
+
+    the query returns the hdf file, standard name, value, and units for each of the datasets found.
+
+    The function `get_fan_curve_dataseries` transforms this into a list of Observation objects, defined in
+    opencefadb.models.observation, where each Observation corresponds to a dataset found in the query.
+    """
     zenodo_record_ns = rdflib.namespace.Namespace(
         "https://doi.org/10.5281/zenodo.17572275#")  # TODO dont hardcode this!
     sn_mean_dp_stat = zenodo_record_ns[
         'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet']
+    # sn_mean_dp_stat = zenodo_record_ns[
+    #     'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_total_pressure_between_fan_outlet_and_fan_inlet']
     sn_mean_vfr = zenodo_record_ns[
         'standard_name_table/derived_standard_name/arithmetic_mean_of_fan_volume_flow_rate']
     sn_mean_nrot = zenodo_record_ns['standard_name_table/derived_standard_name/arithmetic_mean_of_fan_rotational_speed']
@@ -534,9 +585,9 @@ def get_fan_curve_dataseries(
         condition_range=n_rot_range
     )
 
-    print(" > Executing query (may take a few moments)...")
-    result = query.execute(metadata_store)
-    print(f"   - Found {len(result.data)} results.")
+    opencefadb_print("> Executing query (may take a few moments)...")
+    result = query.execute(rdf_store)
+    opencefadb_print(f"> Found {len(result.data)} results.")
 
     data = defaultdict(dict)
 
@@ -549,7 +600,12 @@ def get_fan_curve_dataseries(
 
         val_term = row.get("value")
         units_term = row.get("units")
-
+        ds_name = row.get("datasetName")
+        alt_label = row.get("altLabel")
+        label = row.get("label")
+        if alt_label is None:
+            alt_label = ds_name.strip("/")
+        symbol = row.get("hasSymbol")
         try:
             value = val_term.toPython() if val_term is not None else None
         except Exception:
@@ -561,42 +617,35 @@ def get_fan_curve_dataseries(
             units = str(units_term) if units_term is not None else None
 
         if standard_name is not None:
-            unit_entity = get_unit_entity(units, metadata_store)
-            standard_name_entity = get_standard_name_entity(standard_name, metadata_store)
+            unit_entity = get_unit_entity(units, rdf_store)
+            standard_name_entity = get_standard_name_entity(standard_name, rdf_store)
             _data = {
                 "hasNumericalValue": value,
                 "hasUnit": unit_entity,
                 "hasStandardName": standard_name_entity,
-                "hasSymbol": None
+                "hasSymbol": symbol,
+                "label": label,
+                "altLabel": alt_label
             }
             data[hdf_file][standard_name] = NumericalVariable.model_validate(remove_none(_data))
-    return dict(data)
-    # def safe(v):
-    #     if isinstance(v, (str, int, float, bool)) or v is None:
-    #         return v
-    #     return str(v)
-    #
-    # serializable = {
-    #     hf: {sn.rsplit("/", 1)[-1]: {"hasStandardName": sn,
-    #                                  "hasNumericalValue": safe(item["value"]),
-    #                                  "hasUnit": safe(item["units"])} for
-    #          sn, item in sn_map.items()}
-    #     for hf, sn_map in data.items()
-    # }
-    #
-    # _data = []
-    # for k, v in serializable.items():
-    #     _dataset = []
-    #     for sn, value in v.items():
-    #         _dataset.append(NumericalVariable.model_validate(remove_none(value)))
-    #     _data.append(
-    #         NumericalVariable.model_validate(dict(data=_dataset))
-    #     )
-    # dc = DataSeries.model_validate(dict(datasets=_data))
-    # return dc
+    # ...
+    observations = []
+    for k, v in data.items():
+        results = [ssn.Result(hasNumericalVariable=nv) for nv in v.values()]
+        hdf_file = hdf5.File(
+            id=k,
+        )
+        observation = sosa.Observation(
+            hasFeatureOfInterest=FAN_OPERATING_POINT,
+            hasResult=results,
+            hadPrimarySource=hdf_file
+        )
+        observations.append(observation)
+
+    return observations
 
 
-def _pull(
+def _download_catalog(
         version: Optional[str] = None,
         target_directory: Optional[str] = None,
         sandbox: bool = False) -> Optional[pathlib.Path]:
@@ -605,7 +654,7 @@ def _pull(
         target_directory = pathlib.Path.cwd()
 
     if sandbox:
-        base_url = "https://sandbox.zenodo.org/api/records/414371"
+        base_url = "https://sandbox.zenodo.org/api/records/419419"
         dotenv.load_dotenv(pathlib.Path.cwd() / ".env", override=True)
         access_token = os.getenv("ZENODO_SANDBOX_API_TOKEN", None)
         config_filename = "opencefadb-config-sandbox.ttl"
@@ -621,19 +670,19 @@ def _pull(
     # if version is None, get the latest version of the zenodo record and download the file test.ttl, else get the specific version of the record:
     res = requests.get(base_url, params={'access_token': access_token} if sandbox else {})
     if res.status_code != 200:
-        print(f"Error: could not retrieve Zenodo record: {res.status_code}")
+        opencefadb_print(f"Error: could not retrieve Zenodo record: {res.status_code}")
         sys.exit(1)
 
     if version is None:
-        print("Searching for the latest version...")
+        opencefadb_print("Searching for the latest version...")
         links = res.json().get("links", {})
         latest_version_url = links.get("latest", None)
         if latest_version_url is None:
-            print("Error: could not retrieve latest version URL from Zenodo record.")
+            opencefadb_print("Error: could not retrieve latest version URL from Zenodo record.")
             sys.exit(1)
         res = requests.get(latest_version_url, params={'access_token': access_token} if sandbox else {})
         if res.status_code != 200:
-            print(f"Error: could not retrieve latest version record from Zenodo: {res.status_code}")
+            opencefadb_print(f"Error: could not retrieve latest version record from Zenodo: {res.status_code}")
             sys.exit(1)
         detected_version = res.json()["metadata"]["version"]
 
@@ -646,32 +695,33 @@ def _pull(
 
         for file in res.json().get("files", []):
             if file["key"] == config_filename:
-                print(f"downloading version {detected_version}...")
+                opencefadb_print(f"downloading version {detected_version}...")
                 file_res = requests.get(file["links"]["self"], params={'access_token': access_token} if sandbox else {})
                 with open(target_filename, "wb") as f:
                     f.write(file_res.content)
-                print(f"Downloaded latest OpenCeFaDB config file to '{target_filename}'.")
+                opencefadb_print(f"Downloaded latest OpenCeFaDB config file to '{target_filename}'.")
                 return target_filename
-        print(f"Error: Could not find config the file {config_filename} in the latest version of the Zenodo record.")
+        opencefadb_print(
+            f"Error: Could not find config the file {config_filename} in the latest version of the Zenodo record.")
         sys.exit(1)
 
-    print(f"Searching for version {version}...")
+    opencefadb_print(f"Searching for version {version}...")
     # a specific version is given:
     found_hit = None
-    version_hits = \
-        requests.get(res.json()["links"]["versions"], params={'access_token': access_token} if sandbox else {}).json()[
-            "hits"]["hits"]
+    version_hits = requests.get(
+        res.json()["links"]["versions"], params={'access_token': access_token} if sandbox else {}
+    ).json()["hits"]["hits"]
     for hit in version_hits:
         if hit["metadata"]["version"] == version:
             found_hit = hit
             break
     if not found_hit:
-        print(f"Error: could not find version {version} in Zenodo record.")
+        opencefadb_print(f"Error: could not find version {version} in Zenodo record.")
         sys.exit(1)
     res_version = requests.get(found_hit["links"]["self"], params={'access_token': access_token} if sandbox else {})
     for file in res_version.json()["files"]:
         if file["key"] == config_filename:
-            print(f"downloading version {version}...")
+            opencefadb_print(f"Downloading version {version}...")
             file_res = requests.get(file["links"]["self"], params={'access_token': access_token} if sandbox else {})
 
             if sandbox:
@@ -683,7 +733,21 @@ def _pull(
 
             with open(target_filename, "wb") as f:
                 f.write(file_res.content)
-            print(f"Downloaded OpenCeFaDB config file version {version} to '{target_filename}'.")
+            opencefadb_print(f"Downloaded OpenCeFaDB config file version {version} to '{target_filename}'.")
             return target_filename
-    print(f"Error: could not find {config_filename} in the specified version.")
+    opencefadb_print(f"Error: could not find {config_filename} in the specified version.")
     return None
+
+
+def get_fan_property(
+        rdf_store: h5cat.RDFStore,
+        property_standard_name_uri: str
+) -> NumericalVariable:
+    """Gets a specific fan property from the fan curve data for the given rotational speed (in rpm) with the given tolerance."""
+    q = sparql.get_fan_property(property_standard_name_uri)
+    res = q.execute(rdf_store)
+    return parse_to_entity(
+        res.data,
+        property_standard_name_uri,
+        NumericalVariable
+    )

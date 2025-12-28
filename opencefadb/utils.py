@@ -10,6 +10,8 @@ from tqdm import tqdm
 
 logger = logging.getLogger("opencefadb")
 
+def opencefadb_print(*args, **kwargs):
+    print(" [OpenCEFA DB]: ", *args, **kwargs)
 
 class ExportFormat(enum.Enum):
     JSON_LD = "json-ld"

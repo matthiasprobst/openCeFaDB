@@ -10,6 +10,7 @@ directory.
 import hashlib
 import pathlib
 import re
+from dataclasses import dataclass
 from typing import Dict, Tuple, Iterator, List
 
 import rdflib
@@ -17,6 +18,16 @@ import requests
 from pydantic.v1 import HttpUrl
 
 __this_dir__ = pathlib.Path(__file__).parent
+
+from opencefadb.utils import opencefadb_print
+
+
+@dataclass
+class DownloadStatus:
+    record_id: str
+    filename: str
+    ok: bool
+    message: str
 
 
 def extract_record_id(value: str) -> str:
@@ -158,7 +169,7 @@ def parse_checksum(raw: str) -> Tuple[str, str]:
     return algo.lower(), val.lower()
 
 
-def download(download_directory: pathlib.Path, web_resources: List[WebResource]):
+def download(download_directory: pathlib.Path, web_resources: List[WebResource]) -> List[DownloadStatus]:
     """Download and verify a list of WebResource items.
 
     For each resource:
@@ -167,6 +178,8 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
     - stream-download into a .tmp file while computing md5
     - on success move the .tmp to final filename; on checksum mismatch rename with conflict suffix
     - append status entries to the overall list and print progress
+
+    Returns a list of DownloadStatus entries.
     """
     overall = []
     download_directory.mkdir(parents=True, exist_ok=True)
@@ -231,8 +244,8 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
             try:
                 existing_md5 = compute_md5_of_file(dest_path)
                 if expected_algo == "md5" and existing_md5.lower() == expected_val.lower():
-                    print(f"  SKIP (exists & checksum ok): {filename} -> {dest_path}")
-                    overall.append((rec_id, filename, True, f"exists, checksum matches"))
+                    opencefadb_print(f" > SKIP (exists & checksum ok): {filename} -> {dest_path}")
+                    overall.append(DownloadStatus(rec_id, filename, True, f"exists, checksum matches"))
                     continue
             except Exception:
                 # fall through to re-download
@@ -264,29 +277,29 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
                         # move tmp to final
                         tmp_path.replace(dest_path)
                         message = f"saved to {dest_path}"
-                        print(f"  OK: {filename} -> {dest_path} (md5 matches)")
+                        opencefadb_print(f" > OK: {filename} -> {dest_path} (md5 matches)")
                     else:
                         # conflict: keep both, rename new file with record id + short hash
                         new_name = f"{pathlib.Path(filename).stem}__{rec_id}__{computed[:8]}{pathlib.Path(filename).suffix}"
                         new_path = record_dir / new_name
                         tmp_path.replace(new_path)
                         message = f"checksum mismatch: expected={expected_val}, computed={computed}; saved as {new_path}"
-                        print(
-                            f"  MISMATCH: {filename} -> {new_path} (expected md5: {expected_val}, computed md5: {computed})")
+                        opencefadb_print(
+                            f" > MISMATCH: {filename} -> {new_path} (expected md5: {expected_val}, computed md5: {computed})")
                 else:
                     # no expected checksum provided — accept and move
                     tmp_path.replace(dest_path)
                     ok = True
                     message = f"saved to {dest_path} (no expected checksum)"
-                    print(f"  SAVED (no expected checksum): {filename} -> {dest_path}")
+                    opencefadb_print(f" > SAVED (no expected checksum): {filename} -> {dest_path}")
             else:
                 # unsupported algorithm: save file but mark as not-verified
                 tmp_path.replace(dest_path)
                 ok = False
                 message = f"saved to {dest_path} (unsupported checksum algorithm: {expected_algo})"
-                print(f"  SAVED (unsupported checksum alg '{expected_algo}'): {filename} -> {dest_path}")
+                opencefadb_print(f" > SAVED (unsupported checksum alg '{expected_algo}'): {filename} -> {dest_path}")
 
-            overall.append((rec_id, filename, ok, message))
+            overall.append(DownloadStatus(rec_id, filename, ok, message))
 
         except Exception as exc:
             # cleanup tmp file when exists
@@ -295,13 +308,13 @@ def download(download_directory: pathlib.Path, web_resources: List[WebResource])
                     tmp_path.unlink()
             except Exception:
                 pass
-            print(f"  ERROR downloading {filename}: {exc}")
-            overall.append((rec_id, filename, False, str(exc)))
+            opencefadb_print(f" > ERROR downloading {filename}: {exc}")
+            overall.append(DownloadStatus(rec_id, filename, False, str(exc)))
 
     # summary
     total = len(overall)
-    ok_count = sum(1 for _d, _f, ok, _m in overall if ok)
-    print(f"\nSummary: {ok_count}/{total} files verified successfully")
+    ok_count = sum(1 for o in overall if o.ok)
+    opencefadb_print(f"Summary: {ok_count}/{total} files verified successfully")
 
     return overall
 
@@ -319,8 +332,22 @@ def get_rdf_format_from_filename(filename: pathlib.Path) -> str:
 
 def database_initialization(
         config_filename: pathlib.Path,
-        download_directory: pathlib.Path = None
-):
+        download_directory: pathlib.Path
+) -> List[DownloadStatus]:
+    """Initialize the database by downloading metadata files as specified in the config TTL file.
+
+    Parameters
+    ----------
+    config_filename : pathlib.Path
+        Path to the RDF configuration file (TTL or JSON-LD) describing datasets.
+    download_directory : pathlib.Path, optional
+        Directory where downloaded files will be stored.
+
+    Returns
+    -------
+    List[DownloadStatus]
+        A list of DownloadStatus entries indicating the result of each download.
+    """
     config_filename = pathlib.Path(config_filename)
     if not pathlib.Path(download_directory).exists():
         raise ValueError(f"Download directory does not exist: {download_directory}")
@@ -366,6 +393,8 @@ def database_initialization(
         mediaType="text/turtle"
     ) for row in results]
 
+    opencefadb_print(
+        f"Found {len(list_of_ttl_web_resources)} TTL web resources to download. Downloading to {download_directory}...")
     return download(
         download_directory=download_directory,
         web_resources=list_of_ttl_web_resources

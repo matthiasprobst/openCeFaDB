@@ -1,9 +1,10 @@
 from typing import Union
 
-from gldb.query import SparqlQuery, RemoteSparqlQuery
+import rdflib
+from h5rdmtoolbox import catalog as h5cat
 from pydantic import HttpUrl
 
-SELECT_FAN_PROPERTIES = SparqlQuery(
+SELECT_FAN_PROPERTIES = h5cat.SparqlQuery(
     query="""PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
 
 SELECT ?parameter ?property ?value
@@ -17,7 +18,29 @@ ORDER BY ?parameter ?property
 """,
     description="Selects all properties of the fan")
 
-SELECT_FAN_CAD_FILE = SparqlQuery(
+
+def get_fan_property(standard_name_uri: Union[str, rdflib.URIRef]):
+    """Returns a SPARQL query that selects all properties of the fan parameter with the given standard name URI."""
+    if isinstance(standard_name_uri, rdflib.URIRef):
+        standard_name_uri = str(standard_name_uri)
+    query_str = f"""PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
+PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
+
+SELECT ?property ?value
+WHERE {{
+  <https://www.wikidata.org/wiki/Q131549102> m4i:hasParameter ?parameter .
+  ?parameter ssno:hasStandardName <{standard_name_uri}> .
+  ?parameter ?property ?value .
+}}
+ORDER BY ?property
+"""
+    return h5cat.SparqlQuery(
+        query=query_str,
+        description=f"Selects all properties of the fan parameter with standard name {standard_name_uri}"
+    )
+
+
+SELECT_FAN_CAD_FILE = h5cat.SparqlQuery(
     query="""
 PREFIX schema: <http://schema.org/>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -35,72 +58,9 @@ LIMIT 10
 """,
     description="Selects the CAD file for the fan")
 
-SELECT_ALL = SparqlQuery("SELECT * WHERE {?s ?p ?o}", description="Selects all triples in the RDF database")
-
-SELECT_ALL_OPERATION_POINTS = SparqlQuery(
-    query=""""
-PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
-PREFIX qudt: <http://qudt.org/vocab/unit#>
-    
-""",
-    description="Selects all operation points by searching for HDF5 files that contain standard names for operation points"
-)
+SELECT_ALL = h5cat.SparqlQuery("SELECT * WHERE {?s ?p ?o}", description="Selects all triples in the RDF database")
 
 
-# def get_data_based_on_standard_name_based_search_and_range_condition(
-#         target_standard_name_uri: str,
-#         conditional_standard_name_uri: str,
-#         condition_range: tuple[float, float],
-# ) -> SparqlQuery:
-#     """
-#     Finds data based on a target standard name URI per HDF file a dataset with standard name
-#     `conditional_standard_name_uri` whose value is within the given n_rot_range.
-#     https://doi.org/10.5281/zenodo.17572275#standard_name_table/derived_standard_name/arithmetic_mean_of_fan_rotational_speed
-#
-#     :param target_standard_name_uri: the standard name URI to query for
-#     :param conditional_standard_name_uri: the standard name URI that must be present in the same HDF file
-#     :param condition_range: tuple with (min, max) values for the condition
-#     :return:
-#     """
-#     query_str = f"""
-# PREFIX hdf: <http://purl.allotrope.org/ontologies/hdf5/1.8#>
-# PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
-# PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
-#
-# SELECT ?hdfFile ?dataset ?value ?units ?standardName
-# WHERE {{
-#   BIND(<{target_standard_name_uri}> AS ?standardName)
-#   ?dataset a hdf:Dataset ;
-#            ssno:hasStandardName ?standardName .
-#
-#   OPTIONAL {{ ?dataset hdf:value ?value }}
-#
-#   OPTIONAL {{ ?dataset ssno:unit ?unit1 }}
-#   OPTIONAL {{ ?dataset m4i:hasUnit ?unit2 }}
-#   BIND(COALESCE(?unit1, ?unit2) AS ?units)
-#
-#   ?hdfFile (hdf:rootGroup/hdf:member*)* ?dataset .
-#   ?hdfFile a hdf:File .
-#
-#   # Optional: finde im selben File ein Dataset mit Standardname 'conditional_standard_name_uri' und seinen Wert
-#   OPTIONAL {{
-#     ?hdfFile (hdf:rootGroup/hdf:member*)* ?rotDataset .
-#     ?rotDataset ssno:hasStandardName <{conditional_standard_name_uri}> .
-#     OPTIONAL {{ ?rotDataset hdf:value ?conditionValue }}
-#   }}
-#
-#   # Wenn der angefragte Standardname auf 'mean_rot_speed' endet, muss ?conditionValue im Bereich liegen
-#   FILTER(
-#     (BOUND(?conditionValue) && xsd:double(?conditionValue) >= {condition_range[0]} && xsd:double(?conditionValue) <= {condition_range[1]})
-#   )
-# }}
-# ORDER BY ?hdfFile ?dataset
-# """
-#     return SparqlQuery(
-#         query=query_str,
-#         description=f"Selects datasets with standard name {target_standard_name_uri} within range "
-#                     f"{condition_range} of datasets with standard name {conditional_standard_name_uri}"
-#     )
 def get_properties(
         subject_uri: Union[str, HttpUrl],
         cls_uri: Union[str, HttpUrl] = None,
@@ -130,7 +90,7 @@ def get_properties(
     if limit is not None:
         query_str += f"LIMIT {limit}\n"
 
-    return SparqlQuery(
+    return h5cat.SparqlQuery(
         query=query_str,
         description=f"Selects all properties of the target URI {subject_uri}"
     )
@@ -140,7 +100,7 @@ def construct_data_based_on_standard_name_based_search_and_range_condition(
         target_standard_name_uris: list[str],
         conditional_standard_name_uri: str,
         condition_range: tuple[float, float]
-) -> SparqlQuery:
+) -> h5cat.SparqlQuery:
     """
     Finds data for multiple target standard name URIs per HDF file where the file contains a
     dataset with standard name `conditional_standard_name_uri` whose value is within the given range.
@@ -156,17 +116,22 @@ PREFIX hdf: <http://purl.allotrope.org/ontologies/hdf5/1.8#>
 PREFIX ssno: <https://matthiasprobst.github.io/ssno#>
 PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-SELECT ?hdfFile ?dataset ?value ?units ?standardName
+SELECT ?hdfFile ?dataset ?value ?units ?standardName ?datasetName ?hasSymbol ?altLabel ?label
 WHERE {{
   VALUES ?standardName {{ {values_block} }}
   ?dataset a hdf:Dataset ;
            ssno:hasStandardName ?standardName .
 
   OPTIONAL {{ ?dataset hdf:value ?value }}
+  OPTIONAL {{ ?dataset hdf:name ?datasetName }}
+  OPTIONAL {{ ?dataset m4i:hasSymbol ?hasSymbol }}
 
   OPTIONAL {{ ?dataset ssno:unit ?unit1 }}
   OPTIONAL {{ ?dataset m4i:hasUnit ?unit2 }}
+  OPTIONAL {{ ?dataset rdfs:label ?label }}
+  OPTIONAL {{ ?dataset skos:altLabel ?altLabel }}
   BIND(COALESCE(?unit1, ?unit2) AS ?units)
 
   ?hdfFile (hdf:rootGroup/hdf:member*)* ?dataset .
@@ -188,13 +153,13 @@ ORDER BY ?hdfFile ?dataset
 """
     description = (f"Selects datasets with standard names {target_standard_name_uris} within range "
                    f"{condition_range} of datasets with standard name {conditional_standard_name_uri}")
-    return SparqlQuery(
+    return h5cat.SparqlQuery(
         query=query_str,
         description=description
     )
 
 
-def construct_wikidata_property_search(wikidata_entity: str) -> RemoteSparqlQuery:
+def construct_wikidata_property_search(wikidata_entity: str) -> h5cat.RemoteSparqlQuery:
     """e.g. wd:Q131549102"""
     if str(wikidata_entity).startswith("http"):
         wikidata_entity = f"<{wikidata_entity}>"
@@ -220,30 +185,4 @@ SELECT * WHERE {{
 }}
 ORDER BY ?property
 """
-    return RemoteSparqlQuery(query=query, description=f"Searches all properties of Wikidata entity {wikidata_entity}")
-
-# def construct_operation_point_query(
-#         revolution_speed_Hz: float,
-# ):
-#     return SparqlQuery(f"""
-#     PREFIX m4i: <http://w3id.org/nfdi4ing/metadata4ing#>
-#     PREFIX qudt: <http://qudt.org/vocab/unit#>
-#     PREFIX qudt-unit: <http://qudt.org/vocab/unit/>
-#     PREFIX qudt-kind: <http://qudt.org/vocab/quantitykind/>
-#     PREFIX qudt-unit-1-8: <http://qudt.org/vocab/unit/1-8#>
-#     PREFIX qudt-kind-1-8: <http://qudt.org/vocab/quantitykind/1-8#>
-#     PREFIX ex: <https://example.org/>
-#
-#     SELECT ?operationPoint ?speed ?torque ?power ?efficiency ?vibration
-#     WHERE {{
-#       ?operationPoint a m4i:OperationPoint .
-#       ?operationPoint m4i:hasSpeed ?speed .
-#       ?operationPoint m4i:hasTorque ?torque .
-#       ?operationPoint m4i:hasPower ?power .
-#       ?operationPoint m4i:hasEfficiency ?efficiency .
-#       ?operationPoint m4i:hasVibration ?vibration .
-#       ?speed qudt:unit qudt-unit:HZ .
-#       ?speed qudt:kind qudt-kind:Frequency .
-#       ?speed qudt:numericValue {revolution_speed_Hz} .
-#     }}
-#     """)
+    return h5cat.RemoteSparqlQuery(query=query, description=f"Searches all properties of Wikidata entity {wikidata_entity}")

@@ -2,16 +2,15 @@ import logging
 import pathlib
 
 import rdflib
-from gldb.stores import InMemoryRDFStore
-from gldb.stores import RDFStore
+from h5rdmtoolbox.catalog import InMemoryRDFStore, RDFStore, RDFStore
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
-from .._abstracts import OpenCeFaDBRDFStore
+# from .._abstracts import OpenCeFaDBRDFStore
 
 logger = logging.getLogger("opencefadb")
 
 
-class RDFFileStore(InMemoryRDFStore, OpenCeFaDBRDFStore):
+class RDFFileStore(InMemoryRDFStore):
 
     def reset(self, *args, **kwargs):
         self._filenames = []
