@@ -4,3 +4,75 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "opencefadb"
+version = "1.0.0"
+authors = [
+    {name = "Matthias Probst", email = "matthias.probst@kit.edu"},
+]
+description = "Python interface to the Open Centrifugal Fan Database (OpenCeFaDB)."
+readme = "README.md"
+license = "GPL-3.0"
+requires-python = ">3.8,<3.14"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+]
+keywords = ["rdf", "database", "fan", "metadata", "semantic-web"]
+urls = {Homepage = "https://github.com/matthiasprobst/openCeFaDB"}
+
+dependencies = [
+    "appdirs~=1.4.4",
+    "click~=8.1.7",
+    "rdflib~=7.1.1",
+    "requests~=2.32.4",
+    "gldb==2.1.1",
+    "ontolutils>=0.27.2,<1.0.0",
+    "h5rdmtoolbox>=2.5.3,<=3.0.0",
+    "ssnolib>=2.2.0.2,<=3.0.0.0",
+    "tqdm~=4.67.1",
+    "rdflib-endpoint[cli]",
+    "python-dotenv",
+    "pyshacl>=0.30.1",
+    "SPARQLWrapper>=2.0.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+complete = [
+    "opencefadb[test]",
+]
+
+[project.scripts]
+opencefadb = "opencefadb.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["opencefadb*"]
+exclude = ["notebooks*"]
+
+[tool.setuptools.package-data]
+opencefadb = [
+    "db-dataset-config.jsonld",
+    "data/graphdb-config.ttl",
+    "data/opencefadb-config-sandbox",
+]
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+testpaths = ["tests"]
+
+[tool.coverage.paths]
+source = ["tests"]
