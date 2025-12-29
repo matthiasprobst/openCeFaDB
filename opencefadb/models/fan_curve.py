@@ -1,7 +1,6 @@
 from typing import Union, Sequence, Callable, Optional
 
 import matplotlib.pyplot as plt
-import rdflib
 from ontolutils.ex import qudt
 from ontolutils.ex.ssn import Observation
 from rdflib.namespace import split_uri
@@ -84,10 +83,16 @@ def _get_label(variable: NumericalVariable) -> Optional[str]:
     return None
 
 
+def _get_alt_label(variable: NumericalVariable) -> Optional[str]:
+    if variable.altLabel is None:
+        return None
+    return str(variable.altLabel)
+
+
 def _get_symbol(variable: NumericalVariable) -> Optional[str]:
-    if variable.label is not None:
-        return str(variable.hasSymbol)
-    return None
+    if variable.hasSymbol is None:
+        return None
+    return str(variable.hasSymbol)
 
 
 def _get_standard_name(variable: NumericalVariable) -> Optional[str]:
@@ -104,6 +109,7 @@ def _get_standard_name(variable: NumericalVariable) -> Optional[str]:
 LABEL_SELECTION_MAPPER = {
     "label": _get_label,
     "symbol": _get_symbol,
+    "altLabel": _get_alt_label,
     "standard_name": _get_standard_name,
 }
 
@@ -112,6 +118,7 @@ class DefaultLabelResolver:
     LABEL_SELECTION_ORDER = {
         "label",
         "symbol",
+        "altLabel",
         "standard_name",
     }
 
@@ -133,13 +140,16 @@ class DefaultLabelResolver:
                     unit = qunit.symbol
                 except Exception:
                     unit = str(variable.hasUnit)
-            elif variable.hasUnit.unit is not None:
-                unit = str(variable.hasUnit.unit)
+            elif isinstance(variable.hasUnit, qudt.Unit):
+                qunit = variable.hasUnit.expand()
+                unit = qunit.symbol
+            # elif variable.hasUnit.unit is not None:
+            #     unit = str(variable.hasUnit.unit)
 
         if name is None:
             name = "?"
         if unit is None:
-            return "?"
+            unit = "?"
         return f"{name} / {unit}"
 
 
@@ -182,6 +192,9 @@ class SemanticFanCurve:
             raise TypeError("collection must be an ObservationCollection")
         self.collection = collection
 
+    def __len__(self):
+        return len(self.collection.hasMember)
+
     @classmethod
     def from_observations(cls, observations: Sequence[Observation], **kwargs) -> "SemanticFanCurve":
         oc = ObservationCollection(hasMember=list(observations), **kwargs)
@@ -204,158 +217,91 @@ class SemanticFanCurve:
     def serialize(self, format: str = "turtle", **kwargs) -> str:
         return self.collection.serialize(format=format, **kwargs)
 
-    def plot(self,
-             x: Selector,
-             y: Selector,
-             xlabel: Union[str, LabelResolver] = None,
-             ylabel: Union[str, LabelResolver] = None,
-             xsort: bool = True,
-             **kwargs
-             ):
-        ax = kwargs.pop("ax", None)
-        if ax is None:
-            ax = plt.gca()
+    def _get_plotting_data(
+            self, x: Selector, y: Selector,
+            xlabel: Union[str, LabelResolver] = None,
+            ylabel: Union[str, LabelResolver] = None,
+            xsort: bool = True,
+            ret_err: bool = False):
         resolved_x, resolved_y = self.get_xy(x, y)
 
         # strip None values in xs and ys (pair-wise)
         xy_filtered = [(xv, yv) for xv, yv in zip(resolved_x, resolved_y) if xv is not None and yv is not None]
         xs, ys = [t[0].hasNumericalValue for t in xy_filtered], [t[1].hasNumericalValue for t in xy_filtered]
-
+        if len(xy_filtered) == 0:
+            raise ValueError("No data points could be extracted.")
         if xsort:
             xy = sorted(zip(xs, ys), key=lambda t: t[0])
             xs, ys = [t[0] for t in xy], [t[1] for t in xy]
 
+        if ret_err:
+            xerr, yerr = [t[0].hasUncertaintyDeclaration.has_standard_uncertainty for t in xy_filtered], [
+                t[1].hasUncertaintyDeclaration.has_standard_uncertainty for t in xy_filtered]
+        else:
+            xerr, yerr = None, None
+
+        _xlabel = "x / ?"
         if xlabel is None:
-            _xlabel = DefaultLabelResolver()(xy_filtered[0][0])
+            _xlabels = [DefaultLabelResolver()(it) for it in resolved_x if it is not None]
+            for it in _xlabels:
+                if it is not None:
+                    _xlabel = it
+                    break
         else:
             if isinstance(xlabel, str):
                 _xlabel = xlabel
-            elif callable(xlabel):
-                _xlabel = xlabel(xy_filtered[0][0])
             else:
                 _xlabel = "x / ?"
 
+        _ylabel = "y / ?"
         if ylabel is None:
-            _ylabel = DefaultLabelResolver()(xy_filtered[0][1])
+            _ylabels = [DefaultLabelResolver()(it) for it in resolved_y if it is not None]
+            for it in _ylabels:
+                if it is not None:
+                    _ylabel = it
+                    break
         else:
             if isinstance(ylabel, str):
                 _ylabel = ylabel
-            elif callable(ylabel):
-                _ylabel = ylabel(xy_filtered[0][1])
             else:
                 _ylabel = "y / ?"
+
+        return xs, ys, xerr, yerr, _xlabel, _ylabel
+
+    def plot(
+            self,
+            x: Selector,
+            y: Selector,
+            xlabel: Union[str, LabelResolver] = None,
+            ylabel: Union[str, LabelResolver] = None,
+            xsort: bool = True,
+            **kwargs
+    ):
+        ax = kwargs.pop("ax", None)
+        if ax is None:
+            ax = plt.gca()
+
+        xs, ys, xerr, yerr, _xlabel, _ylabel = self._get_plotting_data(x, y, xlabel, ylabel, xsort)
 
         ax.plot(xs, ys, **kwargs)
         plt.xlabel(_xlabel)
         plt.ylabel(_ylabel)
-    # def __init__(self, x: List[SemanticOperatingPoint], y: List[SemanticOperatingPoint], n: NumericalVariable):
-    #     # if len(x) == 0 or len(y) == 0:
-    #     #     raise ValueError("x and y must not be empty")
-    #     # if not isinstance(n, NumericalVariable):
-    #     #     raise TypeError("n must be a NumericalVariable")
-    #     # if not (len(x) == len(y)):
-    #     #     raise ValueError("x and y must have the same length")
-    #     self.x = x
-    #     self.y = y
-    #     self.n = n
-    #     self.collection = None
-    #
-    # @classmethod
-    # def from_observations(
-    #         cls,
-    #         observations: List[Observation],
-    #         id: Union[str, rdflib.URIRef] = None,
-    #         hasFeatureOfInterest: Union[str, rdflib.URIRef] = None,
-    #         type: Union[str, rdflib.URIRef] = None,
-    #         **kwargs
-    # ) -> "SemanticFanCurve":
-    #     observation_collection = ObservationCollection(
-    #         id=id,
-    #         hasFeatureOfInterest=hasFeatureOfInterest,
-    #         hasMember=observations,
-    #         type=type,
-    #         **kwargs
-    #     )
-    #     return cls.from_observation_collection(
-    #         observation_collection
-    #     )
-    #
-    # @classmethod
-    # def from_observation_collection(
-    #         cls,
-    #         observation_collection: ObservationCollection
-    # ) -> "SemanticFanCurve":
-    #     sfc = SemanticFanCurve([], [], 1)
-    #     sfc.collection = observation_collection
-    #     return sfc
-    #
-    # def serialize(self, format: str = "turtle", **kwargs) -> str:
-    #     return self.collection.serialize(format=format, **kwargs)
-    #
-    # @classmethod
-    # def from_operating_points(cls,
-    #                           operating_points: List[SemanticOperatingPoint],
-    #                           n_target: NumericalVariable) -> "SemanticFanCurve":
-    #     if not isinstance(n_target, NumericalVariable):
-    #         raise TypeError("n_target must be a NumericalVariable")
-    #
-    #     n_target_xarray = n_target.to_xarray()
-    #     n_target_hz = n_target_xarray.pint.quantify().pint.to("1/s").pint.magnitude
-    #     with xr.set_options(keep_attrs=True):
-    #         for op in operating_points:
-    #             op_x_xarr = op.x.to_xarray()
-    #             op_y_xarr = op.y.to_xarray()
-    #             op_n_xarr = op.n.to_xarray()
-    #
-    #             n_x_hz = op_n_xarr.pint.quantify().pint.to("1/s").pint.magnitude
-    #             scale_factor = n_target_hz / n_x_hz
-    #
-    #             op_x_xarr_q = op_x_xarr.pint.quantify()
-    #             op_y_xarr_q = op_y_xarr.pint.quantify()
-    #
-    #             x_array_scaled = (op_x_xarr_q * scale_factor).pint.dequantify()
-    #             y_array_scaled = (op_y_xarr_q * (scale_factor ** 2)).pint.dequantify()
-    #
-    #             op.x = op.x.__class__.from_xarray(x_array_scaled)
-    #             op.y = op.y.__class__.from_xarray(y_array_scaled)
-    #
-    #     # sort:
-    #     new_x = [op.x for op in operating_points]
-    #     new_y = [op.y for op in operating_points]
-    #
-    #     paired = sorted(zip(new_x, new_y), key=lambda p: p[0].hasNumericalValue)
-    #
-    #     if paired:
-    #         new_x_sorted, new_y_sorted = map(list, zip(*paired))
-    #     else:
-    #         new_x_sorted, new_y_sorted = [], []
-    #
-    #     return SemanticFanCurve(
-    #         x=new_x_sorted,
-    #         y=new_y_sorted,
-    #         n=n_target
-    #     )
-    #
-    # def plot(self, **kwargs):
-    #     ax = kwargs.pop("ax", None)
-    #     if ax is None:
-    #         ax = plt.gca()
-    #
-    #     xlabel = kwargs.pop("xlabel", None)
-    #     if xlabel is None:
-    #         xlabel = self.x[0].label or self.x[0].altLabel or self.x[0].hasStandardName.standardName
-    #     ylabel = kwargs.pop("ylabel", None)
-    #     if ylabel is None:
-    #         ylabel = self.y[0].label or self.y[0].altLabel or self.y[0].hasStandardName.standardName
-    #
-    #     xx = [x.hasNumericalValue for x in self.x]
-    #     yy = [y.hasNumericalValue for y in self.y]
-    #
-    #     plt.plot(xx, yy, **kwargs)
-    #
-    #     x_unit = _parse_unit(self.x[0].hasUnit)
-    #     y_unit = _parse_unit(self.y[0].hasUnit)
-    #
-    #     ax.set_xlabel(f"{xlabel} [{x_unit.symbol}]")
-    #     ax.set_ylabel(f"{ylabel} [{y_unit.symbol}]")
-    #     return ax
+        return ax
+
+    def errorbar(
+            self,
+            x: Selector,
+            y: Selector,
+            xlabel: Union[str, LabelResolver] = None,
+            ylabel: Union[str, LabelResolver] = None,
+            xsort: bool = True,
+            **kwargs
+    ):
+        ax = kwargs.pop("ax", None)
+        if ax is None:
+            ax = plt.gca()
+        xs, ys, xs_err, ys_err, _xlabel, _ylabel = self._get_plotting_data(x, y, xlabel, ylabel, xsort, ret_err=True)
+        ax.errorbar(xs, ys, xerr=xs_err, yerr=ys_err, **kwargs)
+        plt.xlabel(_xlabel)
+        plt.ylabel(_ylabel)
+        return ax

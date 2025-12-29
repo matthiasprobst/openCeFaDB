@@ -136,7 +136,7 @@ class TestModels(unittest.TestCase):
             )
             plt.legend()
             plt.tight_layout()
-            plt.show()
+            # plt.show()
 
     def test_observation(self):
         dist = dcat.Distribution(

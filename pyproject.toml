@@ -36,7 +36,7 @@ dependencies = [
     "gldb==2.1.1",
     "ontolutils>=0.27.2,<1.0.0",
     "h5rdmtoolbox>=2.5.3,<=3.0.0",
-    "ssnolib>=2.2.0.2,<=3.0.0.0",
+    "ssnolib>=2.2.0.3,<=3.0.0.0",
     "tqdm~=4.67.1",
     "rdflib-endpoint[cli]",
     "python-dotenv",

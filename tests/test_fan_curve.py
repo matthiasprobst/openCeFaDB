@@ -4,15 +4,12 @@ import unittest
 import diss
 import dotenv
 import matplotlib.pyplot as plt
-from h5rdmtoolbox import catalog as h5cat
-from ontolutils import QUDT_UNIT
-from ontolutils.ex import dcat
-from ssnolib import StandardName
-from ssnolib.m4i import NumericalVariable
-from opencefadb.stores import RDFFileStore
+import rdflib
+import requests
+from h5rdmtoolbox.catalog import GraphDB
 
-import opencefadb
 from opencefadb.core import OpenCeFaDB
+from opencefadb.models.fan_curve import SemanticFanCurve
 
 __this_dir__ = pathlib.Path(__file__).parent
 
@@ -23,83 +20,70 @@ class TestFanCurve(unittest.TestCase):
         dotenv.load_dotenv(__this_dir__ / ".env", override=True)
         self.working_dir = pathlib.Path(__this_dir__ / "local-db")
 
-
     def test_get_fan_curve(self):
-        metadata_store = RDFFileStore(
-            data_dir=self.working_dir / "metadata",
-            recursive_exploration=True,
-            formats="ttl"
-        )
+        try:
+            graphdb = GraphDB(
+                endpoint="http://localhost:7201",
+                repository="OpenCeFaDB-Sandbox",
+                username="admin",
+                password="admin"
+            )
+            graphdb.get_repository_info("OpenCeFaDB-Sandbox")
+        except requests.exceptions.ConnectionError as e:
+            self.skipTest(f"GraphDB not available: {e}")
+        res = graphdb.get_or_create_repository(__this_dir__ / "graphdb-config-sandbox.ttl")
+        self.assertTrue(res)
 
-        # catalog = dcat.Catalog.from_ttl(__this_dir__ / "local-db/opencefadb-config-sandbox-1-4-0.ttl")[0]
         db = OpenCeFaDB(
-            version="latest",
+            version=self.working_dir / "opencefadb-config-sandbox-1-5-0.ttl",
             working_directory=self.working_dir
         )
-        db.add_wikidata_store(augment_knowledge=True)
-        db.add_main_rdf_store(metadata_store)
+        db.add_main_rdf_store(graphdb)
+
+        # define the standard names:
+        zenodo_record_ns = rdflib.namespace.Namespace(
+            "https://doi.org/10.5281/zenodo.17572275#")  # TODO dont hardcode this!
+        sn_mean_dp_stat = zenodo_record_ns[
+            'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet']
+        sn_mean_vfr = zenodo_record_ns[
+            'standard_name_table/derived_standard_name/arithmetic_mean_of_fan_volume_flow_rate']
+        sn_mean_nrot = zenodo_record_ns[
+            'standard_name_table/derived_standard_name/arithmetic_mean_of_fan_rotational_speed']
+        operating_point_standard_names = {
+            sn_mean_dp_stat,
+            sn_mean_vfr
+        }
 
         # test getting fan curve data:
-        operating_points = db.get_operating_points(n_rot_speed_rpm=600)
-        print(operating_points)
-        return
-        # plt.figure()
-        # ax = plt.gca()
-        # for op in operating_points:
-        #     op.plot(ax=ax)
-        # plt.show()
-        n_target = NumericalVariable(
-            hasNumericalValue=600,
-            hasUnit=QUDT_UNIT.PER_MIN,
-            hasStandardName=StandardName(
-                id="https://example.org/rotational_speed",
-                standardName="rotational_speed",
-                unit="1/s")
+        n_rot = 600
+        observations = db.get_operating_point_observations(
+            n_rot_speed_rpm=n_rot,
+            operating_point_standard_names=operating_point_standard_names,
+            standard_name_of_rotational_speed=sn_mean_nrot
         )
-        fan_curve = opencefadb.models.SemanticFanCurve.from_operating_points(
-            operating_points,
-            n_target=n_target
-        )
-        with diss.plotting.DissSingleAxis(scale=1.0, filename='fan_curve_exp_n600.svg') as dax:
-            fan_curve.plot(
-                ax=dax.ax,
-                label=r"$\Delta p_{st}$ n=600 rpm",
-                marker="s",
-                markerfacecolor='w',
-                markeredgecolor='k',
-                markeredgewidth=2,
-                linestyle='-')
-        plt.show()
 
-        # x_values = []
-        # y_values = []
-        #
-        # for _ds in ds:
-        #     _ds_by_sn = {r.hasNumericalVariable.hasStandardName.standardName: r for r in ds[0].hasResult}
-        #     x_values.append[_ds_by_sn["arithmetic_mean_of_fan_volume_flow_rate"].hasNumericalValue]
-        #     y_values.append[_ds_by_sn["arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet"].hasNumericalValue]
-        #
-        # self.assertEqual(27, len(ds))
-        # sn_mean_vfr = "https://doi.org/10.5281/zenodo.17572275#standard_name_table/derived_standard_name/arithmetic_mean_of_fan_volume_flow_rate"
-        # mean_dp_stat = "https://doi.org/10.5281/zenodo.17572275#standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet"
-        # x_values = [v[sn_mean_vfr] for k, v in ds.items()]
-        # y_values = [v[mean_dp_stat] for k, v in ds.items()]
-        #
-        # if False:
-        #     import matplotlib.pyplot as plt
-        #     plt.figure()
-        #     ax = plt.gca()
-        #     opencefadb.plot(y=y_values,
-        #                     x=x_values,
-        #                     ax=ax,
-        #                     use_standard_names_over_labels=False,
-        #                     # xunit=u_minute,
-        #                     # yunit=u_kelvin,
-        #                     label="test data",
-        #                     marker="o",
-        #                     xsort=True,
-        #                     )
-        #     plt.legend()
-        #     plt.show()
-        #
-        #     # self.assertEqual(11, ds.sizes["points"])
+        fan_curve = SemanticFanCurve.from_observations(
+            observations=observations
+        )
+        if n_rot == 600:
+            self.assertEqual(45, len(fan_curve))
+        elif n_rot == 1200:
+            self.assertEqual(12, len(fan_curve))
+
+        with diss.plotting.DissSingleAxis(
+                scale=1.0,
+                filename="test_fan_curve.svg",
+        ) as dax:
+            fan_curve.errorbar(
+                x="arithmetic_mean_of_fan_volume_flow_rate",
+                y="arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet",
+                xlabel=None,
+                ylabel=None,
+                label="Test Fan Curve",
+                marker=".",
+                linestyle='-',
+                ax=dax.ax,
+            )
+            plt.legend()
+            plt.tight_layout()
+            plt.show()

@@ -3,6 +3,7 @@ import os
 import pathlib
 import shutil
 import sys
+import time
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Union, Optional, Type
@@ -15,6 +16,7 @@ from h5rdmtoolbox.catalog.profiles import IS_VALID_CATALOG_SHACL
 from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 from ontolutils import Thing
 from ontolutils.ex import dcat, hdf5, qudt, sosa, ssn
+from ontolutils.ex.sis import StandardMU
 from rdflib.namespace import split_uri
 from ssnolib import StandardName
 from ssnolib.m4i import NumericalVariable
@@ -22,8 +24,8 @@ from ssnolib.m4i import NumericalVariable
 from opencefadb import logger
 from opencefadb._core._database_initialization import DownloadStatus, database_initialization
 from opencefadb.query_templates import sparql
-from opencefadb.query_templates.sparql import construct_data_based_on_standard_name_based_search_and_range_condition, \
-    get_properties
+from opencefadb.query_templates.sparql import get_properties, find_dataset_value_in_same_group_by_other_standard_name, \
+    find_datasets_by_standard_name_and_value_range
 from opencefadb.utils import download_file, compute_sha256
 from opencefadb.utils import download_multiple_files
 from opencefadb.utils import remove_none
@@ -348,7 +350,26 @@ class OpenCeFaDB(h5cat.CatalogManager):
             version: str = "latest",
             sandbox: bool = False
     ):
-        catalog = self.__class__.download(version, sandbox=sandbox, target_directory=working_directory)
+        """Initializes the OpenCeFaDB database.
+
+        Parameters
+        ----------
+        working_directory : Union[str, pathlib.Path]
+            The working directory where the database files will be stored.
+        version : str, optional
+            The version of the catalog to use. This can be a version string like "1.0.0", "latest", or a path to a local
+            catalog file. Default is "latest".
+        sandbox : bool, optional
+            Whether to use the sandbox version of the catalog. Default is False.
+        """
+        if pathlib.Path(version).exists():
+            catalog = dcat.Catalog.from_file(source=str(version))[0]
+        else:
+            catalog = self.__class__.download(
+                version,
+                sandbox=sandbox,
+                target_directory=working_directory
+            )
         super().__init__(
             catalog=catalog,
             working_directory=working_directory
@@ -528,25 +549,30 @@ class OpenCeFaDB(h5cat.CatalogManager):
             return target_filename
         return download_file(download_url, target_directory / _guess_filenames)
 
-    def get_operating_points(
+    def get_operating_point_observations(
             self,
+            operating_point_standard_names,
+            standard_name_of_rotational_speed: str,
             n_rot_speed_rpm: float,
             n_rot_tolerance: float = 0.05
-    ) -> List["SemanticOperatingPoint"]:
+    ) -> List[Observation]:
         """Gets the fan curve data for the given rotational speed (in rpm) with the given tolerance
         and infer the OperatingPoint (SemanticOperatingPoint) objects from it
 
         ."""
-        observations = get_fan_curve_observations(
+        return get_operating_point_observations(
             self.main_rdf_store,
+            operating_point_standard_names,
+            standard_name_of_rotational_speed,
             n_rot_speed_rpm=n_rot_speed_rpm,
             n_rot_tolerance=n_rot_tolerance
         )
-        return [SemanticOperatingPoint.from_observation(obs) for obs in observations]
 
 
-def get_fan_curve_observations(
+def get_operating_point_observations(
         rdf_store: h5cat.RDFStore,
+        operating_point_standard_names,
+        standard_name_of_rotational_speed,
         n_rot_speed_rpm: float,
         n_rot_tolerance: float = 0.05
 ) -> List[Observation]:
@@ -566,71 +592,74 @@ def get_fan_curve_observations(
     The function `get_fan_curve_dataseries` transforms this into a list of Observation objects, defined in
     opencefadb.models.observation, where each Observation corresponds to a dataset found in the query.
     """
-    zenodo_record_ns = rdflib.namespace.Namespace(
-        "https://doi.org/10.5281/zenodo.17572275#")  # TODO dont hardcode this!
-    sn_mean_dp_stat = zenodo_record_ns[
-        'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet']
-    # sn_mean_dp_stat = zenodo_record_ns[
-    #     'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_total_pressure_between_fan_outlet_and_fan_inlet']
-    sn_mean_vfr = zenodo_record_ns[
-        'standard_name_table/derived_standard_name/arithmetic_mean_of_fan_volume_flow_rate']
-    sn_mean_nrot = zenodo_record_ns['standard_name_table/derived_standard_name/arithmetic_mean_of_fan_rotational_speed']
 
     n_rot_range = tuple(
         [((1 - n_rot_tolerance) * n_rot_speed_rpm) / 60, ((1 + n_rot_tolerance) * n_rot_speed_rpm) / 60])
 
-    query = construct_data_based_on_standard_name_based_search_and_range_condition(
-        target_standard_name_uris=[sn_mean_vfr, sn_mean_dp_stat, sn_mean_nrot],
-        conditional_standard_name_uri=sn_mean_nrot,
-        condition_range=n_rot_range
+    standard_names_of_interest = operating_point_standard_names
+
+    opencefadb_print("> Executing queries (may take a few moments)...")
+    st = time.time()
+    # find all rotational speed datasets:
+    n_rot_query = find_datasets_by_standard_name_and_value_range(
+        standard_name_of_rotational_speed,
+        n_rot_range
     )
 
-    opencefadb_print("> Executing query (may take a few moments)...")
-    result = query.execute(rdf_store)
-    opencefadb_print(f"> Found {len(result.data)} results.")
+    mean_data = defaultdict(dict)
+    # now iterate over all found rotational speed datasets and find the dataset within the same group for the other given standard names:
 
-    data = defaultdict(dict)
+    for index, row in n_rot_query.execute(rdf_store).data.iterrows():
+        for target_standard_name in standard_names_of_interest:
+            q_sn = find_dataset_value_in_same_group_by_other_standard_name(
+                row["dataset"],
+                target_standard_name
+            )
+            res = q_sn.execute(rdf_store)
+            if len(res) > 1:
+                raise ValueError(f"Expected one dataset for standard name {target_standard_name}, got {len(res)}")
+            if len(res) == 0:
+                continue
 
-    df = result.data
-    for index, row in df.iterrows():
-        hdf_file = str(row["hdfFile"])
-
-        standard_term = row.get("standardName") or row.get("dataset")
-        standard_name = str(standard_term) if standard_term is not None else None
-
-        val_term = row.get("value")
-        units_term = row.get("units")
-        ds_name = row.get("datasetName")
-        alt_label = row.get("altLabel")
-        label = row.get("label")
-        if alt_label is None:
-            alt_label = ds_name.strip("/")
-        symbol = row.get("hasSymbol")
-        try:
-            value = val_term.toPython() if val_term is not None else None
-        except Exception:
-            value = str(val_term) if val_term is not None else None
-
-        try:
-            units = units_term.toPython() if units_term is not None else None
-        except Exception:
-            units = str(units_term) if units_term is not None else None
-
-        if standard_name is not None:
-            unit_entity = get_unit_entity(units, rdf_store)
-            standard_name_entity = get_standard_name_entity(standard_name, rdf_store)
+            target_data = res.data.iloc[0]
+            units_term = target_data.get("units")
+            if units_term:
+                try:
+                    units = units_term.toPython() if units_term is not None else None
+                except Exception:
+                    units = str(units_term) if units_term is not None else None
+                unit_entity = get_unit_entity(units, rdf_store)
+            else:
+                unit_entity = None
+            standard_name_entity = get_standard_name_entity(target_standard_name, rdf_store)
             _data = {
-                "hasNumericalValue": value,
+                "hasNumericalValue": target_data.get("value"),
                 "hasUnit": unit_entity,
                 "hasStandardName": standard_name_entity,
-                "hasSymbol": symbol,
-                "label": label,
-                "altLabel": alt_label
+                "hasSymbol": target_data.get("hasSymbol"),
+                "label": target_data.get("label"),
+                "altLabel": target_data.get("altLabel"),
+                "hasMinimumValue": target_data.get("hasMinimumValue"),
+                "hasMaximumValue": target_data.get("hasMaximumValue")
             }
-            data[hdf_file][standard_name] = NumericalVariable.model_validate(remove_none(_data))
-    # ...
+            # find standard deviation counterpart:
+            std_standard_name = target_standard_name.replace("arithmetic_mean_of", "standard_deviation_of")
+            q = find_dataset_value_in_same_group_by_other_standard_name(
+                row.get("dataset"),
+                std_standard_name,
+            )
+            res = q.execute(rdf_store)
+            if len(res) == 1:
+                value = float(res.data["value"][0])
+                _data["hasUncertaintyDeclaration"] = StandardMU(has_standard_uncertainty=value)
+
+            sn = NumericalVariable.model_validate(remove_none(_data))
+            mean_data[row["dataset"]][target_standard_name] = sn
+    et = time.time()
+    opencefadb_print(f"> ... finished in {et - st:.2f} seconds.")
+
     observations = []
-    for k, v in data.items():
+    for k, v in mean_data.items():
         results = [ssn.Result(hasNumericalVariable=nv) for nv in v.values()]
         hdf_file = hdf5.File(
             id=k,
