@@ -2,8 +2,6 @@ import enum
 import os
 import pathlib
 import shutil
-import sys
-import time
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Union, Optional, Type
@@ -11,27 +9,28 @@ from typing import List, Union, Optional, Type
 import dotenv
 import rdflib
 import requests
+import requests.exceptions
+import tqdm
 from h5rdmtoolbox import catalog as h5cat
+from h5rdmtoolbox.catalog import InMemoryRDFStore, GraphDB, HDF5FileStore
 from h5rdmtoolbox.catalog.profiles import IS_VALID_CATALOG_SHACL
 from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 from ontolutils import Thing
 from ontolutils.ex import dcat, hdf5, qudt, sosa, ssn
 from ontolutils.ex.sis import StandardMU
+from ontolutils.ex.sosa import Observation
 from rdflib.namespace import split_uri
 from ssnolib import StandardName
 from ssnolib.m4i import NumericalVariable
 
 from opencefadb import logger
+from opencefadb import sparql_templates
 from opencefadb._core._database_initialization import DownloadStatus, database_initialization
-from opencefadb.query_templates import sparql
-from opencefadb.query_templates.sparql import get_properties, find_dataset_value_in_same_group_by_other_standard_name, \
-    find_datasets_by_standard_name_and_value_range
-from opencefadb.utils import download_file, compute_sha256
-from opencefadb.utils import download_multiple_files
-from opencefadb.utils import remove_none
-from .models import Observation
+# from opencefadb.sparql_templates.sparql import get_properties, find_dataset_value_in_same_group_by_other_standard_name, \
+#     find_datasets_by_standard_name_and_value_range
+from opencefadb.utils import download_file, remove_none
 from .models.wikidata import FAN_OPERATING_POINT
-from .utils import opencefadb_print
+from .utils import opencefa_print
 
 __this_dir__ = pathlib.Path(__file__).parent
 
@@ -65,9 +64,9 @@ def parse_to_entity(df, uri, entity: Type[Thing]):
     return entity.model_validate(_data_dict)
 
 
-def get_and_unpack_property_value_query(uri: str, entity: Type[Thing], metadata_store: h5cat.RDFStore):
+def get_and_unpack_property_value_query(uri: str, entity: Type[Thing], metadata_store: h5cat.RDFStore) -> Thing:
     """Evaluates a SPARQL query against the metadata store to retrieve the unit entity for the given unit URI."""
-    sparql_query = get_properties(uri)
+    sparql_query = sparql_templates.get_properties(uri)
     res = sparql_query.execute(metadata_store)
     if not res:
         return entity(id=uri)
@@ -80,7 +79,7 @@ def get_unit_entity(unit_uri: str, metadata_store: h5cat.RDFStore) -> Optional[q
     return get_and_unpack_property_value_query(unit_uri, qudt.Unit, metadata_store)
 
 
-def get_standard_name_entity(standard_name_uri: str, metadata_store: h5cat.RDFStore) -> Optional[StandardName]:
+def get_standard_name_entity(standard_name_uri: str, metadata_store: h5cat.RDFStore) -> Thing:
     return get_and_unpack_property_value_query(standard_name_uri, StandardName, metadata_store)
 
 
@@ -203,151 +202,12 @@ def _get_metadata_datasets(
     return g
 
 
-def _download_metadata_datasets(
-        graph: rdflib.Graph,
-        allowed_media_types=None,
-        download_dir=None,
-        n_threads=4,
-        exist_ok: bool = False) -> List[pathlib.Path]:
-    """Downloads all metadata datasets from the given RDF graph.
-
-    If a dataset is a zenodo record, all ttl and jsonld distributions will be downloaded."""
-    if allowed_media_types is None:
-        allowed_media_types = [None, ]
-    if download_dir is None:
-        download_dir = pathlib.Path.cwd()
-    else:
-        download_dir = pathlib.Path(download_dir)
-
-    logger.debug(f"Downloading metadata datasets to '{download_dir.resolve().absolute()}' ...")
-
-    res = graph.query(f"""
-    PREFIX dcat: <http://www.w3.org/ns/dcat#>
-    PREFIX dcterms: <http://purl.org/dc/terms/>
-    PREFIX spdx: <http://spdx.org/rdf/terms#>
-    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-
-    SELECT ?dataset ?downloadURL ?checksumValue ?checksumAlgorithm ?publisherName ?mediaType
-    WHERE {{
-      ?dataset a dcat:Dataset .
-      OPTIONAL {{
-        ?dataset dcat:distribution ?distribution .
-        ?distribution dcat:downloadURL ?downloadURL .
-        ?distribution dcat:mediaType ?mediaType .
-        OPTIONAL {{
-          ?distribution spdx:checksum ?checksum .
-          ?checksum spdx:checksumValue ?checksumValue .
-          ?checksum spdx:algorithm ?checksumAlgorithm .
-        }}
-      }}
-      OPTIONAL {{
-        ?dataset dcterms:publisher ?publisher .
-        ?publisher foaf:name ?publisherName .
-      }}
-    }}
-    """)
-    checksums = []
-    target_filenames = []
-    return_filenames = []
-    download_urls = []
-    download_flags = []
-
-    for r in res.bindings:
-        media_type = MediaType.parse(r.get(rdflib.Variable("mediaType"), None))
-        if media_type is not None and media_type not in allowed_media_types:
-            opencefadb_print(f"Skipping dataset with media type '{media_type}' ...")
-            continue
-        else:
-            has_distributions = rdflib.Variable("downloadURL") in r
-            logger.debug(f"Processing dataset '{r[rdflib.Variable('dataset')]}' ...")
-            if not has_distributions and rdflib.Variable("publisherName") in r:
-                publisher = str(r[rdflib.Variable("publisherName")])
-                resource = str(r[rdflib.Variable("ds")])
-                logger.debug(
-                    f"Getting all distributions related to resource '{resource}' and publisher '{publisher}' ...")
-
-                logger.debug(
-                    f"Getting all distributions related to resource '{resource}' and publisher '{publisher}' ...")
-                distributions = _get_download_urls_of_metadata_distributions_of_publisher(
-                    publisher,
-                    resource
-                )
-            elif has_distributions:
-                logger.debug(f"Downloading '{r[rdflib.Variable('downloadURL')]}' ...")
-                _checksum = r.get(rdflib.Variable("checksumValue"), None)
-                _checksum_algorithm = r.get(rdflib.Variable("checksumAlgorithm"), None)
-                if _checksum is None or _checksum_algorithm is None:
-                    _checksum = None
-                    _checksum_algorithm = None
-                    opencefadb_print(f"No checksum information found for dataset '{r[rdflib.Variable('dataset')]}'")
-                distributions = [
-                    DistributionMetadata(
-                        download_url=str(r[rdflib.Variable("downloadURL")]),
-                        media_type=media_type,
-                        checksum=_checksum,
-                        checksum_algorithm=_checksum_algorithm
-                    )
-                ]
-            opencefadb_print(f"Found {len(distributions)} distributions.")
-
-            for d in distributions:
-                _filename = pathlib.Path(d.download_url.rsplit('/', 1)[-1])
-                _suffix = _filename.suffix
-                _url_hash = compute_sha256(d.download_url)
-                target_directory = download_dir / _url_hash
-                target_directory.mkdir(parents=True, exist_ok=True)
-                target_filename = download_dir / _url_hash / _filename.name
-                if target_filename.suffix == "":
-                    opencefadb_print(d.download_url)
-                    opencefadb_print(d.media_type)
-                    if d.media_type is not None:
-                        target_filename = target_filename.with_suffix(d.media_type.get_suffix())
-                if target_filename in target_filenames:
-                    logger.debug(f"File {target_filename.name} already in download list, skipping duplicate.")
-                    download_flags.append(False)
-                elif target_filename.exists() and not exist_ok:
-                    download_flags.append(False)
-                    logger.debug(f"File {target_filename.name} already exists, skipping download.")
-                else:
-                    download_flags.append(True)
-                target_filenames.append(target_filename)
-                download_urls.append(d.download_url)
-                checksums.append({"checksum": d.checksum, "checksum_algorithm": d.checksum_algorithm})
-
-    if n_threads == 1:
-        for download_url, target_filename, checksum_data, download_flag in zip(download_urls, target_filenames,
-                                                                               checksums, download_flags):
-            if download_flag:
-                checksum = checksum_data.get("checksum", None)
-                checksum_algorithm = checksum_data.get("checksum_algorithm", None)
-                if target_filename.exists() and not exist_ok:
-                    logger.debug(f"File {target_filename.name} already exists, skipping download.")
-                    continue
-                opencefadb_print(f"Downloading file {target_filename.name} ...")
-                return_filenames.append(download_file(
-                    download_url,
-                    target_filename.resolve(),
-                    checksum=checksum,
-                    checksum_algorithm=checksum_algorithm
-                )
-                )
-    else:
-        download_multiple_files(
-            urls=[download_url for download_url, flag in zip(download_urls, download_flags) if flag],
-            target_filenames=[target_filename for target_filename, flag in zip(target_filenames, download_flags) if
-                              flag],
-            max_workers=n_threads,
-            checksums=[checksum for checksum, flag in zip(checksums, download_flags) if flag],
-        )
-    return target_filenames
-
-
 class OpenCeFaDB(h5cat.CatalogManager):
 
     def __init__(
             self,
             working_directory: Union[str, pathlib.Path],
-            version: str = "latest",
+            version: Union[str, pathlib.Path] = "latest",
             sandbox: bool = False
     ):
         """Initializes the OpenCeFaDB database.
@@ -363,9 +223,10 @@ class OpenCeFaDB(h5cat.CatalogManager):
             Whether to use the sandbox version of the catalog. Default is False.
         """
         if pathlib.Path(version).exists():
+            opencefa_print("Using local catalog file as version.")
             catalog = dcat.Catalog.from_file(source=str(version))[0]
         else:
-            catalog = self.__class__.download(
+            catalog = self.__class__.download_catalog(
                 version,
                 sandbox=sandbox,
                 target_directory=working_directory
@@ -375,65 +236,83 @@ class OpenCeFaDB(h5cat.CatalogManager):
             working_directory=working_directory
         )
 
-    # def __init__(
-    #         self,
-    #         metadata_store: MetadataStore = None,
-    #         hdf_store: DataStore = None
-    # ):
-    #     wikidata_store = RemoteSparqlStore(endpoint_url="https://query.wikidata.org/sparql", return_format="json")
-    #     stores = {
-    #         "wikidata": wikidata_store
-    #     }
-    #     if metadata_store is not None:
-    #         stores["rdf"] = metadata_store
-    #     if hdf_store is not None:
-    #         stores["hdf"] = hdf_store
-    #     super().__init__(
-    #         stores=stores
-    #     )
-
-    # def __repr__(self):
-    #     return f"{self.__class__.__name__}(stores={self.stores})"
-
-    # @property
-    # def metadata_store(self):
-    #     return self.stores.rdf
-
-    # @property
-    # def hdf_store(self):
-    #     return self.stores.hdf
-
-    # @classmethod
-    # def validate_config(cls, config_filename: Union[str, pathlib.Path]) -> bool:
-    #     config_graph = rdflib.Graph()
-    #     config_graph.parse(source=config_filename, format="ttl")
-    #     shacl_graph = rdflib.Graph()
-    #     shacl_graph.parse(data=MINIMUM_DATASET_SHACL, format="ttl")
-    #     results = pyshacl.validate(
-    #         data_graph=config_graph,
-    #         shacl_graph=shacl_graph,
-    #         inference='rdfs',
-    #         abort_on_first=False,
-    #         meta_shacl=False,
-    #         advanced=True,
-    #     )
-    #     conforms, results_graph, results_text = results
-    #     if not conforms:
-    #         warnings.warn("Configuration file does not conform to SHACL shapes.")
-    #         opencefadb_print("SHACL validation results:")
-    #         opencefadb_print(results_text)
+    @classmethod
+    def from_graphdb_setup(
+            cls,
+            *,
+            working_directory: Union[str, pathlib.Path],
+            version: Union[str, pathlib.Path] = "latest",
+            sandbox: bool = False,
+            endpoint: str = "http://localhost:7200",
+            repository: str = "OpenCeFaDB",
+            username: str = None,
+            password: str = None,
+            add_wikidata_store: bool = False
+    ) -> "OpenCeFaDB":
+        try:
+            gdb = GraphDB(
+                endpoint=endpoint,
+                repository=repository,
+                username=username,
+                password=password
+            )
+            gdb.get_repository_info(repository)
+        except requests.exceptions.ConnectionError as e:
+            raise RuntimeError(f"GraphDB not available: {e}")
+        gdb_exists = gdb.get_repository_info(repository)
+        if not gdb_exists:
+            raise RuntimeError(f"GraphDB repository '{repository}' does not exist.")
+        db = cls(working_directory=working_directory, version=version, sandbox=sandbox)
+        db.add_main_rdf_store(gdb)
+        if add_wikidata_store:
+            db.add_wikidata_store(augment_main_rdf_store=True)
+        db.add_hdf_infile_index()
+        return db
 
     @classmethod
-    def download(cls,
-                 version: Optional[str] = None,
-                 target_directory: Optional[Union[str, pathlib.Path]] = None,
-                 sandbox: bool = False,
-                 validate=True) -> dcat.Catalog:
+    def from_rdflib_setup(
+            cls,
+            *,
+            working_directory: Union[str, pathlib.Path],
+            version: Union[str, pathlib.Path] = "latest",
+            sandbox: bool = False,
+            add_wikidata_store: bool = False
+    ) -> "OpenCeFaDB":
+        working_directory = pathlib.Path(working_directory)
+        working_directory.mkdir(parents=True, exist_ok=True)
+        db = cls(working_directory=working_directory, version=version, sandbox=sandbox)
+        InMemoryRDFStore.__populate_on_init__ = False
+        local_rdf_store = InMemoryRDFStore(
+            data_dir=working_directory / "rdf",
+            recursive_exploration=True,
+            formats=["ttl"]
+        )
+        db.add_main_rdf_store(local_rdf_store)
+        db.download_metadata()
+        _local_graph_file = working_directory / ".graph.nt"
+        if _local_graph_file.exists():
+            g = rdflib.Graph().parse(_local_graph_file)
+            local_rdf_store.graph += g
+        hdf_store = HDF5FileStore(data_directory=working_directory / "hdf")
+        db.add_hdf_store(hdf_store)
+        if add_wikidata_store:
+            db.add_wikidata_store(augment_main_rdf_store=True)
+        db.add_hdf_infile_index()
+        return db
+
+    @classmethod
+    def download_catalog(cls,
+                         version: Optional[str] = None,
+                         target_directory: Optional[Union[str, pathlib.Path]] = None,
+                         sandbox: bool = False,
+                         validate=True) -> dcat.Catalog:
         """Download the catalog (dcat:Catalog)"""
         catalog_filename = _download_catalog(version, target_directory, sandbox)
         catalog = dcat.Catalog.from_file(source=catalog_filename)[0]
         if validate:
+            opencefa_print("Validating downloaded catalog against SHACL shapes...")
             catalog.validate(shacl_data=IS_VALID_CATALOG_SHACL, raise_on_error=True)
+            opencefa_print("Catalog is valid.")
         return catalog
 
     @classmethod
@@ -446,7 +325,7 @@ class OpenCeFaDB(h5cat.CatalogManager):
             working_directory = pathlib.Path.cwd()
         download_directory = pathlib.Path(working_directory) / "metadata"
         download_directory.mkdir(parents=True, exist_ok=True)
-        opencefadb_print(
+        opencefa_print(
             f"Copying the config file {config_filename} to the target directory {download_directory.resolve()} ..."
         )
         shutil.copy(
@@ -464,79 +343,25 @@ class OpenCeFaDB(h5cat.CatalogManager):
             return __this_dir__ / "data/opencefadb-config-sandbox.ttl"
         return __this_dir__ / "data/opencefadb-config.ttl"
 
-    # @classmethod
-    # def setup_local_default(
-    #         cls,
-    #         working_directory: Optional[Union[str, pathlib.Path]] = None,
-    #         config_filename: Optional[Union[str, pathlib.Path]] = None):
-    #     from opencefadb.stores import RDFFileStore
-    #     from opencefadb.stores import HDF5SqlDB
-    #     if working_directory is not None:
-    #         working_directory = pathlib.Path(working_directory)
-    #     else:
-    #         working_directory = pathlib.Path.cwd()
-    #     if config_filename is None:
-    #         config_filename = __this_dir__ / "db-dataset-config.ttl"
-    #     else:
-    #         config_filename = pathlib.Path(config_filename)
-    #         if not config_filename.exists():
-    #             raise FileNotFoundError(f"Config file {config_filename.resolve()} does not exist.")
-    #     working_directory.mkdir(parents=True, exist_ok=True)
-    #     return cls(
-    #         metadata_store=RDFFileStore(data_dir=working_directory / "metadata"),
-    #         hdf_store=HDF5SqlDB(),
-    #         working_directory=working_directory,
-    #         config_filename=config_filename
-    #     )
+    @property
+    def rdf_store(self):
+        """The database's main RDF store."""
+        return self.main_rdf_store
 
-    # def download_metadata(self):
-    #     """Downloads metadata files from the metadata directory."""
-    #     metadata_store: InMemoryRDFStore = self.stores.rdf
-    #     for file in metadata_store.data_dir.glob("*.ttl"):
-    #         opencefadb_print(f"> Downloading metadata file: {file.name} ...")
-
-    # def upload_hdf(self, filename: pathlib.Path):
-    #     """Uploads a file to all stores in the store manager. Not all stores may support this operation.
-    #     This is then skipped."""
-    #     filename = pathlib.Path(filename)
-    #     if not filename.exists():
-    #         raise FileNotFoundError(f"File {filename} does not exist.")
-    #     hdf_db_id = self.stores.hdf.upload_file(filename)
-    #     # get the metadata:
-    #     meta_filename = self.metadata_directory / f"{filename.stem}.ttl"
-    #     try:
-    #         with open(meta_filename, "w", encoding="utf-8") as f:
-    #             f.write(h5tbx.serialize(filename, fmt="turtle", indent=2, file_uri="https://local.org/"))
-    #     except Exception as e:
-    #         logger.error(f"Error while generating metadata for {filename}: {e}")
-    #         meta_filename.unlink(missing_ok=True)
-    #         raise e
-    #     self.stores.rdf.upload_file(meta_filename)
-    #
-    #     # # now link both items:
-    #     # g = rdflib.Graph()
-    #     # g.parse(meta_filename, format="turtle")
-    #     # sparql = f"""
-    #     # PREFIX hdf5: <http://purl.allotrope.org/ontologies/hdf5/1.8#>
-    #     #
-    #     # SELECT ?h5id
-    #     # WHERE {{
-    #     #     ?h5id a hdf5:File .
-    #     # }}
-    #     # LIMIT 1
-    #     # """
-    #     # result = g.query(sparql)
-    #     # # opencefadb_print(str(result.bindings[0].get(rdflib.Variable("h5id"))))
-    #     # # # TODO: link the resources using what? owl: sameAs?
-    #     # # self.store_manager["rdf_db"].link_resources(hdf_db_id, str(result.bindings[0].get(rdflib.Variable("h5id"))))
-    #     return hdf_db_id
-
-    # def linked_upload(self, filename: Union[str, pathlib.Path]):
-    #     raise NotImplemented("Linked upload not yet implemented")
+    def add_hdf_infile_index(self):
+        if hasattr(self.main_rdf_store, 'graph'):
+            from .utils import build_infile_index_via_parents_for_graph
+            idx_g = build_infile_index_via_parents_for_graph(self.main_rdf_store.graph, include_rootgroup=True)
+            for s, p, o in tqdm.tqdm(idx_g, desc="Uploading HDF5 infile index triples", unit=" triples"):
+                self.main_rdf_store.upload_triple((s, p, o))
+        else:
+            # is graphdb?!
+            from .utils import build_infile_index_via_parents_for_graphdb
+            build_infile_index_via_parents_for_graphdb(self.main_rdf_store)
 
     def download_cad_file(self, target_directory: Union[str, pathlib.Path], exist_ok=False):
         """Queries the RDF database for the iges cad file"""
-        query_result = sparql.SELECT_FAN_CAD_FILE.execute(self.stores.rdf)
+        query_result = sparql_templates.fan.SELECT_FAN_CAD_FILE.execute(self.main_rdf_store)
         bindings = query_result.data
         n_bindings = len(bindings)
         if n_bindings != 1:
@@ -548,6 +373,25 @@ class OpenCeFaDB(h5cat.CatalogManager):
         if target_filename.exists() and exist_ok:
             return target_filename
         return download_file(download_url, target_directory / _guess_filenames)
+
+    # database specific methods:
+    def get_fan_properties(self):
+        from .sparql_templates.fan import SELECT_FAN_PROPERTIES
+        res = SELECT_FAN_PROPERTIES.execute(self.main_rdf_store)
+        return res.data  # {str(it["parameter"]): it for it in res.data.to_dict("records")}
+
+    def get_fan_property(
+            self,
+            property_standard_name_uri: str
+    ) -> NumericalVariable:
+        """Gets a specific fan property from the fan curve data for the given rotational speed (in rpm) with the given tolerance."""
+        q = sparql_templates.fan.get_fan_property(property_standard_name_uri)
+        res = q.execute(self.main_rdf_store)
+        return parse_to_entity(
+            res.data,
+            property_standard_name_uri,
+            NumericalVariable
+        )
 
     def get_operating_point_observations(
             self,
@@ -575,99 +419,82 @@ def get_operating_point_observations(
         standard_name_of_rotational_speed,
         n_rot_speed_rpm: float,
         n_rot_tolerance: float = 0.05
-) -> List[Observation]:
-    """This function will make a SPARQL query to get the fan curve data for the given rotational speed (in rpm) considering
-    a certain tolerance.
-
-    The SPARQL query identifies alls HDF5 Files (hdf:File) that contain datasets with standard names for:
-    - arithmetic_mean_of_fan_rotational_speed
-    - arithmetic_mean_of_fan_volume_flow_rate
-    - arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet
-
-    and where the value of the arithmetic_mean_of_fan_rotational_speed is within the given tolerance of the
-    specified n_rot_speed_rpm.
-
-    the query returns the hdf file, standard name, value, and units for each of the datasets found.
-
-    The function `get_fan_curve_dataseries` transforms this into a list of Observation objects, defined in
-    opencefadb.models.observation, where each Observation corresponds to a dataset found in the query.
-    """
-
+):
     n_rot_range = tuple(
-        [((1 - n_rot_tolerance) * n_rot_speed_rpm) / 60, ((1 + n_rot_tolerance) * n_rot_speed_rpm) / 60])
-
+        [((1 - n_rot_tolerance) * n_rot_speed_rpm) / 60.,
+         ((1 + n_rot_tolerance) * n_rot_speed_rpm) / 60.]
+    )
+    q_n_rot = sparql_templates.hdf.find_dataset_for_standard_name(standard_name_of_rotational_speed, n_rot_range)
     standard_names_of_interest = operating_point_standard_names
 
-    opencefadb_print("> Executing queries (may take a few moments)...")
-    st = time.time()
-    # find all rotational speed datasets:
-    n_rot_query = find_datasets_by_standard_name_and_value_range(
-        standard_name_of_rotational_speed,
-        n_rot_range
-    )
-
     mean_data = defaultdict(dict)
-    # now iterate over all found rotational speed datasets and find the dataset within the same group for the other given standard names:
 
-    for index, row in n_rot_query.execute(rdf_store).data.iterrows():
-        for target_standard_name in standard_names_of_interest:
-            q_sn = find_dataset_value_in_same_group_by_other_standard_name(
-                row["dataset"],
-                target_standard_name
-            )
-            res = q_sn.execute(rdf_store)
-            if len(res) > 1:
-                raise ValueError(f"Expected one dataset for standard name {target_standard_name}, got {len(res)}")
-            if len(res) == 0:
-                continue
+    res_n_rot = q_n_rot.execute(rdf_store)
 
-            target_data = res.data.iloc[0]
-            units_term = target_data.get("units")
-            if units_term:
-                try:
-                    units = units_term.toPython() if units_term is not None else None
-                except Exception:
-                    units = str(units_term) if units_term is not None else None
-                unit_entity = get_unit_entity(units, rdf_store)
-            else:
-                unit_entity = None
-            standard_name_entity = get_standard_name_entity(target_standard_name, rdf_store)
-            _data = {
-                "hasNumericalValue": target_data.get("value"),
-                "hasUnit": unit_entity,
-                "hasStandardName": standard_name_entity,
-                "hasSymbol": target_data.get("hasSymbol"),
-                "label": target_data.get("label"),
-                "altLabel": target_data.get("altLabel"),
-                "hasMinimumValue": target_data.get("hasMinimumValue"),
-                "hasMaximumValue": target_data.get("hasMaximumValue")
-            }
-            # find standard deviation counterpart:
-            std_standard_name = target_standard_name.replace("arithmetic_mean_of", "standard_deviation_of")
-            q = find_dataset_value_in_same_group_by_other_standard_name(
-                row.get("dataset"),
-                std_standard_name,
-            )
-            res = q.execute(rdf_store)
-            if len(res) == 1:
-                value = float(res.data["value"][0])
-                _data["hasUncertaintyDeclaration"] = StandardMU(has_standard_uncertainty=value)
+    if len(res_n_rot.data) > 0:
+        for dataset_uri in tqdm.tqdm(res_n_rot.data["dataset"], desc="Processing operating point datasets",
+                                     unit=" datasets"):
+            q = sparql_templates.hdf.find_hdf5_file_for_dataset(dataset_uri)
+            res_hdf_file = q.execute(rdf_store)
+            hdf_file_uri = res_hdf_file.data.iloc[0]["hdfFile"]
 
-            sn = NumericalVariable.model_validate(remove_none(_data))
-            mean_data[row["dataset"]][target_standard_name] = sn
-    et = time.time()
-    opencefadb_print(f"> ... finished in {et - st:.2f} seconds.")
+            for target_standard_name in standard_names_of_interest:
+                q = sparql_templates.hdf.find_dataset_in_file_by_standard_name(hdf_file_uri, target_standard_name)
+                res = q.execute(rdf_store)
+                if len(res) > 1:
+                    raise ValueError(f"Expected one dataset for standard name {target_standard_name}, got {len(res)}")
+                if len(res) == 0:
+                    continue
+
+                target_data = res.data.iloc[0]
+                units_term = target_data.get("units")
+                if units_term:
+                    try:
+                        units = units_term.toPython() if units_term is not None else None
+                    except Exception:
+                        units = str(units_term) if units_term is not None else None
+                    unit_entity = get_unit_entity(units, rdf_store)
+                else:
+                    unit_entity = None
+                standard_name_entity = get_standard_name_entity(target_standard_name, rdf_store)
+                _data = {
+                    "hasNumericalValue": target_data.get("value"),
+                    "hasUnit": unit_entity,
+                    "hasStandardName": standard_name_entity,
+                    "hasSymbol": target_data.get("hasSymbol"),
+                    "label": target_data.get("label"),
+                    "altLabel": target_data.get("altLabel"),
+                    "hasMinimumValue": target_data.get("hasMinimumValue"),
+                    "hasMaximumValue": target_data.get("hasMaximumValue")
+                }
+                # find standard deviation counterpart:
+                std_standard_name = target_standard_name.replace("arithmetic_mean_of", "standard_deviation_of")
+                q = sparql_templates.hdf.find_dataset_in_file_by_standard_name(
+                    dataset_uri,
+                    std_standard_name,
+                )
+                res = q.execute(rdf_store)
+                if len(res) == 1:
+                    value = float(res.data["value"][0])
+                    _data["hasUncertaintyDeclaration"] = StandardMU(has_standard_uncertainty=value)
+
+                sn = NumericalVariable.model_validate(remove_none(_data))
+                mean_data[dataset_uri][target_standard_name] = sn
+                mean_data[dataset_uri]["hdf_uri"] = hdf_file_uri
 
     observations = []
     for k, v in mean_data.items():
+        _hdf_uri = v.pop("hdf_uri")
         results = [ssn.Result(hasNumericalVariable=nv) for nv in v.values()]
-        hdf_file = hdf5.File(
-            id=k,
+        hdf_dist = dcat.Distribution(
+            id=_hdf_uri,
+            media_type="application/x-hdf5",
+            download_URL=_hdf_uri
         )
         observation = sosa.Observation(
             hasFeatureOfInterest=FAN_OPERATING_POINT,
             hasResult=results,
-            hadPrimarySource=hdf_file
+            hadPrimarySource=hdf_dist
         )
         observations.append(observation)
 
@@ -699,20 +526,20 @@ def _download_catalog(
     # if version is None, get the latest version of the zenodo record and download the file test.ttl, else get the specific version of the record:
     res = requests.get(base_url, params={'access_token': access_token} if sandbox else {})
     if res.status_code != 200:
-        opencefadb_print(f"Error: could not retrieve Zenodo record: {res.status_code}")
-        sys.exit(1)
+        opencefa_print(f"Error: could not retrieve Zenodo record: {res.status_code}")
+        raise ValueError(f"Error: could not retrieve Zenodo record: {res.status_code}")
 
     if version is None:
-        opencefadb_print("Searching for the latest version...")
+        opencefa_print("Searching for the latest version...")
         links = res.json().get("links", {})
         latest_version_url = links.get("latest", None)
         if latest_version_url is None:
-            opencefadb_print("Error: could not retrieve latest version URL from Zenodo record.")
-            sys.exit(1)
+            opencefa_print("Error: could not retrieve latest version URL from Zenodo record.")
+            raise ValueError("Error: could not retrieve latest version URL from Zenodo record.")
         res = requests.get(latest_version_url, params={'access_token': access_token} if sandbox else {})
         if res.status_code != 200:
-            opencefadb_print(f"Error: could not retrieve latest version record from Zenodo: {res.status_code}")
-            sys.exit(1)
+            opencefa_print(f"Error: could not retrieve latest version record from Zenodo: {res.status_code}")
+            raise ValueError(f"Error: could not retrieve latest version record from Zenodo: {res.status_code}")
         detected_version = res.json()["metadata"]["version"]
 
         if sandbox:
@@ -724,17 +551,18 @@ def _download_catalog(
 
         for file in res.json().get("files", []):
             if file["key"] == config_filename:
-                opencefadb_print(f"downloading version {detected_version}...")
+                opencefa_print(f"downloading version {detected_version}...")
                 file_res = requests.get(file["links"]["self"], params={'access_token': access_token} if sandbox else {})
                 with open(target_filename, "wb") as f:
                     f.write(file_res.content)
-                opencefadb_print(f"Downloaded latest OpenCeFaDB config file to '{target_filename}'.")
+                opencefa_print(f"Downloaded latest OpenCeFaDB config file to '{target_filename}'.")
                 return target_filename
-        opencefadb_print(
+        opencefa_print(
             f"Error: Could not find config the file {config_filename} in the latest version of the Zenodo record.")
-        sys.exit(1)
+        raise ValueError(
+            f"Error: Could not find config the file {config_filename} in the latest version of the Zenodo record.")
 
-    opencefadb_print(f"Searching for version {version}...")
+    opencefa_print(f"Searching for version {version}...")
     # a specific version is given:
     found_hit = None
     version_hits = requests.get(
@@ -745,12 +573,12 @@ def _download_catalog(
             found_hit = hit
             break
     if not found_hit:
-        opencefadb_print(f"Error: could not find version {version} in Zenodo record.")
-        sys.exit(1)
+        opencefa_print(f"Error: could not find version {version} in Zenodo record.")
+        raise ValueError(f"Error: could not find version {version} in Zenodo record.")
     res_version = requests.get(found_hit["links"]["self"], params={'access_token': access_token} if sandbox else {})
     for file in res_version.json()["files"]:
         if file["key"] == config_filename:
-            opencefadb_print(f"Downloading version {version}...")
+            opencefa_print(f"Downloading version {version}...")
             file_res = requests.get(file["links"]["self"], params={'access_token': access_token} if sandbox else {})
 
             if sandbox:
@@ -762,21 +590,7 @@ def _download_catalog(
 
             with open(target_filename, "wb") as f:
                 f.write(file_res.content)
-            opencefadb_print(f"Downloaded OpenCeFaDB config file version {version} to '{target_filename}'.")
+            opencefa_print(f"Downloaded OpenCeFaDB config file version {version} to '{target_filename}'.")
             return target_filename
-    opencefadb_print(f"Error: could not find {config_filename} in the specified version.")
+    opencefa_print(f"Error: could not find {config_filename} in the specified version.")
     return None
-
-
-def get_fan_property(
-        rdf_store: h5cat.RDFStore,
-        property_standard_name_uri: str
-) -> NumericalVariable:
-    """Gets a specific fan property from the fan curve data for the given rotational speed (in rpm) with the given tolerance."""
-    q = sparql.get_fan_property(property_standard_name_uri)
-    res = q.execute(rdf_store)
-    return parse_to_entity(
-        res.data,
-        property_standard_name_uri,
-        NumericalVariable
-    )

@@ -1,0 +1,55 @@
+# customizing your plots: https://matplotlib.org/tutorials/introductory/customizing.html
+# see also: https://tobiasraabe.github.io/blog/matplotlib-for-publications.html
+# and: https://jwalton.info/Embed-Publication-Matplotlib-Latex/
+# markers: https://matplotlib.org/3.1.1/api/markers_api.html
+
+#font.family : Times New Roman
+text.usetex: False # True
+font.family: DeJavu Serif
+font.serif : Times New Roman
+#font.monospace : Times New Roman # Courier New
+font.size : 12
+font.weight : normal
+
+svg.fonttype : none
+# How to handle SVG fonts:
+#    'path'
+#    'none': Assume fonts are installed on the machine where the SVG will be viewed.
+#    'path': Embed characters as paths -- supported by most SVG renderers
+#    'svgfont': Embed characters as SVG fonts -- supported only by Chrome,
+#               Opera and Safari
+
+
+axes.titlesize : 12
+axes.labelsize : 12
+axes.axisbelow   : False
+
+lines.linewidth : 2
+lines.markersize : 10
+lines.markeredgewidth: 2
+
+scatter.marker : .
+
+xtick.labelsize : 12
+xtick.direction: in
+xtick.minor.width: 0.5
+xtick.major.width: 1
+ytick.labelsize : 12
+ytick.direction: in
+ytick.minor.width: 0.5
+ytick.major.width: 1
+#xtick.length: --> only via ax.tick_params(length=...)
+
+axes.grid: False
+grid.color:     b0b0b0  # grid color
+grid.linestyle: --      # solid
+grid.linewidth: 0.8     # in points
+grid.alpha:     0.5     # transparency, between 0.0 and 1.0
+
+errorbar.capsize : 2
+
+legend.frameon:       True     # if True, draw the legend on a background patch
+legend.framealpha:    1.0      # legend patch transparency
+legend.facecolor:     white  # inherit from axes.facecolor; or color spec
+
+image.cmap   : jet #gnuplot # jet, hot

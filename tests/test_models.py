@@ -1,83 +1,125 @@
 import pathlib
 import unittest
 
-import diss
 from matplotlib import pyplot as plt
-from ontolutils.ex import dcat, hdf5
-from ontolutils.ex.ssn import Result
-from ontolutils.namespacelib import QUDT_UNIT
+from ontolutils.ex import hdf5
+from ontolutils.ex.sosa import Result, Observation, ObservationCollection
+from ontolutils.namespacelib import QUDT_UNIT, QUDT_KIND
 from ssnolib.m4i import NumericalVariable
 
+from opencefadb import plotting
 from opencefadb.entities import WIKIDATA_ITS_FAN_V1, WIKIDATA_FAN_OPERATING_POINT
-from opencefadb.models import Observation, ObservationCollection
-from opencefadb.models.fan_curve import SemanticFanCurve
+from opencefadb.models.fan_curve import DefaultLabelResolver, SemanticFanCurve
 
 __this_dir__ = pathlib.Path(__file__).parent
+
+from opencefadb.models.operating_point import is_operating_point
 
 
 class TestModels(unittest.TestCase):
 
+    def setUp(self):
+        self.valid_observation = Observation(
+            id="https://example.org/observation/1",
+            has_result=[
+                Result(
+                    id="https://example.org/result/vfr1",
+                    has_numerical_variable=NumericalVariable(
+                        id="https://example.org/numvar/1",
+                        has_standard_name="https://example.org/standard_name/air_flow_rate",
+                        hasUnit=QUDT_UNIT.M3_PER_HR
+                    )
+                ),
+                Result(
+                    id="https://example.org/result/dp1",
+                    has_numerical_variable=NumericalVariable(
+                        id="https://example.org/numvar/2",
+                        has_standard_name="https://example.org/standard_name/static_pressure_difference",
+                        hasUnit=QUDT_UNIT.PA,
+                        has_kind_of_quantity=QUDT_KIND.StaticPressure
+                    )
+                ),
+                Result(
+                    id="https://example.org/result/n1",
+                    has_numerical_variable=NumericalVariable(
+                        id="https://example.org/numvar/3",
+                        has_standard_name="https://example.org/standard_name/rotational_speed",
+                        hasUnit=QUDT_UNIT.PER_MIN
+                    )
+                ),
+            ],
+        )
+
     def test_fan_curve(self):
         """A fan curve is made up of multiple observations, hence a ObservationCollection"""
+        import requests
+        requests.get("https://zenodo.org/records/17271932/files/Standard_Name_Table_for_the_Property_Descriptions_of_Centrifugal_Fans.jsonld",
+                     timeout=60).raise_for_status()
         vfr1 = Result(
             id="https://example.org/result/vfr1",
-            hasNumericalVariable=NumericalVariable(
+            has_numerical_variable=NumericalVariable(
                 id="https://example.org/numvar/1",
                 label="Volumetric Flow Rate",
                 has_standard_name="https://example.org/standard_name/air_flow_rate",
                 has_numerical_value=10.0,
                 units=QUDT_UNIT.M3_PER_HR,
+                has_kind_of_quantity=QUDT_KIND.VolumeFlowRate
             )
         )
         dp1 = Result(
             id="https://example.org/result/dp1",
-            hasNumericalVariable=NumericalVariable(
+            has_numerical_variable=NumericalVariable(
                 id="https://example.org/numvar/2",
                 label="Static Pressure Difference",
                 has_standard_name="https://example.org/standard_name/static_pressure_difference",
                 has_numerical_value=80.0,
                 units=QUDT_UNIT.PA,
+                has_kind_of_quantity=QUDT_KIND.StaticPressure
             )
         )
         n1 = Result(
             id="https://example.org/result/n1",
-            hasNumericalVariable=NumericalVariable(
+            has_numerical_variable=NumericalVariable(
                 id="https://example.org/numvar/3",
                 label="Rotational Speed",
                 has_standard_name="https://example.org/standard_name/rotational_speed",
                 has_numerical_value=600.0,
-                units=QUDT_UNIT.PER_MIN,
+                has_unit=QUDT_UNIT.REV_PER_MIN,
+                has_kind_of_quantity=QUDT_KIND.RotationalVelocity
             )
         )
 
         vfr2 = Result(
             id="https://example.org/result/vfr2",
-            hasNumericalVariable=NumericalVariable(
+            has_numerical_variable=NumericalVariable(
                 id="https://example.org/numvar/4",
                 label="Volumetric Flow Rate",
                 has_standard_name="https://example.org/standard_name/air_flow_rate",
                 has_numerical_value=50.0,
-                units=QUDT_UNIT.M3_PER_HR,
+                has_unit=QUDT_UNIT.M3_PER_HR,
+                has_kind_of_quantity=QUDT_KIND.VolumeFlowRate
             )
         )
         dp2 = Result(
             id="https://example.org/result/dp2",
-            hasNumericalVariable=NumericalVariable(
+            has_numerical_variable=NumericalVariable(
                 label="Static Pressure Difference",
                 id="https://example.org/numvar/5",
                 has_standard_name="https://example.org/standard_name/static_pressure_difference",
                 has_numerical_value=30.0,
-                units=QUDT_UNIT.PA,
+                has_unit=QUDT_UNIT.PA,
+                has_kind_of_quantity=QUDT_KIND.StaticPressure
             )
         )
         n2 = Result(
             id="https://example.org/result/n2",
-            hasNumericalVariable=NumericalVariable(
+            has_numerical_variable=NumericalVariable(
                 id="https://example.org/numvar/6",
                 label="Rotational Speed",
                 has_standard_name="https://example.org/standard_name/rotational_speed",
                 has_numerical_value=600.0,
-                units=QUDT_UNIT.PER_MIN,
+                has_unit=QUDT_UNIT.REV_PER_MIN,
+                has_kind_of_quantity=QUDT_KIND.RotationalVelocity
             )
         )
 
@@ -113,14 +155,24 @@ class TestModels(unittest.TestCase):
         ttl_sfc = sfc.serialize("ttl")
         self.assertEqual(ttl_sfc, ttl)
 
-        from opencefadb.models.fan_curve import DefaultLabelResolver
+        sfc_scaled = sfc.scale(
+            n=NumericalVariable(
+                has_numerical_value=1200.0,
+                units=QUDT_UNIT.PER_MIN,
+                has_kind_of_quantity=QUDT_KIND.RotationalVelocity
+            ),
+            # x="https://example.org/standard_name/air_flow_rate",
+            # y="https://example.org/standard_name/static_pressure_difference",
+            # n="https://example.org/standard_name/rotational_speed",
+        )
+        print(sfc_scaled.serialize("ttl"))
 
         DefaultLabelResolver.LABEL_SELECTION_ORDER = {
             "label",
             "standard_name",
         }
 
-        with diss.plotting.DissSingleAxis(
+        with plotting.SingleAxis(
                 scale=1.0,
                 filename="test_fan_curve.svg",
         ) as dax:
@@ -129,29 +181,81 @@ class TestModels(unittest.TestCase):
                 y="https://example.org/standard_name/static_pressure_difference",
                 xlabel=None,
                 ylabel=None,
-                label="Test Fan Curve",
+                label="raw",
                 marker="o",
+                linestyle='-',
+                ax=dax.ax,
+            )
+            sfc_scaled.plot(
+                x="https://example.org/standard_name/air_flow_rate",
+                y="https://example.org/standard_name/static_pressure_difference",
+                xlabel=None,
+                ylabel=None,
+                label="scaled",
+                marker="+",
                 linestyle='-',
                 ax=dax.ax,
             )
             plt.legend()
             plt.tight_layout()
-            # plt.show()
+            plt.show()
 
-    def test_observation(self):
-        dist = dcat.Distribution(
-            id="https://example.org/distribution/1",
+    def test_is_operating_point(self):
+        is_op = is_operating_point(self.valid_observation, verbose=True)
+        self.assertTrue(is_op)
+
+        invalid_op = Observation(
+            id="https://example.org/observation/2",
+            has_result=[
+                Result(
+                    id="https://example.org/result/vfr1",
+                    has_numerical_variable=NumericalVariable(
+                        id="https://example.org/numvar/1",
+                        has_standard_name="https://example.org/standard_name/air_flow_rate",
+                        hasUnit=QUDT_UNIT.M3_PER_HR
+                    )
+                ),
+                Result(
+                    id="https://example.org/result/dp1",
+                    has_numerical_variable=NumericalVariable(
+                        id="https://example.org/numvar/2",
+                        has_standard_name="https://example.org/standard_name/static_pressure_difference",
+                        hasUnit=QUDT_UNIT.PA
+                    )
+                ),
+            ],
         )
-        h5file = hdf5.File(
-            id="https://example.org/file/1",
-            distribution=dist
+        is_op_invalid = is_operating_point(invalid_op, verbose=True)
+        self.assertFalse(is_op_invalid)
+
+        another_invalid_op = Observation(
+            id="https://example.org/observation/3",
+            has_result=[]
         )
-        res = Result(
-            id="https://example.org/result/1",
+        is_op_another_invalid = is_operating_point(another_invalid_op, verbose=True)
+        self.assertFalse(is_op_another_invalid)
+
+        another_invalid_op = Observation(
+            id="https://example.org/observation/4",
+            has_result=[
+                Result(
+                    id="https://example.org/result/vfr1"
+                ),
+                Result(
+                    id="https://example.org/result/dp1",
+                    has_numerical_variable=NumericalVariable(
+                        id="https://example.org/numvar/2",
+                    )
+                ),
+                Result(
+                    id="https://example.org/result/n1",
+                    has_numerical_variable=NumericalVariable(
+                        id="https://example.org/numvar/3",
+                        has_standard_name="https://example.org/standard_name/temperature",  # wrong kind
+                        has_unit=QUDT_UNIT.K
+                    )
+                ),
+            ],
         )
-        o = Observation(
-            id="https://example.org/observation/1",
-            has_result=res,
-            hadPrimarySource=h5file
-        )
-        print(o.serialize("ttl"))
+        is_op_another_invalid = is_operating_point(another_invalid_op, verbose=True)
+        self.assertFalse(is_op_another_invalid)

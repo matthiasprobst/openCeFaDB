@@ -1,7 +1,7 @@
 import pathlib
 import unittest
 
-import diss
+from opencefadb import plotting
 import dotenv
 import matplotlib.pyplot as plt
 import rdflib
@@ -23,7 +23,7 @@ class TestFanCurve(unittest.TestCase):
     def test_get_fan_curve(self):
         try:
             graphdb = GraphDB(
-                endpoint="http://localhost:7201",
+                endpoint="http://localhost:7200",
                 repository="OpenCeFaDB-Sandbox",
                 username="admin",
                 password="admin"
@@ -39,10 +39,10 @@ class TestFanCurve(unittest.TestCase):
             working_directory=self.working_dir
         )
         db.add_main_rdf_store(graphdb)
+        db.add_hdf_infile_index()
 
         # define the standard names:
-        zenodo_record_ns = rdflib.namespace.Namespace(
-            "https://doi.org/10.5281/zenodo.17572275#")  # TODO dont hardcode this!
+        zenodo_record_ns = rdflib.namespace.Namespace("https://doi.org/10.5281/zenodo.17572275#")
         sn_mean_dp_stat = zenodo_record_ns[
             'standard_name_table/derived_standard_name/arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet']
         sn_mean_vfr = zenodo_record_ns[
@@ -56,21 +56,21 @@ class TestFanCurve(unittest.TestCase):
 
         # test getting fan curve data:
         n_rot = 600
-        observations = db.get_operating_point_observations(
+        operating_point_observations = db.get_operating_point_observations(
             n_rot_speed_rpm=n_rot,
             operating_point_standard_names=operating_point_standard_names,
             standard_name_of_rotational_speed=sn_mean_nrot
         )
 
         fan_curve = SemanticFanCurve.from_observations(
-            observations=observations
+            observations=operating_point_observations
         )
         if n_rot == 600:
             self.assertEqual(45, len(fan_curve))
         elif n_rot == 1200:
             self.assertEqual(12, len(fan_curve))
 
-        with diss.plotting.DissSingleAxis(
+        with plotting.SingleAxis(
                 scale=1.0,
                 filename="test_fan_curve.svg",
         ) as dax:

@@ -1,12 +1,15 @@
 from typing import Union, Sequence, Callable, Optional
 
 import matplotlib.pyplot as plt
+import numpy as np
 from ontolutils.ex import qudt
-from ontolutils.ex.ssn import Observation
+from ontolutils.ex.sosa import ObservationCollection
+from ontolutils.ex.ssn import Observation, Result
+from ontolutils.namespacelib import QUDT_KIND
 from rdflib.namespace import split_uri
 from ssnolib.m4i import NumericalVariable
 
-from opencefadb.models import ObservationCollection
+import opencefadb
 
 
 def _parse_unit(unit: Union[str, qudt.Unit]) -> str:
@@ -17,54 +20,6 @@ def _parse_unit(unit: Union[str, qudt.Unit]) -> str:
     return unit
 
 
-# class SemanticOperatingPoint:
-#
-#     def __init__(self, x, y, n, attrs=None):
-#         self.x = x
-#         self.y = y
-#         self.n = n
-#         self.attrs = attrs or {}
-#
-#     @classmethod
-#     def from_observation(cls, observation: Observation):
-#         results = observation.hasResult
-#         x = next(r.hasNumericalVariable for r in results if
-#                  r.hasNumericalVariable.hasStandardName.standardName == "arithmetic_mean_of_fan_volume_flow_rate")
-#         y = next(r.hasNumericalVariable for r in results if
-#                  r.hasNumericalVariable.hasStandardName.standardName == "arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet")
-#         n = next(r.hasNumericalVariable for r in results if
-#                  r.hasNumericalVariable.hasStandardName.standardName == "arithmetic_mean_of_fan_rotational_speed")
-#         attrs = observation.model_dump(exclude_none=True)
-#         attrs.pop("hasResult", None)
-#         return cls(x=x, y=y, n=n, attrs=attrs)
-#
-#     def plot(self, **kwargs):
-#         ax = kwargs.pop("ax", None)
-#         if ax is None:
-#             ax = plt.gca()
-#
-#         x_unit = _parse_unit(self.x.hasUnit)
-#         y_unit = _parse_unit(self.y.hasUnit)
-#         ax.plot(
-#             self.x.hasNumericalValue,
-#             self.y.hasNumericalValue, marker="o",
-#             label=f"n={self.n.hasNumericalValue}"
-#         )
-#         xlabel = kwargs.pop("xlabel", None)
-#         if xlabel is None:
-#             xlabel = self.x.label or self.x.altLabel or self.x.hasStandardName.standardName
-#
-#         ylabel = kwargs.pop("ylabel", None)
-#         if ylabel is None:
-#             ylabel = self.y.label or self.y.altLabel or self.y.hasStandardName.standardName
-#
-#         # x_unit_symbol = self.x.hasUnit.symbol or self.x.hasUnit
-#         # y_unit_symbol = self.y.hasUnit.symbol or self.x.hasUnit
-#         ax.set_xlabel(f"{xlabel} [{x_unit.symbol}]")
-#         ax.set_ylabel(f"{ylabel} [{y_unit.symbol}]")
-#         return ax
-
-
 Selector = Union[str, Callable[[Observation], NumericalVariable]]
 LabelResolver = Callable[[NumericalVariable], str]
 
@@ -73,14 +28,14 @@ def resolve_selector(sel: Selector) -> Callable[[Observation], NumericalVariable
     if callable(sel):
         return sel
     if isinstance(sel, str):
-        return lambda obs: standard_name_selector(obs, sel)
+        return lambda obs: _standard_name_selector(obs, sel)
     raise TypeError(f"Unsupported selector type: {type(sel)}")
 
 
 def _get_label(variable: NumericalVariable) -> Optional[str]:
-    if variable.label is not None:
-        return str(variable.label)
-    return None
+    if variable.label is None:
+        return None
+    return str(variable.label)
 
 
 def _get_alt_label(variable: NumericalVariable) -> Optional[str]:
@@ -115,12 +70,12 @@ LABEL_SELECTION_MAPPER = {
 
 
 class DefaultLabelResolver:
-    LABEL_SELECTION_ORDER = {
+    LABEL_SELECTION_ORDER = [
         "label",
         "symbol",
         "altLabel",
         "standard_name",
-    }
+    ]
 
     def __call__(self, variable: NumericalVariable) -> str:
         unit = None
@@ -153,7 +108,7 @@ class DefaultLabelResolver:
         return f"{name} / {unit}"
 
 
-def standard_name_selector(obs: Observation, standard_name: str) -> Optional[NumericalVariable]:
+def _standard_name_selector(obs: Observation, standard_name: str) -> Optional[NumericalVariable]:
     wanted = str(standard_name).strip()
     is_iri = wanted.startswith("http://") or wanted.startswith("https://")
 
@@ -179,6 +134,86 @@ def standard_name_selector(obs: Observation, standard_name: str) -> Optional[Num
     return None
 
 
+
+
+class SemanticOperationPoint:
+    EXPECTED_PRESSURE_QUANTITY_KINDS = [
+        QUDT_KIND.Pressure,
+        QUDT_KIND.StaticPressure,
+        QUDT_KIND.TotalPressure,
+    ]
+    ROTATIONAL_FREQUENCY_QUANTITY_KIND = QUDT_KIND.RotationalVelocity
+    VOLUME_FLOW_RATE_QUANTITY_KIND = QUDT_KIND.VolumeFlowRate
+
+    def __init__(self, observation: Observation):
+        self.observation = observation
+
+    def scale(
+            self,
+            reference_rotational_frequency: NumericalVariable
+    ) -> "SemanticOperationPoint":
+        """Scale the operating point by the provided numerical variable according to the affinity laws."""
+
+        if not isinstance(reference_rotational_frequency, NumericalVariable):
+            raise TypeError("reference_rotational_frequency must be a NumericalVariable")
+        if not reference_rotational_frequency.is_kind_of_quantity(self.ROTATIONAL_FREQUENCY_QUANTITY_KIND):
+            raise ValueError("reference_rotational_frequency must be of kind of quantity "
+                             f"{self.ROTATIONAL_FREQUENCY_QUANTITY_KIND}: {reference_rotational_frequency}")
+
+        reference_nfreq_value = reference_rotational_frequency.hasNumericalValue
+        current_rotational_frequency = self.observation.get_numerical_variable_by_kind_of_quantity(
+            self.ROTATIONAL_FREQUENCY_QUANTITY_KIND
+        )
+        if len(current_rotational_frequency) != 1:
+            raise ValueError(
+                f"Fan curve must have exactly one numerical variable of kind {self.ROTATIONAL_FREQUENCY_QUANTITY_KIND}")
+        n = current_rotational_frequency[0]
+        nfreq_value = n.hasNumericalValue
+
+        vfr_numerical_variables = self.observation.get_numerical_variable_by_kind_of_quantity(
+            self.VOLUME_FLOW_RATE_QUANTITY_KIND
+        )
+        if len(vfr_numerical_variables) != 1:
+            raise ValueError(
+                f"Fan curve must have exactly one numerical variable of kind {self.VOLUME_FLOW_RATE_QUANTITY_KIND}")
+
+        pressure_numerical_variables = []
+        for PKC in self.EXPECTED_PRESSURE_QUANTITY_KINDS:
+            _pressure_variable = self.observation.get_numerical_variable_by_kind_of_quantity(
+                PKC
+            )
+            if len(_pressure_variable) > 0:
+                pressure_numerical_variables.extend(_pressure_variable)
+        scaled_variables = []
+        for p in pressure_numerical_variables:
+            p_value = p.hasNumericalValue
+            scaled_pressure_value = p_value * (reference_nfreq_value / nfreq_value) ** 2
+            scaled_p = p.model_copy()
+            scaled_p.hasNumericalValue = scaled_pressure_value
+            scaled_variables.append(scaled_p)
+
+        for vfr in vfr_numerical_variables:
+            vfr_value = vfr.hasNumericalValue
+            scaled_vfr_value = vfr_value * (reference_nfreq_value / nfreq_value)
+            scaled_vfr = vfr.model_copy()
+            scaled_vfr.hasNumericalValue = scaled_vfr_value
+            scaled_variables.append(scaled_vfr)
+
+        scaled_variables.append(
+            reference_rotational_frequency.model_copy()
+        )
+
+        scaled_observation = Observation(
+            has_result=[
+                Result(
+                    has_numerical_variable=n
+                )
+                for n in scaled_variables
+            ]
+        )
+        return SemanticOperationPoint(scaled_observation)
+
+
 class SemanticFanCurve:
     """
     A view on an ObservationCollection that enables plotting based on two
@@ -197,7 +232,16 @@ class SemanticFanCurve:
 
     @classmethod
     def from_observations(cls, observations: Sequence[Observation], **kwargs) -> "SemanticFanCurve":
-        oc = ObservationCollection(hasMember=list(observations), **kwargs)
+        observations = list(observations)
+        feature_of_interests = [obs.hasFeatureOfInterest for obs in observations if
+                                obs.hasFeatureOfInterest is not None]
+        # check if they all have the same foi
+        if len(set(feature_of_interests)) > 1:
+            raise ValueError("All observations must have the same feature of interest")
+        foi = feature_of_interests[0] if len(feature_of_interests) > 0 else None
+        oc = ObservationCollection(has_member=list(observations), **kwargs)
+        if foi:
+            oc.hasFeatureOfInterest = foi
         return cls(oc)
 
     def get_xy(self, x: Selector, y: Selector):
@@ -217,26 +261,87 @@ class SemanticFanCurve:
     def serialize(self, format: str = "turtle", **kwargs) -> str:
         return self.collection.serialize(format=format, **kwargs)
 
+    def scale(
+            self,
+            n: NumericalVariable
+    ):
+        """Scale the fan curve by the provided numerical variable according to the affinity laws."""
+        scaled_members = [
+            SemanticOperationPoint(observation).scale(n).observation for observation in self.collection.hasMember
+        ]
+        return SemanticFanCurve.from_observations(
+            scaled_members,
+            id=self.collection.id,
+            hasFeatureOfInterest=self.collection.hasFeatureOfInterest,
+            type=self.collection.type,
+        )
+        # for observation in self.collection.hasMember:
+        #     scaled_observations =
+        #     for result in obs.hasResult:
+        #         nv = result.hasNumericalVariable
+        #         if nv is not None:
+        #             if nv.has_numerical_value is not None:
+        #                 scaled_value = nv.has_numerical_value * n.has_numerical_value
+        #             else:
+        #                 scaled_value = None
+        #             scaled_nv = NumericalVariable(
+        #                 id=nv.id,
+        #                 label=nv.label,
+        #                 hasStandardName=nv.hasStandardName,
+        #                 has_numerical_value=scaled_value,
+        #                 hasUnit=nv.hasUnit,
+        #             )
+        #             scaled_result = type(result)(
+        #                 id=result.id,
+        #                 hasNumericalVariable=scaled_nv,
+        #             )
+        #             scaled_results.append(scaled_result)
+        #         else:
+        #             scaled_results.append(result)
+        #     scaled_obs = type(obs)(
+        #         id=obs.id,
+        #         hasResult=scaled_results,
+        #         hasFeatureOfInterest=obs.hasFeatureOfInterest,
+        #         hadPrimarySource=obs.hadPrimarySource,
+        #     )
+        #     scaled_members.append(scaled_obs)
+
     def _get_plotting_data(
             self, x: Selector, y: Selector,
             xlabel: Union[str, LabelResolver] = None,
             ylabel: Union[str, LabelResolver] = None,
             xsort: bool = True,
-            ret_err: bool = False):
+            ret_err: bool = False,
+            raise_on_no_data_points=True
+    ):
         resolved_x, resolved_y = self.get_xy(x, y)
 
         # strip None values in xs and ys (pair-wise)
         xy_filtered = [(xv, yv) for xv, yv in zip(resolved_x, resolved_y) if xv is not None and yv is not None]
         xs, ys = [t[0].hasNumericalValue for t in xy_filtered], [t[1].hasNumericalValue for t in xy_filtered]
         if len(xy_filtered) == 0:
-            raise ValueError("No data points could be extracted.")
+            if raise_on_no_data_points:
+                raise ValueError("No data points could be extracted.")
+            else:
+                return [], [], None, None, "x / ?", "y / ?"
         if xsort:
             xy = sorted(zip(xs, ys), key=lambda t: t[0])
             xs, ys = [t[0] for t in xy], [t[1] for t in xy]
 
         if ret_err:
-            xerr, yerr = [t[0].hasUncertaintyDeclaration.has_standard_uncertainty for t in xy_filtered], [
-                t[1].hasUncertaintyDeclaration.has_standard_uncertainty for t in xy_filtered]
+            # hasUncertaintyDeclaration may be null!
+            xerr = []
+            for t in xy_filtered:
+                if t[0].hasUncertaintyDeclaration is not None:
+                    xerr.append(t[0].hasUncertaintyDeclaration.has_standard_uncertainty)
+                else:
+                    xerr.append(np.nan)
+            yerr = []
+            for t in xy_filtered:
+                if t[1].hasUncertaintyDeclaration is not None:
+                    yerr.append(t[1].hasUncertaintyDeclaration.has_standard_uncertainty)
+                else:
+                    yerr.append(np.nan)
         else:
             xerr, yerr = None, None
 
@@ -275,17 +380,21 @@ class SemanticFanCurve:
             xlabel: Union[str, LabelResolver] = None,
             ylabel: Union[str, LabelResolver] = None,
             xsort: bool = True,
+            raise_on_no_data_points: bool = True,
             **kwargs
     ):
+        verbose = kwargs.pop("verbose", None)
         ax = kwargs.pop("ax", None)
         if ax is None:
             ax = plt.gca()
 
-        xs, ys, xerr, yerr, _xlabel, _ylabel = self._get_plotting_data(x, y, xlabel, ylabel, xsort)
+        xs, ys, xerr, yerr, _xlabel, _ylabel = self._get_plotting_data(x, y, xlabel, ylabel, xsort,
+                                                                       raise_on_no_data_points=raise_on_no_data_points)
 
-        ax.plot(xs, ys, **kwargs)
-        plt.xlabel(_xlabel)
-        plt.ylabel(_ylabel)
+        if ys:
+            ax.plot(xs, ys, **kwargs)
+            plt.xlabel(_xlabel)
+            plt.ylabel(_ylabel)
         return ax
 
     def errorbar(
@@ -295,13 +404,19 @@ class SemanticFanCurve:
             xlabel: Union[str, LabelResolver] = None,
             ylabel: Union[str, LabelResolver] = None,
             xsort: bool = True,
+            raise_on_no_data_points: bool = True,
             **kwargs
     ):
+        verbose = kwargs.pop("verbose", None)
         ax = kwargs.pop("ax", None)
         if ax is None:
             ax = plt.gca()
-        xs, ys, xs_err, ys_err, _xlabel, _ylabel = self._get_plotting_data(x, y, xlabel, ylabel, xsort, ret_err=True)
-        ax.errorbar(xs, ys, xerr=xs_err, yerr=ys_err, **kwargs)
-        plt.xlabel(_xlabel)
-        plt.ylabel(_ylabel)
+        opencefadb.opencefa_print("Obtaining plotting data...", verbose=verbose)
+        xs, ys, xs_err, ys_err, _xlabel, _ylabel = self._get_plotting_data(x, y, xlabel, ylabel, xsort, ret_err=True,
+                                                                           raise_on_no_data_points=raise_on_no_data_points)
+        opencefadb.opencefa_print("... done.", verbose=verbose)
+        if ys:
+            ax.errorbar(xs, ys, xerr=xs_err, yerr=ys_err, **kwargs)
+            plt.xlabel(_xlabel)
+            plt.ylabel(_ylabel)
         return ax

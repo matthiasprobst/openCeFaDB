@@ -3,13 +3,12 @@ import unittest
 
 import dotenv
 import rdflib
-import requests.exceptions
 from h5rdmtoolbox import catalog as h5cat
 from h5rdmtoolbox.catalog import HDF5SqlDB, GraphDB
 from h5rdmtoolbox.catalog.profiles import IS_VALID_CATALOG_SHACL
 
 from opencefadb import OpenCeFaDB
-from opencefadb.query_templates.sparql import SELECT_FAN_PROPERTIES
+from opencefadb.sparql_templates.fan import SELECT_FAN_PROPERTIES
 from opencefadb.stores import RDFFileStore
 
 __this_dir__ = pathlib.Path(__file__).parent
@@ -21,54 +20,26 @@ class TestInitDatabase(unittest.TestCase):
         dotenv.load_dotenv(__this_dir__ / ".env", override=True)
         self.working_dir = pathlib.Path(__this_dir__ / "local-db")
 
-    # def tearDown(self):
-    #     if self.working_dir.exists():
-    #         shutil.rmtree(self.working_dir)
-
     def test_database_with_graphdb(self):
-        try:
-            gdb = GraphDB(
-                endpoint="http://localhost:7201",
-                repository="OpenCeFaDB-Sandbox",
-                username="admin",
-                password="admin"
-            )
-            gdb.get_repository_info("OpenCeFaDB-Sandbox")
-        except requests.exceptions.ConnectionError as e:
-            self.skipTest(f"GraphDB not available: {e}")
-
-        db = OpenCeFaDB(working_directory=self.working_dir, version="latest", sandbox=True)
-        self.assertEqual(db.catalog.version, "1.5.0")
-
-        gdb = GraphDB(
-            endpoint="http://localhost:7201",
+        db = OpenCeFaDB.from_graphdb_setup(
+            working_directory=self.working_dir,
+            version="latest",
+            sandbox=True,
+            endpoint="http://localhost:7200",
             repository="OpenCeFaDB-Sandbox",
             username="admin",
-            password="admin"
+            password="admin",
+            add_wikidata_store=True
         )
-        # reset repository:
-        if gdb.get_repository_info("OpenCeFaDB-Sandbox"):
-            gdb.delete_repository("OpenCeFaDB-Sandbox")
-
-        res = gdb.get_or_create_repository(__this_dir__ / "graphdb-config-sandbox.ttl")
-        self.assertTrue(res)
-
-        # gdb.register_shacl_shape("PersonShape", shacl_data=PERSON_SHACL)
-
-        for filename in db.rdf_directory.rglob("*.ttl"):
-            gdb.upload_file(filename)
-
-        db.add_main_rdf_store(gdb)
-
-        db.add_wikidata_store(augment_knowledge=True)
-
+        db.download_metadata()
+        self.assertEqual(db.catalog.version, "1.7.0")
         res = h5cat.RemoteSparqlQuery(
             "SELECT * WHERE { ?s ?p ?o }",
             description="Selects all triples in the RDF database"
         ).execute(db.main_rdf_store)
 
         count = len(res.data)
-        tripels = gdb.count_triples(key="total")
+        tripels = db.main_rdf_store.count_triples(key="total")
         self.assertEqual(count, tripels)
 
         res = h5cat.RemoteSparqlQuery(
@@ -82,7 +53,7 @@ class TestInitDatabase(unittest.TestCase):
             """
             PREFIX foaf: <http://xmlns.com/foaf/0.1/>
             PREFIX prov: <http://www.w3.org/ns/prov#>
-
+    
             SELECT ?s
             WHERE {
                 ?s a prov:Person .
@@ -92,9 +63,25 @@ class TestInitDatabase(unittest.TestCase):
         ).execute(db.main_rdf_store)
         self.assertEqual(2, len(res.data))
 
+        # find a hdf5 dataset based on a hdf attribute standard_name="volume_flow_rate":
+        res = h5cat.SparqlQuery(
+            """
+            PREFIX h5py: <http://purl.org/nfdi4ing/h5py#>
+            PREFIX dcterms: <http://purl.org/dc/terms/>
+            
+            SELECT ?dataset ?title
+            WHERE {
+                ?dataset a h5py:Dataset .
+                ?dataset dcterms:title ?title .
+                ?dataset h5py:standard_name "volume_flow_rate" .
+            }
+            """,
+            description="Finds a hdf5 dataset based on a hdf attribute standard_name='volume_flow_rate'"
+        ).execute(db.hdf5_store)
+
     def test_database_with_rdflib_store(self):
         db = OpenCeFaDB(working_directory=self.working_dir, version="latest", sandbox=True)
-        self.assertEqual(db.catalog.version, "1.5.0")
+        self.assertEqual(db.catalog.version, "1.6.0")
 
         metadata_store = RDFFileStore(
             data_dir=self.working_dir / "metadata",
@@ -103,7 +90,7 @@ class TestInitDatabase(unittest.TestCase):
         )
 
         db.add_main_rdf_store(metadata_store)
-        db.add_wikidata_store(augment_knowledge=True)
+        db.add_wikidata_store(augment_main_rdf_store=True)
         res = SELECT_FAN_PROPERTIES.execute(db.main_rdf_store)
         self.assertEqual(88, len(res.data))
 
@@ -152,7 +139,7 @@ class TestInitDatabase(unittest.TestCase):
         )
 
     def test_config_validation(self):
-        catalog = OpenCeFaDB.download(
+        catalog = OpenCeFaDB.download_catalog(
             version="latest",
             target_directory=self.working_dir,
             sandbox=True,

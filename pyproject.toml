@@ -34,7 +34,7 @@ dependencies = [
     "rdflib~=7.1.1",
     "requests~=2.32.4",
     "gldb==2.1.1",
-    "ontolutils>=0.27.2,<1.0.0",
+    "ontolutils>=0.27.5,<1.0.0",
     "h5rdmtoolbox>=2.5.3,<=3.0.0",
     "ssnolib>=2.2.0.3,<=3.0.0.0",
     "tqdm~=4.67.1",

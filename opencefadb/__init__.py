@@ -16,7 +16,6 @@ from typing import Union
 import appdirs
 
 from . import models
-from .plotting import plot
 
 __this_dir__ = pathlib.Path(__file__).parent
 
@@ -58,4 +57,6 @@ GRAPH_DB_CONFIG_FILENAME = __this_dir__ / "../data/graphdb-config.ttl"
 
 from .core import OpenCeFaDB
 
-__all__ = ["set_logging_level", "OpenCeFaDB", "plot", "models"]
+from .utils import opencefa_print
+
+__all__ = ["set_logging_level", "OpenCeFaDB", "models", "opencefa_print"]
