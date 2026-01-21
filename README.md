@@ -61,7 +61,7 @@ A quickstart guide is provided as Jupyter Notebook in the `notebooks/` folder.
 
 The further analysis should be made in Python scripts or Jupyter Notebooks.
 
-## Viewer
+## Viewer (experimental!)
 
 The package also provides a simple viewer to explore the metadata in a streamlit app:
 
