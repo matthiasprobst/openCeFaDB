@@ -1,0 +1,61 @@
+{
+  "@context": {
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "dct": "http://purl.org/dc/terms/"
+  },
+  "@graph": [
+    {
+      "@id": "https://zenodo.org/record/14055811",
+      "@type": "dcat:Dataset",
+      "dct:identifier": "14055811",
+      "dcat:distribution": {
+        "dcat:mediaType": "application/ld+json",
+        "dcat:downloadURL": "https://zenodo.org/records/14055811/files/Standard_Name_Table_for_the_Property_Descriptions_of_Centrifugal_Fans.jsonld"
+      }
+    },
+    {
+      "@id": "https://matthiasprobst.github.io/ssno/1.3.0/",
+      "@type": "dcat:Dataset",
+      "dct:identifier": "ssno-130",
+      "dcat:distribution": {
+        "dcat:mediaType": "text/turtle",
+        "dcat:downloadURL": "https://matthiasprobst.github.io/ssno/1.3.0/ssno.ttl"
+      }
+    },
+    {
+      "@id": "https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl",
+      "@type": "dcat:Dataset",
+      "dct:identifier": "ALLOTROPE-VOC-ADF-REC-2024-12-HDF",
+      "dct:title": "The HDF5 data description ontology. (REC/2024/12)",
+      "dct:creator": {
+        "@type": "foaf:Organization",
+        "foaf:name": "Allotrope Foundation",
+        "foaf:homepage": "http://www.allotrope.org"
+      },
+      "dcat:distribution": {
+        "dcat:mediaType": "text/turtle",
+        "dcat:downloadURL": "https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl"
+      }
+    },
+    {
+      "@id": "https://zenodo.org/record/14551649",
+      "@type": "dcat:Dataset",
+      "dct:identifier": "14551649",
+      "dcat:distribution": [
+      {
+        "dcat:mediaType": "application/ld+json",
+        "dcat:downloadURL": "https://zenodo.org/records/14551649/files/metadata.jsonld",
+        "dcat:byteSize": 15927,
+        "dcat:accessURL": "https://doi.org/10.5281/zenodo.14551649"
+      },
+      {
+        "dcat:mediaType": "model/iges",
+        "dcat:downloadURL": "https://zenodo.org/records/14551649/files/cefa_asm_v1.igs",
+        "dcat:byteSize": 14278906,
+        "dcat:accessURL": "https://doi.org/10.5281/zenodo.14551649"
+      }
+    ]
+    }
+  ]
+}

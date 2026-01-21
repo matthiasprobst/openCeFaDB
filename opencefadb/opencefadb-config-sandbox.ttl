@@ -1,0 +1,2637 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix schema: <https://schema.org/> .
+@prefix spdx: <http://spdx.org/rdf/terms#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://doi.org/10.5072/zenodo.411647> a dcat:Dataset ;
+    dcterms:accessRights "open" ;
+    dcterms:creator <https://orcid.org/0000-0001-8729-0482>,
+        <https://orcid.org/0000-0001-9560-500X> ;
+    dcterms:description "Data from the open centrifugal fan database showcasing FAIR data management with HDF5 files and RDF metadata annotations applied on experimental measurement data of a generic centrifugal fan." ;
+    dcterms:identifier "10.5072/zenodo.411647" ;
+    dcterms:issued "2025-12-04T20:23:25.363216+00:00"^^xsd:dateTime ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:modified "2025-12-04T20:23:29.286813+00:00"^^xsd:dateTime ;
+    dcterms:publisher <https://www.wikidata.org/wiki/Q22661177> ;
+    dcterms:title "OpenCeFaDB Dataset 1 - n600 fan curve" ;
+    dcat:distribution <https://sandbox.zenodo.org/api/records/411647/files/03a678bc-fa11-4089-a71e-e8cf22d7c121>,
+        <https://sandbox.zenodo.org/api/records/411647/files/058806c0-1613-418a-96a7-96f1e7c31e61>,
+        <https://sandbox.zenodo.org/api/records/411647/files/072c8597-75ae-48ce-8740-b3cfa904f607>,
+        <https://sandbox.zenodo.org/api/records/411647/files/0b6029d6-861c-41a2-a64d-5cc6fe4d124e>,
+        <https://sandbox.zenodo.org/api/records/411647/files/0efffae8-72b8-4d3d-9ddd-abf159f332c5>,
+        <https://sandbox.zenodo.org/api/records/411647/files/0fb82f3d-e828-42ae-aae5-1ed4205ae93e>,
+        <https://sandbox.zenodo.org/api/records/411647/files/11e658c3-1ad9-456f-a017-347f6b40c7f7>,
+        <https://sandbox.zenodo.org/api/records/411647/files/122456e5-db2a-4bf2-b00a-d84ffc362f94>,
+        <https://sandbox.zenodo.org/api/records/411647/files/151305b6-2a6d-47ca-a370-6e61d366af1c>,
+        <https://sandbox.zenodo.org/api/records/411647/files/169ceed4-3960-4449-af5d-f5fe353c7190>,
+        <https://sandbox.zenodo.org/api/records/411647/files/17ae2fa5-2dcb-41da-9955-3ee2ba9d32d2>,
+        <https://sandbox.zenodo.org/api/records/411647/files/198ef4f0-beb9-45aa-b33e-a89ed4edbb76>,
+        <https://sandbox.zenodo.org/api/records/411647/files/1a5524ec-e582-4079-9759-725ff29361af>,
+        <https://sandbox.zenodo.org/api/records/411647/files/20eb33f1-f249-4ae8-be6e-88a5dd1fb700>,
+        <https://sandbox.zenodo.org/api/records/411647/files/20fc705e-a32a-42d4-9393-aa6a4afb4f5a>,
+        <https://sandbox.zenodo.org/api/records/411647/files/21493cac-57bb-416b-a98d-52b15b6feaf6>,
+        <https://sandbox.zenodo.org/api/records/411647/files/3c58531d-9407-4992-ab28-3f0b5ce7c6bf>,
+        <https://sandbox.zenodo.org/api/records/411647/files/3dad3e17-53d5-4ae3-8029-7a322bb737a0>,
+        <https://sandbox.zenodo.org/api/records/411647/files/3e6365fd-080f-46ab-a7c2-aa529aea5fc3>,
+        <https://sandbox.zenodo.org/api/records/411647/files/3f8db603-2e26-4d89-a4d9-36330ad14a9e>,
+        <https://sandbox.zenodo.org/api/records/411647/files/42b887e2-b114-40bf-a9ac-f0e097a84ee3>,
+        <https://sandbox.zenodo.org/api/records/411647/files/431297d7-dfb2-468e-a444-964ad1d34be1>,
+        <https://sandbox.zenodo.org/api/records/411647/files/491447fe-7ab0-449c-a967-f9774a97669b>,
+        <https://sandbox.zenodo.org/api/records/411647/files/4a86ae0a-3ee5-4fd4-babd-c653c3f61d56>,
+        <https://sandbox.zenodo.org/api/records/411647/files/5504a251-ecd7-480f-8978-7929f1d9293c>,
+        <https://sandbox.zenodo.org/api/records/411647/files/55bb91e0-8867-456f-bc68-084a2f394abd>,
+        <https://sandbox.zenodo.org/api/records/411647/files/5cffa73f-851a-441d-9911-36cb549c5330>,
+        <https://sandbox.zenodo.org/api/records/411647/files/62eccdf6-cc58-4770-b50e-180c5019d992>,
+        <https://sandbox.zenodo.org/api/records/411647/files/68851bd5-5539-4a65-9a91-26bb832bb9d0>,
+        <https://sandbox.zenodo.org/api/records/411647/files/6f090b20-faaa-4f39-97cc-61743f476e81>,
+        <https://sandbox.zenodo.org/api/records/411647/files/7304610b-d964-40f7-8205-b2ff1a6b6fba>,
+        <https://sandbox.zenodo.org/api/records/411647/files/76476c52-5368-4a15-be90-e3ae19a7a68d>,
+        <https://sandbox.zenodo.org/api/records/411647/files/797e995e-a3be-491b-ad26-e284230d6218>,
+        <https://sandbox.zenodo.org/api/records/411647/files/7aaf33ce-f2aa-4cdf-b61c-bdb6a4ce71d4>,
+        <https://sandbox.zenodo.org/api/records/411647/files/7c437996-3609-45ef-8096-cfd37269e43a>,
+        <https://sandbox.zenodo.org/api/records/411647/files/7d332ec2-bfed-4671-93ee-bdc001a70fec>,
+        <https://sandbox.zenodo.org/api/records/411647/files/7e839712-bd93-487b-952d-6725bc22c4cf>,
+        <https://sandbox.zenodo.org/api/records/411647/files/7f4ad9bc-846b-423c-9afa-7bc7d9f9e25e>,
+        <https://sandbox.zenodo.org/api/records/411647/files/81fd0e15-5e4c-4522-b6e0-a4764546d04d>,
+        <https://sandbox.zenodo.org/api/records/411647/files/856f9481-2ecc-4670-9ab7-a649f571bf3b>,
+        <https://sandbox.zenodo.org/api/records/411647/files/86c8961f-6b2d-4f12-bda6-0cdc2296bf81>,
+        <https://sandbox.zenodo.org/api/records/411647/files/87d1c429-abe5-4ba9-8333-2525e568d141>,
+        <https://sandbox.zenodo.org/api/records/411647/files/89c8b9e5-f075-48b5-922c-c2e4f6ab6d35>,
+        <https://sandbox.zenodo.org/api/records/411647/files/8d88e18c-f290-4544-a638-c42728286386>,
+        <https://sandbox.zenodo.org/api/records/411647/files/8f43a18f-e8ca-499c-8fa6-031099f60fef>,
+        <https://sandbox.zenodo.org/api/records/411647/files/8f4458a1-275a-4adc-a444-6cded5dc5b58>,
+        <https://sandbox.zenodo.org/api/records/411647/files/9103ed07-3a83-4f86-8bab-8cd28d2aef2a>,
+        <https://sandbox.zenodo.org/api/records/411647/files/93883ff5-e317-40a4-af51-a770abce2a88>,
+        <https://sandbox.zenodo.org/api/records/411647/files/93c8c909-8c14-4b1c-8f64-347279b27840>,
+        <https://sandbox.zenodo.org/api/records/411647/files/94eb758e-c000-4460-9d23-3d38912cf1bf>,
+        <https://sandbox.zenodo.org/api/records/411647/files/9a9790f9-b5fd-4b85-a054-c684513542d2>,
+        <https://sandbox.zenodo.org/api/records/411647/files/9ea38604-e8ab-4b79-8064-0e30afcd53b5>,
+        <https://sandbox.zenodo.org/api/records/411647/files/9ed36730-963e-4937-b1be-1e5788fe97c0>,
+        <https://sandbox.zenodo.org/api/records/411647/files/9fee2718-de7e-4ff3-8bbb-c790c97a92ee>,
+        <https://sandbox.zenodo.org/api/records/411647/files/a1e57210-b9f6-4808-83b8-5969ae4e7c5e>,
+        <https://sandbox.zenodo.org/api/records/411647/files/a346a90c-e12e-4526-92b1-e5ca23ed2aae>,
+        <https://sandbox.zenodo.org/api/records/411647/files/a5d7223b-9719-4e60-9402-1456ebed96ee>,
+        <https://sandbox.zenodo.org/api/records/411647/files/a663d5af-3e4f-4d03-9318-dcc8c6c0b619>,
+        <https://sandbox.zenodo.org/api/records/411647/files/aa3918e8-eb2f-4f0a-a7b7-7902ef2a915f>,
+        <https://sandbox.zenodo.org/api/records/411647/files/aaf91341-c4f7-4f21-ab40-197af80d8421>,
+        <https://sandbox.zenodo.org/api/records/411647/files/adaab613-a36c-49f1-8698-ba968299c329>,
+        <https://sandbox.zenodo.org/api/records/411647/files/b1297e93-63c6-4ef2-869e-2b8684343119>,
+        <https://sandbox.zenodo.org/api/records/411647/files/b33a8e1b-adad-4e72-9538-a2c2e090ceb1>,
+        <https://sandbox.zenodo.org/api/records/411647/files/b5c26cb0-d90c-4c29-a380-65459f0a8fce>,
+        <https://sandbox.zenodo.org/api/records/411647/files/bb3eeefd-94ab-4e35-9a1a-14ff55fefcdb>,
+        <https://sandbox.zenodo.org/api/records/411647/files/c2eb9980-c9f6-4424-b963-46e9df375991>,
+        <https://sandbox.zenodo.org/api/records/411647/files/c48bb7a3-e76e-47c6-8a88-41e3a8e3b289>,
+        <https://sandbox.zenodo.org/api/records/411647/files/c80b9927-62d7-4507-86fd-e681613a7f67>,
+        <https://sandbox.zenodo.org/api/records/411647/files/cd1da205-a084-458f-8133-da0b491e34cc>,
+        <https://sandbox.zenodo.org/api/records/411647/files/d350d777-b226-41d7-ad2f-e9fa4888ee58>,
+        <https://sandbox.zenodo.org/api/records/411647/files/d605889c-90d4-4994-a179-db9fa6223a81>,
+        <https://sandbox.zenodo.org/api/records/411647/files/d7c28889-7c46-42aa-833e-0818002fa928>,
+        <https://sandbox.zenodo.org/api/records/411647/files/d9e28712-86ef-47a7-94ac-5c64d55d5697>,
+        <https://sandbox.zenodo.org/api/records/411647/files/dde12b7c-69eb-42fe-85a0-3b6b0b680ed2>,
+        <https://sandbox.zenodo.org/api/records/411647/files/de856248-e1f4-4f96-85bd-6925a1efc9d0>,
+        <https://sandbox.zenodo.org/api/records/411647/files/e5bb72ca-1fd9-4b30-a3b3-288a226bceb0>,
+        <https://sandbox.zenodo.org/api/records/411647/files/edc14d32-297b-46e7-8191-6906a595cb4b>,
+        <https://sandbox.zenodo.org/api/records/411647/files/ef7b85fc-e903-4269-8741-5005df7a7f60>,
+        <https://sandbox.zenodo.org/api/records/411647/files/f27671b2-71ce-40f4-a1fa-a63989eaf28e>,
+        <https://sandbox.zenodo.org/api/records/411647/files/f370c9d2-dc9b-49ab-a7fd-17695f7e764c>,
+        <https://sandbox.zenodo.org/api/records/411647/files/f50ecaff-8016-4428-b00a-85475bb771bb>,
+        <https://sandbox.zenodo.org/api/records/411647/files/f90e5480-faee-4b9e-be2c-93318c5cd746>,
+        <https://sandbox.zenodo.org/api/records/411647/files/fbcc206c-fbc2-497b-b618-4fb4b8477cc9>,
+        <https://sandbox.zenodo.org/api/records/411647/files/fd90b119-db72-4c50-9070-428f24c7e67a> ;
+    dcat:keyword "hdf5",
+        "opencefadb",
+        "rdm",
+        "research data management" ;
+    dcat:landingPage <https://sandbox.zenodo.org/api/records/411647> ;
+    dcat:version "0.5.0" .
+
+<https://doi.org/10.5072/zenodo.411650> a dcat:Dataset ;
+    dcterms:accessRights "open" ;
+    dcterms:creator <https://orcid.org/0000-0001-8729-0482>,
+        <https://orcid.org/0000-0001-9560-500X> ;
+    dcterms:description "Data from the open centrifugal fan database showcasing FAIR data management with HDF5 files and RDF metadata annotations applied on experimental measurement data of a generic centrifugal fan." ;
+    dcterms:identifier "10.5072/zenodo.411650" ;
+    dcterms:issued "2025-12-04T20:23:41.626988+00:00"^^xsd:dateTime ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:modified "2025-12-04T20:23:42.170014+00:00"^^xsd:dateTime ;
+    dcterms:publisher <https://www.wikidata.org/wiki/Q22661177> ;
+    dcterms:title "OpenCeFaDB Dataset 2 - n600 fan curve" ;
+    dcat:distribution <https://sandbox.zenodo.org/api/records/411650/files/29f1ff24-7f8c-4a7a-ad48-2ed265436e2d>,
+        <https://sandbox.zenodo.org/api/records/411650/files/3a263551-dcfa-4a93-86b6-d68dab8a9242>,
+        <https://sandbox.zenodo.org/api/records/411650/files/6af5c7f1-2994-4f4e-afc3-4d194ea52874>,
+        <https://sandbox.zenodo.org/api/records/411650/files/7a36d5c5-254b-40b3-a859-2c910fcb1b3a>,
+        <https://sandbox.zenodo.org/api/records/411650/files/a5c48c41-2732-471d-840d-1b1be077490f>,
+        <https://sandbox.zenodo.org/api/records/411650/files/def63fb8-fd51-4103-94e1-490829ba1556> ;
+    dcat:keyword "hdf5",
+        "opencefadb",
+        "rdm",
+        "research data management" ;
+    dcat:landingPage <https://sandbox.zenodo.org/api/records/411650> ;
+    dcat:version "0.4.0" .
+
+<https://doi.org/10.5072/zenodo.411651> a dcat:Dataset ;
+    dcterms:accessRights "open" ;
+    dcterms:creator <https://orcid.org/0000-0001-8729-0482>,
+        <https://orcid.org/0000-0001-9560-500X> ;
+    dcterms:description "Data from the open centrifugal fan database showcasing FAIR data management with HDF5 files and RDF metadata annotations applied on experimental measurement data of a generic centrifugal fan." ;
+    dcterms:identifier "10.5072/zenodo.411651" ;
+    dcterms:issued "2025-12-04T20:25:55.628697+00:00"^^xsd:dateTime ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:modified "2025-12-04T20:26:01.261569+00:00"^^xsd:dateTime ;
+    dcterms:publisher <https://www.wikidata.org/wiki/Q22661177> ;
+    dcterms:title "OpenCeFaDB Dataset 1 - n800 fan curve" ;
+    dcat:distribution <https://sandbox.zenodo.org/api/records/411651/files/032c9f87-36ec-4e54-a9e5-876fab1aa127>,
+        <https://sandbox.zenodo.org/api/records/411651/files/0b1afa12-7029-439a-a808-9f12197d14c2>,
+        <https://sandbox.zenodo.org/api/records/411651/files/102f85db-ac0a-49fb-8034-56a9e255cae0>,
+        <https://sandbox.zenodo.org/api/records/411651/files/11bb6b2a-9501-4943-9c51-5422debb951b>,
+        <https://sandbox.zenodo.org/api/records/411651/files/1ad3aed1-5e08-4246-8e55-dd2a238d3cd6>,
+        <https://sandbox.zenodo.org/api/records/411651/files/1c334146-30b8-4e5b-b25c-2ccf5626dbea>,
+        <https://sandbox.zenodo.org/api/records/411651/files/1f978409-253b-4468-9f3a-7fa37ed9febb>,
+        <https://sandbox.zenodo.org/api/records/411651/files/20794d93-100e-4e95-947c-d95516dc134f>,
+        <https://sandbox.zenodo.org/api/records/411651/files/227a9f02-e4fc-425f-a6ae-ae29e7574a45>,
+        <https://sandbox.zenodo.org/api/records/411651/files/24dc50ad-b8ea-4a40-b76d-891ff88b8edf>,
+        <https://sandbox.zenodo.org/api/records/411651/files/2603cd5a-2208-43e2-a7de-38ed8b943f70>,
+        <https://sandbox.zenodo.org/api/records/411651/files/2888e6a9-1db1-48d5-a43d-ab97960842f4>,
+        <https://sandbox.zenodo.org/api/records/411651/files/2dfee041-aa25-4f07-b1e8-7c2eb98d78c4>,
+        <https://sandbox.zenodo.org/api/records/411651/files/3ae1df53-cf43-4503-8d84-432146f58248>,
+        <https://sandbox.zenodo.org/api/records/411651/files/3cea3f57-d16c-49a3-bb59-2d531b26430e>,
+        <https://sandbox.zenodo.org/api/records/411651/files/4075ec0e-87be-4b1b-8b5a-81371ecd2ff2>,
+        <https://sandbox.zenodo.org/api/records/411651/files/41ddedad-29b8-4ee5-8781-5c0760df2322>,
+        <https://sandbox.zenodo.org/api/records/411651/files/434a0088-53ec-4675-8db1-6fd952a605ae>,
+        <https://sandbox.zenodo.org/api/records/411651/files/4b57bbd2-4109-4aa9-8975-e3fd65cfeb79>,
+        <https://sandbox.zenodo.org/api/records/411651/files/4d0f39d6-55b7-4990-8023-6211876b563a>,
+        <https://sandbox.zenodo.org/api/records/411651/files/5175907c-4497-4634-9d29-c3bfdc615946>,
+        <https://sandbox.zenodo.org/api/records/411651/files/5a7bb16d-969c-430c-bef9-ab7f02a69e70>,
+        <https://sandbox.zenodo.org/api/records/411651/files/5cd1b0a4-2c5a-4e3a-9f1a-45ec674d87c5>,
+        <https://sandbox.zenodo.org/api/records/411651/files/6073bc50-ca07-41de-ab80-241df7f963ed>,
+        <https://sandbox.zenodo.org/api/records/411651/files/65571457-17be-490c-8805-126a707d8f7b>,
+        <https://sandbox.zenodo.org/api/records/411651/files/68020cef-6b18-4b5a-9187-bf335752d6a7>,
+        <https://sandbox.zenodo.org/api/records/411651/files/6afa65a6-65a3-40c4-8ef6-49d8935d6c0e>,
+        <https://sandbox.zenodo.org/api/records/411651/files/6b91bf4d-5c41-4cc7-9121-cd3c1264c4b4>,
+        <https://sandbox.zenodo.org/api/records/411651/files/768639d0-9511-45df-a9c7-e638114d20de>,
+        <https://sandbox.zenodo.org/api/records/411651/files/84073d70-76dd-47aa-b82b-c571d3f3176b>,
+        <https://sandbox.zenodo.org/api/records/411651/files/85591527-c977-4f46-9600-d4a9e67519cb>,
+        <https://sandbox.zenodo.org/api/records/411651/files/8aea7b54-3cb4-4980-88de-9098c18fdd28>,
+        <https://sandbox.zenodo.org/api/records/411651/files/924d3bd6-5e81-4985-8b6b-5b3ad2ff067a>,
+        <https://sandbox.zenodo.org/api/records/411651/files/94f6a01a-3357-438c-9227-cf6e4fe3e732>,
+        <https://sandbox.zenodo.org/api/records/411651/files/978d3b77-500f-4e20-a1b8-aeff83f45619>,
+        <https://sandbox.zenodo.org/api/records/411651/files/a36bdd1e-e1aa-4af9-82c5-2728df55594c>,
+        <https://sandbox.zenodo.org/api/records/411651/files/a5f4f525-3326-441e-a084-c57d33d2f404>,
+        <https://sandbox.zenodo.org/api/records/411651/files/ac0ad151-c8d6-4f00-b61d-24d269d0fba8>,
+        <https://sandbox.zenodo.org/api/records/411651/files/af352608-3b11-4307-85c8-4a869ec9f6c4>,
+        <https://sandbox.zenodo.org/api/records/411651/files/b5adbfe2-ede1-400c-8d42-beb845e458d8>,
+        <https://sandbox.zenodo.org/api/records/411651/files/bb76f6d2-ae0f-4262-994c-da611b3d926a>,
+        <https://sandbox.zenodo.org/api/records/411651/files/bde3e14d-1bab-4e6f-9113-0280922cf3da>,
+        <https://sandbox.zenodo.org/api/records/411651/files/bf1cc35b-de0e-4d9d-9278-2e62d0b753a8>,
+        <https://sandbox.zenodo.org/api/records/411651/files/c215f43a-8fd1-435b-9a20-db2cd0c40afe>,
+        <https://sandbox.zenodo.org/api/records/411651/files/c545e973-0dbd-46da-9355-105bcbc7c025>,
+        <https://sandbox.zenodo.org/api/records/411651/files/c9659fb4-a6fb-4b9c-8d97-a909156753ee>,
+        <https://sandbox.zenodo.org/api/records/411651/files/cb277539-967f-4cca-aa9c-0d10fdb9804e>,
+        <https://sandbox.zenodo.org/api/records/411651/files/ceb3ab3c-6ab9-42f4-926b-e933a818ccef>,
+        <https://sandbox.zenodo.org/api/records/411651/files/d0fc037d-6444-4d3f-abd8-e42ff7c158c9>,
+        <https://sandbox.zenodo.org/api/records/411651/files/d38ef613-fe3a-4b27-8217-9fde8db038dc>,
+        <https://sandbox.zenodo.org/api/records/411651/files/d57aec15-4092-4d75-91a8-23e48a4786a2>,
+        <https://sandbox.zenodo.org/api/records/411651/files/dbdc2e92-8dba-4ba1-8e7c-368ccdbaf318>,
+        <https://sandbox.zenodo.org/api/records/411651/files/e2aba30c-3505-4b65-a446-c4273e6aeb90>,
+        <https://sandbox.zenodo.org/api/records/411651/files/f9e9f28e-f8e6-4922-9ae5-c92404e45d56>,
+        <https://sandbox.zenodo.org/api/records/411651/files/fc942369-241e-489f-8198-7f148ac70b5e>,
+        <https://sandbox.zenodo.org/api/records/411651/files/fe6b8c05-50b6-4be4-85a3-13222b90c7ce> ;
+    dcat:keyword "hdf5",
+        "opencefadb",
+        "rdm",
+        "research data management" ;
+    dcat:landingPage <https://sandbox.zenodo.org/api/records/411651> ;
+    dcat:version "0.4.0" .
+
+<https://doi.org/10.5072/zenodo.411652> a dcat:Dataset ;
+    dcterms:accessRights "open" ;
+    dcterms:creator <https://orcid.org/0000-0001-8729-0482>,
+        <https://orcid.org/0000-0001-9560-500X> ;
+    dcterms:description "Data from the open centrifugal fan database showcasing FAIR data management with HDF5 files and RDF metadata annotations applied on experimental measurement data of a generic centrifugal fan." ;
+    dcterms:identifier "10.5072/zenodo.411652" ;
+    dcterms:issued "2025-12-04T20:27:35.245768+00:00"^^xsd:dateTime ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:modified "2025-12-04T20:27:39.047871+00:00"^^xsd:dateTime ;
+    dcterms:publisher <https://www.wikidata.org/wiki/Q22661177> ;
+    dcterms:title "OpenCeFaDB Dataset 1 - n1000 fan curve" ;
+    dcat:distribution <https://sandbox.zenodo.org/api/records/411652/files/0132e424-bfcb-4399-b368-d4d1bafa46b8>,
+        <https://sandbox.zenodo.org/api/records/411652/files/02723ad6-6baf-48bb-821e-025347f84c02>,
+        <https://sandbox.zenodo.org/api/records/411652/files/0624548c-ba29-4dc0-af39-0fe37987a187>,
+        <https://sandbox.zenodo.org/api/records/411652/files/0c4022f3-4f00-47e5-a5c4-9b4453a4baee>,
+        <https://sandbox.zenodo.org/api/records/411652/files/0c9b9489-3c98-4507-a190-4400e94abc38>,
+        <https://sandbox.zenodo.org/api/records/411652/files/0e209739-f8f2-47f6-8e40-1f0d61cae1f3>,
+        <https://sandbox.zenodo.org/api/records/411652/files/113224af-98ab-4694-8086-13062680c870>,
+        <https://sandbox.zenodo.org/api/records/411652/files/1173a807-118c-4ea5-b595-cd42b9766e2e>,
+        <https://sandbox.zenodo.org/api/records/411652/files/120253fd-4208-4be1-a936-d15dd91cd855>,
+        <https://sandbox.zenodo.org/api/records/411652/files/13e39144-1ec9-4274-8fb2-d31de36a3827>,
+        <https://sandbox.zenodo.org/api/records/411652/files/2c0f8428-c3a3-4b24-aa4f-2f354dcd859f>,
+        <https://sandbox.zenodo.org/api/records/411652/files/2f3f804f-aee6-4cc6-906d-494632f2fb44>,
+        <https://sandbox.zenodo.org/api/records/411652/files/333fda9d-9a25-46a9-8fb3-1f0cad82fc42>,
+        <https://sandbox.zenodo.org/api/records/411652/files/3653d278-d37e-4fd2-9673-ebee3bbe5a3e>,
+        <https://sandbox.zenodo.org/api/records/411652/files/397e4add-bc84-40d6-86ae-a3362d707af1>,
+        <https://sandbox.zenodo.org/api/records/411652/files/41dce390-c17f-4dc4-82b3-028bc7ff0258>,
+        <https://sandbox.zenodo.org/api/records/411652/files/44aab2f1-1214-487d-8e28-ac1a615d9ba5>,
+        <https://sandbox.zenodo.org/api/records/411652/files/4be28ad9-6700-4c87-9f74-0480500f1684>,
+        <https://sandbox.zenodo.org/api/records/411652/files/505c2086-bc82-4f25-aa07-7f369ef4c7b4>,
+        <https://sandbox.zenodo.org/api/records/411652/files/56f3d601-ed22-4850-9d59-b26f228e37bc>,
+        <https://sandbox.zenodo.org/api/records/411652/files/5a61ead2-4588-497f-838c-e1ed76d9b38e>,
+        <https://sandbox.zenodo.org/api/records/411652/files/653901fb-e12a-40c1-8aef-3f7735204fca>,
+        <https://sandbox.zenodo.org/api/records/411652/files/65d9696f-3022-4c33-8e3e-b5d86382f029>,
+        <https://sandbox.zenodo.org/api/records/411652/files/66892282-8380-4f35-9314-b4055aef9659>,
+        <https://sandbox.zenodo.org/api/records/411652/files/6cfba283-7605-4006-b4fc-12245c7f679a>,
+        <https://sandbox.zenodo.org/api/records/411652/files/6db72313-8dc0-4a55-a752-50ce332a964d>,
+        <https://sandbox.zenodo.org/api/records/411652/files/6ff5e197-65d1-4bae-b741-b0a7cde76310>,
+        <https://sandbox.zenodo.org/api/records/411652/files/71ef19c6-8a07-4c4a-981c-11b27de37862>,
+        <https://sandbox.zenodo.org/api/records/411652/files/7911b94a-14b8-4612-984b-c3a861e0e8d4>,
+        <https://sandbox.zenodo.org/api/records/411652/files/7c9075b1-4d04-496f-8cfe-bec86cf2e8b9>,
+        <https://sandbox.zenodo.org/api/records/411652/files/825a0c2f-a04d-4d8e-9b2b-bb6333f7bfb7>,
+        <https://sandbox.zenodo.org/api/records/411652/files/86e0a150-e1d1-4f9d-970e-8faa0edaf352>,
+        <https://sandbox.zenodo.org/api/records/411652/files/8f0be268-e71b-4924-8043-16359e67124f>,
+        <https://sandbox.zenodo.org/api/records/411652/files/938093e0-f8cd-4b77-a601-b52016f210ad>,
+        <https://sandbox.zenodo.org/api/records/411652/files/96486495-2d7d-440a-8699-039653b5af4a>,
+        <https://sandbox.zenodo.org/api/records/411652/files/9abdeaaa-a441-414a-8ea2-ef8a7478a455>,
+        <https://sandbox.zenodo.org/api/records/411652/files/9aefce98-bb2c-4371-ae97-e3a85736b9c4>,
+        <https://sandbox.zenodo.org/api/records/411652/files/a19bcbea-c67d-4318-84ac-a26fd8eaefd2>,
+        <https://sandbox.zenodo.org/api/records/411652/files/a662015f-57e2-4d16-973a-242ebe7abc8d>,
+        <https://sandbox.zenodo.org/api/records/411652/files/a8628692-f411-4948-93e5-69028e6607d4>,
+        <https://sandbox.zenodo.org/api/records/411652/files/adbbabfa-fe52-4b42-a5e3-ac11a2739d9a>,
+        <https://sandbox.zenodo.org/api/records/411652/files/ba641235-b9e9-4acb-a2fa-bc7c52446009>,
+        <https://sandbox.zenodo.org/api/records/411652/files/bef4bd14-1115-4d3a-81f5-4a433527798d>,
+        <https://sandbox.zenodo.org/api/records/411652/files/c1742484-0173-4470-b900-ee2407d40b1b>,
+        <https://sandbox.zenodo.org/api/records/411652/files/c694b33c-afd3-4433-8a26-7ec064e9b636>,
+        <https://sandbox.zenodo.org/api/records/411652/files/c77fbf08-d65b-4e60-96bf-7e168e141d13>,
+        <https://sandbox.zenodo.org/api/records/411652/files/cc20aecd-b753-4b46-b055-da1f47525d1c>,
+        <https://sandbox.zenodo.org/api/records/411652/files/d37fa80f-2492-4b85-8cf0-2e65fcdb0f26>,
+        <https://sandbox.zenodo.org/api/records/411652/files/d4575ace-cc8a-4112-91a5-2bf416b7cb2b>,
+        <https://sandbox.zenodo.org/api/records/411652/files/dbb2fd83-1a17-44e5-bdbe-04b3b7e2e4e2>,
+        <https://sandbox.zenodo.org/api/records/411652/files/f019af5a-1371-4ab0-bea8-20586e00f056>,
+        <https://sandbox.zenodo.org/api/records/411652/files/f5ed51d1-ee81-4fd6-911b-b731ad618da8>,
+        <https://sandbox.zenodo.org/api/records/411652/files/fb8f36ff-4b18-40be-a393-2a1c62635497>,
+        <https://sandbox.zenodo.org/api/records/411652/files/fdf39316-c83d-43f0-95c2-24b8df88c387> ;
+    dcat:keyword "hdf5",
+        "opencefadb",
+        "rdm",
+        "research data management" ;
+    dcat:landingPage <https://sandbox.zenodo.org/api/records/411652> ;
+    dcat:version "0.4.0" .
+
+<https://doi.org/10.5072/zenodo.411653> a dcat:Dataset ;
+    dcterms:accessRights "open" ;
+    dcterms:creator <https://orcid.org/0000-0001-8729-0482>,
+        <https://orcid.org/0000-0001-9560-500X> ;
+    dcterms:description "Data from the open centrifugal fan database showcasing FAIR data management with HDF5 files and RDF metadata annotations applied on experimental measurement data of a generic centrifugal fan." ;
+    dcterms:identifier "10.5072/zenodo.411653" ;
+    dcterms:issued "2025-12-04T20:28:04.544055+00:00"^^xsd:dateTime ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:modified "2025-12-04T20:28:05.319238+00:00"^^xsd:dateTime ;
+    dcterms:publisher <https://www.wikidata.org/wiki/Q22661177> ;
+    dcterms:title "OpenCeFaDB Dataset 1 - n1200 fan curve" ;
+    dcat:distribution <https://sandbox.zenodo.org/api/records/411653/files/1b8052fc-c493-40bd-a1a7-2756d8ee9aac>,
+        <https://sandbox.zenodo.org/api/records/411653/files/1c1fb78f-a0b5-473f-a07c-f03357e04f3f>,
+        <https://sandbox.zenodo.org/api/records/411653/files/25ddb0ed-613a-4975-bbbf-a3182fc4cc37>,
+        <https://sandbox.zenodo.org/api/records/411653/files/5545a376-0a50-4255-8088-63102f0fd45c>,
+        <https://sandbox.zenodo.org/api/records/411653/files/5f203aa4-edf9-4d36-9579-3a7392a59dd2>,
+        <https://sandbox.zenodo.org/api/records/411653/files/884ba7d2-0421-4456-bc5a-23ee23a50fc6>,
+        <https://sandbox.zenodo.org/api/records/411653/files/b5f0571d-0515-4968-8146-cebe58307cda>,
+        <https://sandbox.zenodo.org/api/records/411653/files/cf72283d-bb10-4962-af28-7d1d56180786> ;
+    dcat:keyword "hdf5",
+        "opencefadb",
+        "rdm",
+        "research data management" ;
+    dcat:landingPage <https://sandbox.zenodo.org/api/records/411653> ;
+    dcat:version "0.4.0" .
+
+<https://doi.org/10.5072/zenodo.411654> a dcat:Dataset ;
+    dcterms:accessRights "open" ;
+    dcterms:creator <https://orcid.org/0000-0001-8729-0482>,
+        <https://orcid.org/0000-0001-9560-500X> ;
+    dcterms:description "Data from the open centrifugal fan database showcasing FAIR data management with HDF5 files and RDF metadata annotations applied on experimental measurement data of a generic centrifugal fan." ;
+    dcterms:identifier "10.5072/zenodo.411654" ;
+    dcterms:issued "2025-12-04T20:28:38.994106+00:00"^^xsd:dateTime ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:modified "2025-12-04T20:28:40.118781+00:00"^^xsd:dateTime ;
+    dcterms:publisher <https://www.wikidata.org/wiki/Q22661177> ;
+    dcterms:title "OpenCeFaDB Dataset 2 - n1200 fan curve" ;
+    dcat:distribution <https://sandbox.zenodo.org/api/records/411654/files/07d56c25-ab35-4ec8-b1a4-026df938f3b6>,
+        <https://sandbox.zenodo.org/api/records/411654/files/085af95b-4f59-452b-bc21-a19df0e57924>,
+        <https://sandbox.zenodo.org/api/records/411654/files/123b26c5-8663-4b08-8a04-1c7adfe0623f>,
+        <https://sandbox.zenodo.org/api/records/411654/files/2eb98ae5-3309-4e11-97b7-8bc0625ce141>,
+        <https://sandbox.zenodo.org/api/records/411654/files/306023bb-e077-480a-923b-c2e75e2cb772>,
+        <https://sandbox.zenodo.org/api/records/411654/files/43765b7e-e562-459b-be5c-47e0f73b9258>,
+        <https://sandbox.zenodo.org/api/records/411654/files/60cc99e1-3346-4280-a3b9-c184d960c8f8>,
+        <https://sandbox.zenodo.org/api/records/411654/files/7958dccf-0550-44c8-b3a0-a70df0f1504c>,
+        <https://sandbox.zenodo.org/api/records/411654/files/991fee22-0c55-4820-b040-50ab0dda348b>,
+        <https://sandbox.zenodo.org/api/records/411654/files/b046e314-38b6-4e85-8e30-76f53aa1632f>,
+        <https://sandbox.zenodo.org/api/records/411654/files/b69980e6-b9b3-49a3-a5ed-6051ca8d25d2>,
+        <https://sandbox.zenodo.org/api/records/411654/files/b6b90a55-c178-4b80-827b-423179b0dbdf>,
+        <https://sandbox.zenodo.org/api/records/411654/files/c10794cb-7932-40b3-826e-4678cd0de029>,
+        <https://sandbox.zenodo.org/api/records/411654/files/cf3dd165-4d23-411f-9919-ea1cbf6d4927>,
+        <https://sandbox.zenodo.org/api/records/411654/files/f1e69996-105d-49ac-93a6-be7260ff8cc9>,
+        <https://sandbox.zenodo.org/api/records/411654/files/f81ab833-205f-4e6d-b48a-a16a94c24a2e> ;
+    dcat:keyword "hdf5",
+        "opencefadb",
+        "rdm",
+        "research data management" ;
+    dcat:landingPage <https://sandbox.zenodo.org/api/records/411654> ;
+    dcat:version "0.4.0" .
+
+<https://matthiasprobst.github.io/ssno/1.3.0/> a dcat:Dataset ;
+    dcterms:description "Ontology of standard names for scientific data with a focus on HDF5 files, serialized in Turtle." ;
+    dcterms:identifier "ssno-130" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:title "Scientific Standard Names Ontology (SSNO) 1.3.0"@en ;
+    dcat:distribution [ spdx:checksum [ a spdx:Checksum ;
+                    spdx:algorithm spdx:checksumAlgorithm_md5 ;
+                    spdx:checksumValue "499bb117e356b4c0f6777bfa290bce11" ] ;
+            dcat:downloadURL <https://matthiasprobst.github.io/ssno/1.3.0/ssno.ttl> ;
+            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ] ;
+    dcat:keyword "ontology"@en,
+        "standard names"@en .
+
+<https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl> a dcat:Dataset ;
+    dcterms:identifier "ALLOTROPE-VOC-ADF-REC-2024-12-HDF" ;
+    dcterms:license <http://purl.allotrope.org/voc/creative-commons-attribution-license>,
+        <http://purl.allotrope.org/voc/hdf-license> ;
+    dcterms:publisher [ a vcard:Organization ;
+            vcard:fn "Allotrope Foundation" ;
+            vcard:hasURL <https://www.allotrope.org/> ] ;
+    dcterms:title "The HDF5 data description ontology. (REC/2024/12)"@en ;
+    dcat:distribution [ dcat:downloadURL <https://purl.allotrope.org/voc/adf/REC/2024/12/hdf.ttl> ;
+            dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ] .
+
+<https://sandbox.zenodo.org/api/records/411647/files/03a678bc-fa11-4089-a71e-e8cf22d7c121> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-07-46_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "01dd068d869428a45f7fabf147559103" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/03a678bc-fa11-4089-a71e-e8cf22d7c121> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-07-46_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/058806c0-1613-418a-96a7-96f1e7c31e61> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-03-39_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "30b886f7b4206b42e1f3d72a621d8fc5" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/058806c0-1613-418a-96a7-96f1e7c31e61> ;
+    dcat:byteSize 846620 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-03-39_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/072c8597-75ae-48ce-8740-b3cfa904f607> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-26-26_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b2aae8778e93cf92c1d28e3c060f9e8e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/072c8597-75ae-48ce-8740-b3cfa904f607> ;
+    dcat:byteSize 833707 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-26-26_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/0b6029d6-861c-41a2-a64d-5cc6fe4d124e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-11-06_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c2ee77e85cbf6f3bc17613a15cbfc5bb" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/0b6029d6-861c-41a2-a64d-5cc6fe4d124e> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-11-06_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/0efffae8-72b8-4d3d-9ddd-abf159f332c5> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-15-47_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f136638b36aa5c1d77f45700c8a872c9" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/0efffae8-72b8-4d3d-9ddd-abf159f332c5> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-15-47_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/0fb82f3d-e828-42ae-aae5-1ed4205ae93e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-24-11_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3374cf8d3e3c5e5d9ef8289dc9650658" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/0fb82f3d-e828-42ae-aae5-1ed4205ae93e> ;
+    dcat:byteSize 198082 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-24-11_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/11e658c3-1ad9-456f-a017-347f6b40c7f7> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-23-55_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f8a7d8a113cc674c13347daa2993e850" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/11e658c3-1ad9-456f-a017-347f6b40c7f7> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-23-55_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/122456e5-db2a-4bf2-b00a-d84ffc362f94> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-40-47_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "33ce49b4cd62b74da4a2fef63f80d6b1" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/122456e5-db2a-4bf2-b00a-d84ffc362f94> ;
+    dcat:byteSize 198085 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-40-47_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/151305b6-2a6d-47ca-a370-6e61d366af1c> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-29-04_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4da7c0cfb8162b8fc6c2f1daae93a74f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/151305b6-2a6d-47ca-a370-6e61d366af1c> ;
+    dcat:byteSize 841834 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-29-04_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/169ceed4-3960-4449-af5d-f5fe353c7190> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-36-51_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3c444ec593788ba14b0cfd6ae5e75857" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/169ceed4-3960-4449-af5d-f5fe353c7190> ;
+    dcat:byteSize 854727 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-36-51_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/17ae2fa5-2dcb-41da-9955-3ee2ba9d32d2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-50-42_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "9eface69cb6fa8367038af7b32ef6b01" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/17ae2fa5-2dcb-41da-9955-3ee2ba9d32d2> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-50-42_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/198ef4f0-beb9-45aa-b33e-a89ed4edbb76> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-18-06_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "39462314d0c70b80e0fdb99b89937e0a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/198ef4f0-beb9-45aa-b33e-a89ed4edbb76> ;
+    dcat:byteSize 854668 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-18-06_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/1a5524ec-e582-4079-9759-725ff29361af> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-05-20_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "249682e98b0ad29e3f12a582f985000e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/1a5524ec-e582-4079-9759-725ff29361af> ;
+    dcat:byteSize 825027 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-05-20_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/20eb33f1-f249-4ae8-be6e-88a5dd1fb700> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-47-32_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "317adb70c985a17bf7edd91e9113a210" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/20eb33f1-f249-4ae8-be6e-88a5dd1fb700> ;
+    dcat:byteSize 848615 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-47-32_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/20fc705e-a32a-42d4-9393-aa6a4afb4f5a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-36-51_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "7cd9a8345b0fac1a3823613d1a9934b0" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/20fc705e-a32a-42d4-9393-aa6a4afb4f5a> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-36-51_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/21493cac-57bb-416b-a98d-52b15b6feaf6> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-18-21_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f90d749f7ed6a0da37dc6a0cedfa25a1" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/21493cac-57bb-416b-a98d-52b15b6feaf6> ;
+    dcat:byteSize 839334 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-18-21_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/3c58531d-9407-4992-ab28-3f0b5ce7c6bf> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-58-32_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e1f1c288f30b79609544f968ed2f34f1" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/3c58531d-9407-4992-ab28-3f0b5ce7c6bf> ;
+    dcat:byteSize 849417 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-58-32_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/3dad3e17-53d5-4ae3-8029-7a322bb737a0> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-34-32_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "747c7421f1bb058414958b9ddd117d8e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/3dad3e17-53d5-4ae3-8029-7a322bb737a0> ;
+    dcat:byteSize 827899 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-34-32_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/3e6365fd-080f-46ab-a7c2-aa529aea5fc3> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-37-12_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "36225f008a0ebbb187fa87471ea0486e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/3e6365fd-080f-46ab-a7c2-aa529aea5fc3> ;
+    dcat:byteSize 845906 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-37-12_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/3f8db603-2e26-4d89-a4d9-36330ad14a9e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-11-06_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "48457fa9207cd3c51ceb919988775156" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/3f8db603-2e26-4d89-a4d9-36330ad14a9e> ;
+    dcat:byteSize 826735 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-11-06_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/42b887e2-b114-40bf-a9ac-f0e097a84ee3> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-38-30_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "de346480581926d46a56b042c1340893" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/42b887e2-b114-40bf-a9ac-f0e097a84ee3> ;
+    dcat:byteSize 198083 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-38-30_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/431297d7-dfb2-468e-a444-964ad1d34be1> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-08-28_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "724950c6a456891fa6fc3ebe813c3fa4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/431297d7-dfb2-468e-a444-964ad1d34be1> ;
+    dcat:byteSize 852486 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-08-28_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/491447fe-7ab0-449c-a967-f9774a97669b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-01-03_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "6ef5b11878102c47dbff2bba49726be8" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/491447fe-7ab0-449c-a967-f9774a97669b> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-01-03_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/4a86ae0a-3ee5-4fd4-babd-c653c3f61d56> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-11-39_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "43ddfe246edd9fc71c631f94a28b3dc1" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/4a86ae0a-3ee5-4fd4-babd-c653c3f61d56> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-11-39_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/5504a251-ecd7-480f-8978-7929f1d9293c> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-16-13_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "6b691db25db1790ec19b6051f07b0cc1" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/5504a251-ecd7-480f-8978-7929f1d9293c> ;
+    dcat:byteSize 856776 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-16-13_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/55bb91e0-8867-456f-bc68-084a2f394abd> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-31-01_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "9fef3899d5f940f746f47b023871bac5" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/55bb91e0-8867-456f-bc68-084a2f394abd> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-31-01_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/5cffa73f-851a-441d-9911-36cb549c5330> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-31-01_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "48648bcc08faf16a242fe02ce82883fe" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/5cffa73f-851a-441d-9911-36cb549c5330> ;
+    dcat:byteSize 856683 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-31-01_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/62eccdf6-cc58-4770-b50e-180c5019d992> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-31-31_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2d6ec01a1edf145d0367e00ea8571bc5" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/62eccdf6-cc58-4770-b50e-180c5019d992> ;
+    dcat:byteSize 839890 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-31-31_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/68851bd5-5539-4a65-9a91-26bb832bb9d0> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-24-11_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d3bf7958d72138c7d76445d95a31b20d" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/68851bd5-5539-4a65-9a91-26bb832bb9d0> ;
+    dcat:byteSize 856049 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-24-11_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/6f090b20-faaa-4f39-97cc-61743f476e81> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-26-26_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2cf774fe152f427ce0fd6a438a3941f3" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/6f090b20-faaa-4f39-97cc-61743f476e81> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-26-26_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/7304610b-d964-40f7-8205-b2ff1a6b6fba> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-35-14_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "9930df4b93ab4cceaa2e9a32d3047a82" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/7304610b-d964-40f7-8205-b2ff1a6b6fba> ;
+    dcat:byteSize 198082 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-35-14_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/76476c52-5368-4a15-be90-e3ae19a7a68d> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-44-03_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "244cd3eba390bf35550f11aeee57792e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/76476c52-5368-4a15-be90-e3ae19a7a68d> ;
+    dcat:byteSize 843839 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-44-03_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/797e995e-a3be-491b-ad26-e284230d6218> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-18-35_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f1edf89fa1d1c3fad8ed592656da7674" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/797e995e-a3be-491b-ad26-e284230d6218> ;
+    dcat:byteSize 829099 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-16-18-35_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/7aaf33ce-f2aa-4cdf-b61c-bdb6a4ce71d4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-05-20_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "dc15787199b4a9021f78111128551295" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/7aaf33ce-f2aa-4cdf-b61c-bdb6a4ce71d4> ;
+    dcat:byteSize 198070 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-05-20_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/7c437996-3609-45ef-8096-cfd37269e43a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-22-14_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "317f1f34035b331c1fd198f3fe164f9f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/7c437996-3609-45ef-8096-cfd37269e43a> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-22-14_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/7d332ec2-bfed-4671-93ee-bdc001a70fec> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-14-08_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "5c49b5d4c181c03fb4042c9f465c6d7d" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/7d332ec2-bfed-4671-93ee-bdc001a70fec> ;
+    dcat:byteSize 198073 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-14-08_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/7e839712-bd93-487b-952d-6725bc22c4cf> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-23-55_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b37ef76da2bedf22827d13f799dc467f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/7e839712-bd93-487b-952d-6725bc22c4cf> ;
+    dcat:byteSize 836499 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-23-55_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/7f4ad9bc-846b-423c-9afa-7bc7d9f9e25e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-11-39_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "02cce2777e50571a416a46cb5a0e748f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/7f4ad9bc-846b-423c-9afa-7bc7d9f9e25e> ;
+    dcat:byteSize 853408 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-11-39_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/81fd0e15-5e4c-4522-b6e0-a4764546d04d> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-40-37_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "17b426839ea7d303540c0588468d924e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/81fd0e15-5e4c-4522-b6e0-a4764546d04d> ;
+    dcat:byteSize 844793 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-40-37_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/856f9481-2ecc-4670-9ab7-a649f571bf3b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-47-32_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "cff9f56f0cb8868226d25c6144555804" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/856f9481-2ecc-4670-9ab7-a649f571bf3b> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-47-32_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/86c8961f-6b2d-4f12-bda6-0cdc2296bf81> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-50-42_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "69c131b5f7ce31a902f51b1ed2b49e01" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/86c8961f-6b2d-4f12-bda6-0cdc2296bf81> ;
+    dcat:byteSize 849210 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-50-42_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/87d1c429-abe5-4ba9-8333-2525e568d141> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-20-03_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d03aa803ab9d4c8b379c1ce5638f3e87" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/87d1c429-abe5-4ba9-8333-2525e568d141> ;
+    dcat:byteSize 837225 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-20-03_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/89c8b9e5-f075-48b5-922c-c2e4f6ab6d35> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-03-33_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "18b8595cdb8d79fdeda7ac721ec7cdf4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/89c8b9e5-f075-48b5-922c-c2e4f6ab6d35> ;
+    dcat:byteSize 843157 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-03-33_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/8d88e18c-f290-4544-a638-c42728286386> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-18-21_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "85b951b44e4c837e5c95d1fcfa203af4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/8d88e18c-f290-4544-a638-c42728286386> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-18-21_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/8f43a18f-e8ca-499c-8fa6-031099f60fef> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-05-48_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "ebe9e15eaabb864b9c1f47bf054ccc94" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/8f43a18f-e8ca-499c-8fa6-031099f60fef> ;
+    dcat:byteSize 848986 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-05-48_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/8f4458a1-275a-4adc-a444-6cded5dc5b58> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-03-39_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "fb6c1aa5b914ba53a09d656897d8df70" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/8f4458a1-275a-4adc-a444-6cded5dc5b58> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-03-39_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/9103ed07-3a83-4f86-8bab-8cd28d2aef2a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-15-07_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "cdc799d2f97e781238aff7a528b85bc0" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/9103ed07-3a83-4f86-8bab-8cd28d2aef2a> ;
+    dcat:byteSize 836657 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-16-15-07_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/93883ff5-e317-40a4-af51-a770abce2a88> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-40-37_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "5398d0244947d25a722e5884c72f373f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/93883ff5-e317-40a4-af51-a770abce2a88> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-40-37_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/93c8c909-8c14-4b1c-8f64-347279b27840> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-03-33_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "31b017298154954ffdb783371c07adf0" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/93c8c909-8c14-4b1c-8f64-347279b27840> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-03-33_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/94eb758e-c000-4460-9d23-3d38912cf1bf> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-26-24_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "81cf3acfa1ba7dcb3ca230a4879acf5c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/94eb758e-c000-4460-9d23-3d38912cf1bf> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-26-24_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/9a9790f9-b5fd-4b85-a054-c684513542d2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-29-04_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "5621b01f7c8d3e8e0779203625969ab4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/9a9790f9-b5fd-4b85-a054-c684513542d2> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-29-04_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/9ea38604-e8ab-4b79-8064-0e30afcd53b5> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-40-47_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a67bc73efd4b2e45fbd7a2d7aa9f115f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/9ea38604-e8ab-4b79-8064-0e30afcd53b5> ;
+    dcat:byteSize 857026 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-40-47_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/9ed36730-963e-4937-b1be-1e5788fe97c0> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-38-30_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "98b2257f2d7a5c71be2339766846d318" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/9ed36730-963e-4937-b1be-1e5788fe97c0> ;
+    dcat:byteSize 849691 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-38-30_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/9fee2718-de7e-4ff3-8bbb-c790c97a92ee> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-28-39_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "018168ddb9d3e59629919db9330ada9a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/9fee2718-de7e-4ff3-8bbb-c790c97a92ee> ;
+    dcat:byteSize 850988 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-28-39_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/a1e57210-b9f6-4808-83b8-5969ae4e7c5e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-42-29_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "880f994b2adce83458bea5c141ef44d3" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/a1e57210-b9f6-4808-83b8-5969ae4e7c5e> ;
+    dcat:byteSize 198083 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-42-29_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/a346a90c-e12e-4526-92b1-e5ca23ed2aae> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-44-03_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "686f4862d8cb3bf420ccf5dae4544769" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/a346a90c-e12e-4526-92b1-e5ca23ed2aae> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-44-03_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/a5d7223b-9719-4e60-9402-1456ebed96ee> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-01-03_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "0b91ac6c475b4621a7c2edabe3af90d0" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/a5d7223b-9719-4e60-9402-1456ebed96ee> ;
+    dcat:byteSize 832245 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-01-03_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/a663d5af-3e4f-4d03-9318-dcc8c6c0b619> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-53-07_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "bba7669f18b943e49b93dbc98a34d781" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/a663d5af-3e4f-4d03-9318-dcc8c6c0b619> ;
+    dcat:byteSize 836070 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-53-07_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/aa3918e8-eb2f-4f0a-a7b7-7902ef2a915f> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-20-03_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "45d9dfe398d26056239ce24318bcf7d6" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/aa3918e8-eb2f-4f0a-a7b7-7902ef2a915f> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-20-03_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/aaf91341-c4f7-4f21-ab40-197af80d8421> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-33-03_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4f40d3eeb5588b354a06f4fb59a02e7c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/aaf91341-c4f7-4f21-ab40-197af80d8421> ;
+    dcat:byteSize 841352 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-33-03_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/adaab613-a36c-49f1-8698-ba968299c329> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-18-35_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "747aef097bb852c166d3b36fe4164184" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/adaab613-a36c-49f1-8698-ba968299c329> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-16-18-35_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/b1297e93-63c6-4ef2-869e-2b8684343119> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-28-39_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "8cbd7d05f8c18fcfcf24d8b9f7f6df26" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/b1297e93-63c6-4ef2-869e-2b8684343119> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-28-39_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/b33a8e1b-adad-4e72-9538-a2c2e090ceb1> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-56-05_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e768421d1ecea0abac9aa73c3ccb1e6c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/b33a8e1b-adad-4e72-9538-a2c2e090ceb1> ;
+    dcat:byteSize 839156 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-56-05_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/b5c26cb0-d90c-4c29-a380-65459f0a8fce> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-13-18_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "5d5ab658e3aaef44625351069e08d0c9" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/b5c26cb0-d90c-4c29-a380-65459f0a8fce> ;
+    dcat:byteSize 858664 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-13-18_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/bb3eeefd-94ab-4e35-9a1a-14ff55fefcdb> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-56-05_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d9914cc57adcafd627cae9540d46b71a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/bb3eeefd-94ab-4e35-9a1a-14ff55fefcdb> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-56-05_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/c2eb9980-c9f6-4424-b963-46e9df375991> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-33-03_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f7813a9cdc86743f8afb866ad00f2a91" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/c2eb9980-c9f6-4424-b963-46e9df375991> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-33-03_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/c48bb7a3-e76e-47c6-8a88-41e3a8e3b289> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-26-24_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "1d0db87fba0c3b3ba2cf848c2a2b5c2e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/c48bb7a3-e76e-47c6-8a88-41e3a8e3b289> ;
+    dcat:byteSize 856043 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-26-24_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/c80b9927-62d7-4507-86fd-e681613a7f67> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-42-29_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "86ff5b71c18e436d1358c8135033ce6e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/c80b9927-62d7-4507-86fd-e681613a7f67> ;
+    dcat:byteSize 844318 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-42-29_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/cd1da205-a084-458f-8133-da0b491e34cc> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-05-48_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "65cf97ba1bba0cf863d43a9389d49f14" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/cd1da205-a084-458f-8133-da0b491e34cc> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-05-48_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/d350d777-b226-41d7-ad2f-e9fa4888ee58> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-13-18_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c88aad9518df679f6420729d16024a41" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/d350d777-b226-41d7-ad2f-e9fa4888ee58> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-13-18_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/d605889c-90d4-4994-a179-db9fa6223a81> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-18-06_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "cbbc3758409a161b72e79861c7adcfeb" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/d605889c-90d4-4994-a179-db9fa6223a81> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-18-06_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/d7c28889-7c46-42aa-833e-0818002fa928> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-53-07_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "192045f013d71d2e11346e9aae007aab" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/d7c28889-7c46-42aa-833e-0818002fa928> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-53-07_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/d9e28712-86ef-47a7-94ac-5c64d55d5697> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-35-14_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "20fa70547e2eae85417bf4f434c4b70c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/d9e28712-86ef-47a7-94ac-5c64d55d5697> ;
+    dcat:byteSize 831233 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-35-14_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/dde12b7c-69eb-42fe-85a0-3b6b0b680ed2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-34-32_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d617864a871d5027bc15fac6b21cdae6" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/dde12b7c-69eb-42fe-85a0-3b6b0b680ed2> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-34-32_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/de856248-e1f4-4f96-85bd-6925a1efc9d0> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-16-13_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b44b64ebd29fcac6ba9db833da394904" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/de856248-e1f4-4f96-85bd-6925a1efc9d0> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-16-13_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/e5bb72ca-1fd9-4b30-a3b3-288a226bceb0> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-15-47_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e88c41e830729e1051f267a87f9ea16b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/e5bb72ca-1fd9-4b30-a3b3-288a226bceb0> ;
+    dcat:byteSize 847041 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-15-47_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/edc14d32-297b-46e7-8191-6906a595cb4b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-58-32_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "640ab30e8101e7f18b7c547e9a3e8e93" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/edc14d32-297b-46e7-8191-6906a595cb4b> ;
+    dcat:byteSize 198083 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-58-32_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/ef7b85fc-e903-4269-8741-5005df7a7f60> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-14-08_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "6f9820b6745e0da6bd3e59e890905a10" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/ef7b85fc-e903-4269-8741-5005df7a7f60> ;
+    dcat:byteSize 853653 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-14-08_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/f27671b2-71ce-40f4-a1fa-a63989eaf28e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-08-28_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f2342a22484f47dc7529eee6466473f3" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/f27671b2-71ce-40f4-a1fa-a63989eaf28e> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-08-28_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/f370c9d2-dc9b-49ab-a7fd-17695f7e764c> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-31-31_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "284f670f82eb65d370e2ae7014142c59" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/f370c9d2-dc9b-49ab-a7fd-17695f7e764c> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-31-31_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/f50ecaff-8016-4428-b00a-85475bb771bb> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-15-07_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a523f5c812a91a0874a53ead56bc7330" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/f50ecaff-8016-4428-b00a-85475bb771bb> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-16-15-07_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/f90e5480-faee-4b9e-be2c-93318c5cd746> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-22-14_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "ed5d0fd92ab7f35a2ae5c68f452d8daa" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/f90e5480-faee-4b9e-be2c-93318c5cd746> ;
+    dcat:byteSize 857026 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-22-14_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/fbcc206c-fbc2-497b-b618-4fb4b8477cc9> a dcat:Distribution ;
+    dcterms:title "2023-11-07-14-37-12_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e9e0c1dc63ab67b9dc60c4d4c27a9640" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/fbcc206c-fbc2-497b-b618-4fb4b8477cc9> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-14-37-12_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411647/files/fd90b119-db72-4c50-9070-428f24c7e67a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-15-07-46_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "5d8a67367716df741ba2abd0f0c0cb88" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411647/files/fd90b119-db72-4c50-9070-428f24c7e67a> ;
+    dcat:byteSize 859292 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411647/files/2023-11-07-15-07-46_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411650/files/29f1ff24-7f8c-4a7a-ad48-2ed265436e2d> a dcat:Distribution ;
+    dcterms:title "2023-11-09-14-10-10_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "1fca5eab92cb00ad395e66f426dad91e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411650/files/29f1ff24-7f8c-4a7a-ad48-2ed265436e2d> ;
+    dcat:byteSize 621638 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411650/files/2023-11-09-14-10-10_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411650/files/3a263551-dcfa-4a93-86b6-d68dab8a9242> a dcat:Distribution ;
+    dcterms:title "2023-11-09-14-11-07_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3c02a870bbb5903c13e371c00fceaf1a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411650/files/3a263551-dcfa-4a93-86b6-d68dab8a9242> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411650/files/2023-11-09-14-11-07_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411650/files/6af5c7f1-2994-4f4e-afc3-4d194ea52874> a dcat:Distribution ;
+    dcterms:title "2023-11-09-14-09-21_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "498c779927dbb6bdba52d9cebce444fa" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411650/files/6af5c7f1-2994-4f4e-afc3-4d194ea52874> ;
+    dcat:byteSize 623563 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411650/files/2023-11-09-14-09-21_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411650/files/7a36d5c5-254b-40b3-a859-2c910fcb1b3a> a dcat:Distribution ;
+    dcterms:title "2023-11-09-14-09-21_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b0608bbde936a126353401290bea8a08" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411650/files/7a36d5c5-254b-40b3-a859-2c910fcb1b3a> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411650/files/2023-11-09-14-09-21_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411650/files/a5c48c41-2732-471d-840d-1b1be077490f> a dcat:Distribution ;
+    dcterms:title "2023-11-09-14-10-10_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "27e8d4d24496dfc57b5bc1f521ba21ac" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411650/files/a5c48c41-2732-471d-840d-1b1be077490f> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411650/files/2023-11-09-14-10-10_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411650/files/def63fb8-fd51-4103-94e1-490829ba1556> a dcat:Distribution ;
+    dcterms:title "2023-11-09-14-11-07_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "680a28f2047bc1efd98bde4b849560b8" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411650/files/def63fb8-fd51-4103-94e1-490829ba1556> ;
+    dcat:byteSize 618062 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411650/files/2023-11-09-14-11-07_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/032c9f87-36ec-4e54-a9e5-876fab1aa127> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-18-46_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2da3aeeef84018fd5f9a8d7b1dfc4d42" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/032c9f87-36ec-4e54-a9e5-876fab1aa127> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-18-46_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/0b1afa12-7029-439a-a808-9f12197d14c2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-46-35_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4c139a97212ba57216e87734f8e681ca" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/0b1afa12-7029-439a-a808-9f12197d14c2> ;
+    dcat:byteSize 869258 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-46-35_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/102f85db-ac0a-49fb-8034-56a9e255cae0> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-16-47_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "50cc6a5e4735eea24e1208cb7bba9549" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/102f85db-ac0a-49fb-8034-56a9e255cae0> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-16-47_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/11bb6b2a-9501-4943-9c51-5422debb951b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-02-41_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f418aa90338098096e8a7afa66bd1c5b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/11bb6b2a-9501-4943-9c51-5422debb951b> ;
+    dcat:byteSize 198082 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-02-41_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/1ad3aed1-5e08-4246-8e55-dd2a238d3cd6> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-43-41_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b072525f8e10f9c679e53192833f79e3" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/1ad3aed1-5e08-4246-8e55-dd2a238d3cd6> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-43-41_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/1c334146-30b8-4e5b-b25c-2ccf5626dbea> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-40-57_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "bc0a09445dd8989114eef4b99bc8192c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/1c334146-30b8-4e5b-b25c-2ccf5626dbea> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-40-57_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/1f978409-253b-4468-9f3a-7fa37ed9febb> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-14-50_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a6c9d3ae0b049d75725deb859e12e2b7" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/1f978409-253b-4468-9f3a-7fa37ed9febb> ;
+    dcat:byteSize 198082 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-14-50_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/20794d93-100e-4e95-947c-d95516dc134f> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-30-17_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "26748149dccb312a3bdf8477ae20994d" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/20794d93-100e-4e95-947c-d95516dc134f> ;
+    dcat:byteSize 198073 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-30-17_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/227a9f02-e4fc-425f-a6ae-ae29e7574a45> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-05-17_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "838ecfe4912625d40423a5f878f0996c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/227a9f02-e4fc-425f-a6ae-ae29e7574a45> ;
+    dcat:byteSize 198082 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-05-17_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/24dc50ad-b8ea-4a40-b76d-891ff88b8edf> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-24-15_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2bcc40fd8004bba44b4274e7a432521b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/24dc50ad-b8ea-4a40-b76d-891ff88b8edf> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-24-15_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/2603cd5a-2208-43e2-a7de-38ed8b943f70> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-28-24_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f12d1318315f54c531262d6cdd00c01c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/2603cd5a-2208-43e2-a7de-38ed8b943f70> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-28-24_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/2888e6a9-1db1-48d5-a43d-ab97960842f4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-02-41_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c45e0a1d1352de35b5f96d813f6be6ac" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/2888e6a9-1db1-48d5-a43d-ab97960842f4> ;
+    dcat:byteSize 842248 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-02-41_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/2dfee041-aa25-4f07-b1e8-7c2eb98d78c4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-55-40_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a02adfb4140454ccdd2f6b62065f72d8" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/2dfee041-aa25-4f07-b1e8-7c2eb98d78c4> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-55-40_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/3ae1df53-cf43-4503-8d84-432146f58248> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-40-57_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a52efb45ad38045f8e264ad1c72de31e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/3ae1df53-cf43-4503-8d84-432146f58248> ;
+    dcat:byteSize 872766 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-40-57_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/3cea3f57-d16c-49a3-bb59-2d531b26430e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-55-40_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c2110741e13de1485ef7c5fee3a5dd4e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/3cea3f57-d16c-49a3-bb59-2d531b26430e> ;
+    dcat:byteSize 912510 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-55-40_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/4075ec0e-87be-4b1b-8b5a-81371ecd2ff2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-26-40_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2eec8ae83528d549fcc2e675780572fd" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/4075ec0e-87be-4b1b-8b5a-81371ecd2ff2> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-26-40_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/41ddedad-29b8-4ee5-8781-5c0760df2322> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-20-53_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d98548073b87f0130d4d3016d1e6658e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/41ddedad-29b8-4ee5-8781-5c0760df2322> ;
+    dcat:byteSize 834033 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-20-53_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/434a0088-53ec-4675-8db1-6fd952a605ae> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-46-15_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "01bd110411f151e6e6bf8d6d8b90a0ad" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/434a0088-53ec-4675-8db1-6fd952a605ae> ;
+    dcat:byteSize 874626 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-46-15_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/4b57bbd2-4109-4aa9-8975-e3fd65cfeb79> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-54-00_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "02062600fa6f31b7257d13f9ee3cbf73" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/4b57bbd2-4109-4aa9-8975-e3fd65cfeb79> ;
+    dcat:byteSize 861128 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-54-00_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/4d0f39d6-55b7-4990-8023-6211876b563a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-36-19_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "45e362d5e3d6a7063748befcb500df2f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/4d0f39d6-55b7-4990-8023-6211876b563a> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-36-19_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/5175907c-4497-4634-9d29-c3bfdc615946> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-36-19_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "812dce0b47babb7b25b2cb9012280516" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/5175907c-4497-4634-9d29-c3bfdc615946> ;
+    dcat:byteSize 913657 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-36-19_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/5a7bb16d-969c-430c-bef9-ab7f02a69e70> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-54-00_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "814ac5b6dea95826e5e78a96d25f62f2" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/5a7bb16d-969c-430c-bef9-ab7f02a69e70> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-54-00_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/5cd1b0a4-2c5a-4e3a-9f1a-45ec674d87c5> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-57-59_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d5f08cb6504f17760e65260abb458799" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/5cd1b0a4-2c5a-4e3a-9f1a-45ec674d87c5> ;
+    dcat:byteSize 198072 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-57-59_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/6073bc50-ca07-41de-ab80-241df7f963ed> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-50-23_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "1464ca19ffb5a6dd63fc0cf38f609bd4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/6073bc50-ca07-41de-ab80-241df7f963ed> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-50-23_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/65571457-17be-490c-8805-126a707d8f7b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-52-22_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "9b6c0f38bc46e04d54c1312012c22f50" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/65571457-17be-490c-8805-126a707d8f7b> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-52-22_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/68020cef-6b18-4b5a-9187-bf335752d6a7> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-14-50_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "27d068c0ab698571b67cabe3efa87c3b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/68020cef-6b18-4b5a-9187-bf335752d6a7> ;
+    dcat:byteSize 898990 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-14-50_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/6afa65a6-65a3-40c4-8ef6-49d8935d6c0e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-43-30_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3f17f286558587d9fbf2f396bce02985" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/6afa65a6-65a3-40c4-8ef6-49d8935d6c0e> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-43-30_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/6b91bf4d-5c41-4cc7-9121-cd3c1264c4b4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-43-41_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4c7d521aa4336e095771b170b41622fc" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/6b91bf4d-5c41-4cc7-9121-cd3c1264c4b4> ;
+    dcat:byteSize 905143 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-43-41_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/768639d0-9511-45df-a9c7-e638114d20de> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-28-24_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "007e4d471d284cb9a78e457b9a6466da" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/768639d0-9511-45df-a9c7-e638114d20de> ;
+    dcat:byteSize 887571 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-28-24_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/84073d70-76dd-47aa-b82b-c571d3f3176b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-49-00_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4d400d60860ce89113754397999f74f4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/84073d70-76dd-47aa-b82b-c571d3f3176b> ;
+    dcat:byteSize 918661 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-49-00_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/85591527-c977-4f46-9600-d4a9e67519cb> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-18-46_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3b6d5385cac8e7f954827ab8571cb2c2" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/85591527-c977-4f46-9600-d4a9e67519cb> ;
+    dcat:byteSize 866809 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-18-46_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/8aea7b54-3cb4-4980-88de-9098c18fdd28> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-48-43_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "32b6692b7830a8e0ca1ca4173a75dde1" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/8aea7b54-3cb4-4980-88de-9098c18fdd28> ;
+    dcat:byteSize 898256 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-48-43_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/924d3bd6-5e81-4985-8b6b-5b3ad2ff067a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-49-00_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f70726d82a0fe4524e035b88976b5d25" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/924d3bd6-5e81-4985-8b6b-5b3ad2ff067a> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-49-00_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/94f6a01a-3357-438c-9227-cf6e4fe3e732> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-50-25_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d238dcce6a8591a3e3b62857a6b41fdf" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/94f6a01a-3357-438c-9227-cf6e4fe3e732> ;
+    dcat:byteSize 909332 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-50-25_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/978d3b77-500f-4e20-a1b8-aeff83f45619> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-50-23_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "28413a86a63190b60901378c63dcdc5a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/978d3b77-500f-4e20-a1b8-aeff83f45619> ;
+    dcat:byteSize 902726 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-50-23_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/a36bdd1e-e1aa-4af9-82c5-2728df55594c> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-20-53_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "fef9c40496a426eaba83f4006bf0a8fc" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/a36bdd1e-e1aa-4af9-82c5-2728df55594c> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-20-53_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/a5f4f525-3326-441e-a084-c57d33d2f404> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-26-40_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "258041d921b1f06df1302950715f5ffb" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/a5f4f525-3326-441e-a084-c57d33d2f404> ;
+    dcat:byteSize 914836 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-26-40_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/ac0ad151-c8d6-4f00-b61d-24d269d0fba8> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-50-25_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "dbe9ec186b446fd92b28377a80c5d52b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/ac0ad151-c8d6-4f00-b61d-24d269d0fba8> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-50-25_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/af352608-3b11-4307-85c8-4a869ec9f6c4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-24-15_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "0a6aaf5a15bd53273bbd4c45cbcd6a40" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/af352608-3b11-4307-85c8-4a869ec9f6c4> ;
+    dcat:byteSize 905055 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-24-15_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/b5adbfe2-ede1-400c-8d42-beb845e458d8> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-00-09_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3229da8f3d6e84cd34ecdeefd2c95740" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/b5adbfe2-ede1-400c-8d42-beb845e458d8> ;
+    dcat:byteSize 198083 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-00-09_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/bb76f6d2-ae0f-4262-994c-da611b3d926a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-05-17_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "82b94e954f695324e3f2b70d541bdb94" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/bb76f6d2-ae0f-4262-994c-da611b3d926a> ;
+    dcat:byteSize 894418 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-05-17_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/bde3e14d-1bab-4e6f-9113-0280922cf3da> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-32-49_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "90425238a956822b3297a019228a3e47" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/bde3e14d-1bab-4e6f-9113-0280922cf3da> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-32-49_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/bf1cc35b-de0e-4d9d-9278-2e62d0b753a8> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-46-15_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "61380504ee80bf54c166415101c82325" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/bf1cc35b-de0e-4d9d-9278-2e62d0b753a8> ;
+    dcat:byteSize 198082 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-46-15_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/c215f43a-8fd1-435b-9a20-db2cd0c40afe> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-00-09_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "7272f71a99884b42878e77149549800c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/c215f43a-8fd1-435b-9a20-db2cd0c40afe> ;
+    dcat:byteSize 892666 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-00-09_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/c545e973-0dbd-46da-9355-105bcbc7c025> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-43-30_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "463fb1700290c0c71296304ae72c3040" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/c545e973-0dbd-46da-9355-105bcbc7c025> ;
+    dcat:byteSize 897640 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-43-30_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/c9659fb4-a6fb-4b9c-8d97-a909156753ee> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-38-18_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "80c0a50a11a17a677862507f4e22cdca" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/c9659fb4-a6fb-4b9c-8d97-a909156753ee> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-38-18_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/cb277539-967f-4cca-aa9c-0d10fdb9804e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-48-43_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3a2a2637f6728941a6990910912f3ed8" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/cb277539-967f-4cca-aa9c-0d10fdb9804e> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-48-43_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/ceb3ab3c-6ab9-42f4-926b-e933a818ccef> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-52-46_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "9ebaa39bdec05056419b0556d8706482" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/ceb3ab3c-6ab9-42f4-926b-e933a818ccef> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-52-46_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/d0fc037d-6444-4d3f-abd8-e42ff7c158c9> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-57-59_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "304e255475cfeef71ab45b9f50ea3da8" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/d0fc037d-6444-4d3f-abd8-e42ff7c158c9> ;
+    dcat:byteSize 903454 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-57-59_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/d38ef613-fe3a-4b27-8217-9fde8db038dc> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-52-22_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2d37a526d77209080478236055563054" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/d38ef613-fe3a-4b27-8217-9fde8db038dc> ;
+    dcat:byteSize 920490 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-52-22_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/d57aec15-4092-4d75-91a8-23e48a4786a2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-30-17_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b1cac571017bf4e87fabf5060f7622fc" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/d57aec15-4092-4d75-91a8-23e48a4786a2> ;
+    dcat:byteSize 914133 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-30-17_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/dbdc2e92-8dba-4ba1-8e7c-368ccdbaf318> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-16-47_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "ed757167b32dbb36623658617a3bfc5e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/dbdc2e92-8dba-4ba1-8e7c-368ccdbaf318> ;
+    dcat:byteSize 904245 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-16-47_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/e2aba30c-3505-4b65-a446-c4273e6aeb90> a dcat:Distribution ;
+    dcterms:title "2023-11-07-16-52-46_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2ad7ab1a6f181bfb10c5eea7c3507267" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/e2aba30c-3505-4b65-a446-c4273e6aeb90> ;
+    dcat:byteSize 907378 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-16-52-46_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/f9e9f28e-f8e6-4922-9ae5-c92404e45d56> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-46-35_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "85c650112d316cc0093f76bce23e5d27" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/f9e9f28e-f8e6-4922-9ae5-c92404e45d56> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-46-35_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/fc942369-241e-489f-8198-7f148ac70b5e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-32-49_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "5ee28a7c2bc770bf73e8bf74e2ac1ced" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/fc942369-241e-489f-8198-7f148ac70b5e> ;
+    dcat:byteSize 921654 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-32-49_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411651/files/fe6b8c05-50b6-4be4-85a3-13222b90c7ce> a dcat:Distribution ;
+    dcterms:title "2023-11-07-17-38-18_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "8641d17b7ce142fbde02da26eb81e218" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411651/files/fe6b8c05-50b6-4be4-85a3-13222b90c7ce> ;
+    dcat:byteSize 903211 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411651/files/2023-11-07-17-38-18_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/0132e424-bfcb-4399-b368-d4d1bafa46b8> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-07-46_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "91c77ebf85d5785c02d6e2b8dd92ca86" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/0132e424-bfcb-4399-b368-d4d1bafa46b8> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-07-46_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/02723ad6-6baf-48bb-821e-025347f84c02> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-45-45_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "706d6ab1bd46a3af283d8f6b2eb18af1" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/02723ad6-6baf-48bb-821e-025347f84c02> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-45-45_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/0624548c-ba29-4dc0-af39-0fe37987a187> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-24-19_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f4c4dda571db57af1f5f0246baf12f49" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/0624548c-ba29-4dc0-af39-0fe37987a187> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-24-19_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/0c4022f3-4f00-47e5-a5c4-9b4453a4baee> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-38-55_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a08b229dd4e0ce49e31ef131164be0be" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/0c4022f3-4f00-47e5-a5c4-9b4453a4baee> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-38-55_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/0c9b9489-3c98-4507-a190-4400e94abc38> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-24-19_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "38ef0b7c1e07a205be132c0e05a9fe1d" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/0c9b9489-3c98-4507-a190-4400e94abc38> ;
+    dcat:byteSize 955046 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-24-19_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/0e209739-f8f2-47f6-8e40-1f0d61cae1f3> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-45-45_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4fdbd522cf5b6d33474511a4cd3a4f44" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/0e209739-f8f2-47f6-8e40-1f0d61cae1f3> ;
+    dcat:byteSize 941378 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-45-45_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/113224af-98ab-4694-8086-13062680c870> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-04-48_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "10dba3660bfc3592ce6c5d251a538400" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/113224af-98ab-4694-8086-13062680c870> ;
+    dcat:byteSize 949916 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-04-48_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/1173a807-118c-4ea5-b595-cd42b9766e2e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-17-20_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "7ecf0b676b7cc923ae09590601db8402" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/1173a807-118c-4ea5-b595-cd42b9766e2e> ;
+    dcat:byteSize 950746 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-17-20_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/120253fd-4208-4be1-a936-d15dd91cd855> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-48-34_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "5b281eaa5a3e5c1b8f7b46ef5d4381d3" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/120253fd-4208-4be1-a936-d15dd91cd855> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-48-34_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/13e39144-1ec9-4274-8fb2-d31de36a3827> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-31-26_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a498fb0156b0045b81b9c756e7cfab6d" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/13e39144-1ec9-4274-8fb2-d31de36a3827> ;
+    dcat:byteSize 945833 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-31-26_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/2c0f8428-c3a3-4b24-aa4f-2f354dcd859f> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-35-38_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "25b4ab7ab483c5c0e9472ee6ce707d8d" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/2c0f8428-c3a3-4b24-aa4f-2f354dcd859f> ;
+    dcat:byteSize 926521 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-35-38_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/2f3f804f-aee6-4cc6-906d-494632f2fb44> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-18-56_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b4cdf15d26313a22c56f5d74aa0057e9" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/2f3f804f-aee6-4cc6-906d-494632f2fb44> ;
+    dcat:byteSize 949092 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-18-56_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/333fda9d-9a25-46a9-8fb3-1f0cad82fc42> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-12-23_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "1625d497ce957f23f96c7c45a80d67e7" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/333fda9d-9a25-46a9-8fb3-1f0cad82fc42> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-12-23_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/3653d278-d37e-4fd2-9673-ebee3bbe5a3e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-03-05_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b1f30958993b971c54bc1fdc1306144b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/3653d278-d37e-4fd2-9673-ebee3bbe5a3e> ;
+    dcat:byteSize 949416 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-03-05_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/397e4add-bc84-40d6-86ae-a3362d707af1> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-31-26_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e655437476b02174fe062fea6ca19a66" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/397e4add-bc84-40d6-86ae-a3362d707af1> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-31-26_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/41dce390-c17f-4dc4-82b3-028bc7ff0258> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-00-24_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f14fca6f74c88cb2728ac2ecec2caeac" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/41dce390-c17f-4dc4-82b3-028bc7ff0258> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-00-24_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/44aab2f1-1214-487d-8e28-ac1a615d9ba5> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-38-55_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f3e0101138d463506384a8df814231e4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/44aab2f1-1214-487d-8e28-ac1a615d9ba5> ;
+    dcat:byteSize 946935 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-38-55_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/4be28ad9-6700-4c87-9f74-0480500f1684> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-40-43_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "050c97a12a3e18a8b12c114706e5832e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/4be28ad9-6700-4c87-9f74-0480500f1684> ;
+    dcat:byteSize 920305 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-40-43_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/505c2086-bc82-4f25-aa07-7f369ef4c7b4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-42-50_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "0ad5e086cd069ce9c650ff365bdc122b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/505c2086-bc82-4f25-aa07-7f369ef4c7b4> ;
+    dcat:byteSize 198081 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-42-50_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/56f3d601-ed22-4850-9d59-b26f228e37bc> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-13-53_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "dd778efd2f96d9f95f718121411fc546" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/56f3d601-ed22-4850-9d59-b26f228e37bc> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-13-53_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/5a61ead2-4588-497f-838c-e1ed76d9b38e> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-35-38_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2e5218a4cb80be9315a5352702a67f8a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/5a61ead2-4588-497f-838c-e1ed76d9b38e> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-35-38_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/653901fb-e12a-40c1-8aef-3f7735204fca> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-22-50_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "7338f6bc260b256ec7f609e35aadbb8b" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/653901fb-e12a-40c1-8aef-3f7735204fca> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-22-50_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/65d9696f-3022-4c33-8e3e-b5d86382f029> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-48-34_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "43e7b0c8a05790803c9b98681110d986" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/65d9696f-3022-4c33-8e3e-b5d86382f029> ;
+    dcat:byteSize 912385 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-48-34_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/66892282-8380-4f35-9314-b4055aef9659> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-12-23_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "7bac8f2d9d36e989f101ab66ef4201c5" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/66892282-8380-4f35-9314-b4055aef9659> ;
+    dcat:byteSize 949552 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-12-23_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/6cfba283-7605-4006-b4fc-12245c7f679a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-18-56_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b76eadeaff8240e65963f5597aa75d0a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/6cfba283-7605-4006-b4fc-12245c7f679a> ;
+    dcat:byteSize 198072 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-18-56_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/6db72313-8dc0-4a55-a752-50ce332a964d> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-25-45_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "89dcbb5a8dc6cae6bbc0d8dacf02c3f6" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/6db72313-8dc0-4a55-a752-50ce332a964d> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-25-45_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/6ff5e197-65d1-4bae-b741-b0a7cde76310> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-09-25_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "88b4a379d4e18f4a9de559cfdf9a3849" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/6ff5e197-65d1-4bae-b741-b0a7cde76310> ;
+    dcat:byteSize 950005 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-09-25_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/71ef19c6-8a07-4c4a-981c-11b27de37862> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-13-53_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "6a7294a053576192451242ad8d072d0d" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/71ef19c6-8a07-4c4a-981c-11b27de37862> ;
+    dcat:byteSize 947585 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-13-53_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/7911b94a-14b8-4612-984b-c3a861e0e8d4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-29-39_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e3ab403000b6f59f1cdf762d6b3f9bbd" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/7911b94a-14b8-4612-984b-c3a861e0e8d4> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-29-39_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/7c9075b1-4d04-496f-8cfe-bec86cf2e8b9> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-22-50_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4d0e3244344e92f99951277718d7307c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/7c9075b1-4d04-496f-8cfe-bec86cf2e8b9> ;
+    dcat:byteSize 924030 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-22-50_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/825a0c2f-a04d-4d8e-9b2b-bb6333f7bfb7> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-15-35_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "6fdec6a5f61981355e955a0e5be0f681" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/825a0c2f-a04d-4d8e-9b2b-bb6333f7bfb7> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-15-35_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/86e0a150-e1d1-4f9d-970e-8faa0edaf352> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-32-57_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f222c11da56f3a7bf02cb47d0bdcd78e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/86e0a150-e1d1-4f9d-970e-8faa0edaf352> ;
+    dcat:byteSize 961315 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-32-57_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/8f0be268-e71b-4924-8043-16359e67124f> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-37-02_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "922ea42b51f8ea4340d0d73ee10d1b57" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/8f0be268-e71b-4924-8043-16359e67124f> ;
+    dcat:byteSize 963420 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-37-02_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/938093e0-f8cd-4b77-a601-b52016f210ad> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-47-07_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d0063bff714ed89710442010501036a7" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/938093e0-f8cd-4b77-a601-b52016f210ad> ;
+    dcat:byteSize 907508 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-47-07_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/96486495-2d7d-440a-8699-039653b5af4a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-04-48_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "cdc334d0973580c5ded0acb6aceaae10" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/96486495-2d7d-440a-8699-039653b5af4a> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-04-48_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/9abdeaaa-a441-414a-8ea2-ef8a7478a455> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-42-50_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "20801a219fc5de411f992877fe61e033" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/9abdeaaa-a441-414a-8ea2-ef8a7478a455> ;
+    dcat:byteSize 950344 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-42-50_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/9aefce98-bb2c-4371-ae97-e3a85736b9c4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-37-02_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "fd8636d2b30ceae6b22bbc27351956da" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/9aefce98-bb2c-4371-ae97-e3a85736b9c4> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-37-02_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/a19bcbea-c67d-4318-84ac-a26fd8eaefd2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-44-14_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d2424cca7fd2981fac9e17e4c536d266" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/a19bcbea-c67d-4318-84ac-a26fd8eaefd2> ;
+    dcat:byteSize 924646 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-44-14_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/a662015f-57e2-4d16-973a-242ebe7abc8d> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-00-24_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "964019ce97b72c1a7dcedb976d405c9a" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/a662015f-57e2-4d16-973a-242ebe7abc8d> ;
+    dcat:byteSize 954847 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-00-24_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/a8628692-f411-4948-93e5-69028e6607d4> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-25-45_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a38b2a53bc559f4ad1534ae1efa69be5" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/a8628692-f411-4948-93e5-69028e6607d4> ;
+    dcat:byteSize 945829 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-25-45_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/adbbabfa-fe52-4b42-a5e3-ac11a2739d9a> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-27-18_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "30b54278ef35a503993be12a298205ed" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/adbbabfa-fe52-4b42-a5e3-ac11a2739d9a> ;
+    dcat:byteSize 941579 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-27-18_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/ba641235-b9e9-4acb-a2fa-bc7c52446009> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-29-39_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e9885031e356d6522d25712c10d85191" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/ba641235-b9e9-4acb-a2fa-bc7c52446009> ;
+    dcat:byteSize 926950 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-29-39_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/bef4bd14-1115-4d3a-81f5-4a433527798d> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-47-07_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f9393325a294438d7fd5fa74685960e2" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/bef4bd14-1115-4d3a-81f5-4a433527798d> ;
+    dcat:byteSize 198083 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-47-07_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/c1742484-0173-4470-b900-ee2407d40b1b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-17-20_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "0bf7e445222959cc6a745175bf45ac4f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/c1742484-0173-4470-b900-ee2407d40b1b> ;
+    dcat:byteSize 198073 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-17-20_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/c694b33c-afd3-4433-8a26-7ec064e9b636> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-44-14_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "25f461075a331cf93d4b63bf7525f4ec" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/c694b33c-afd3-4433-8a26-7ec064e9b636> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-44-14_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/c77fbf08-d65b-4e60-96bf-7e168e141d13> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-32-57_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "3ae26e90222c787f703aa682c06cc8be" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/c77fbf08-d65b-4e60-96bf-7e168e141d13> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-32-57_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/cc20aecd-b753-4b46-b055-da1f47525d1c> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-27-18_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "db895664bc43ba3cd0223d6729885948" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/cc20aecd-b753-4b46-b055-da1f47525d1c> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-27-18_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/d37fa80f-2492-4b85-8cf0-2e65fcdb0f26> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-40-43_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2cb891f7ab4a1a5be938678139f8bf87" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/d37fa80f-2492-4b85-8cf0-2e65fcdb0f26> ;
+    dcat:byteSize 198079 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-40-43_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/d4575ace-cc8a-4112-91a5-2bf416b7cb2b> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-20-32_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "7ba6d529660bb05cd3ea1fdd42aa3567" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/d4575ace-cc8a-4112-91a5-2bf416b7cb2b> ;
+    dcat:byteSize 927126 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-20-32_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/dbb2fd83-1a17-44e5-bdbe-04b3b7e2e4e2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-15-35_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "341aa06913bc5efa11608fe8668685c0" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/dbb2fd83-1a17-44e5-bdbe-04b3b7e2e4e2> ;
+    dcat:byteSize 951736 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-15-35_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/f019af5a-1371-4ab0-bea8-20586e00f056> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-07-46_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a1059be9bfbad29866b9c470cb24a0d0" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/f019af5a-1371-4ab0-bea8-20586e00f056> ;
+    dcat:byteSize 940761 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-07-46_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/f5ed51d1-ee81-4fd6-911b-b731ad618da8> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-09-25_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "89b10c75f715f8bb03002b9cbc7a4a02" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/f5ed51d1-ee81-4fd6-911b-b731ad618da8> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-09-25_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/fb8f36ff-4b18-40be-a393-2a1c62635497> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-20-32_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "00a81fcfb29ab92e4ede588a3d83c153" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/fb8f36ff-4b18-40be-a393-2a1c62635497> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-20-32_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411652/files/fdf39316-c83d-43f0-95c2-24b8df88c387> a dcat:Distribution ;
+    dcterms:title "2023-11-07-18-03-05_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "32dad00e8c7be4abfcf5c46d800a2074" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411652/files/fdf39316-c83d-43f0-95c2-24b8df88c387> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411652/files/2023-11-07-18-03-05_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/1b8052fc-c493-40bd-a1a7-2756d8ee9aac> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-06-31_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "69aa8f9bb5f1d89cd5ee71493f481765" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/1b8052fc-c493-40bd-a1a7-2756d8ee9aac> ;
+    dcat:byteSize 990945 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-06-31_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/1c1fb78f-a0b5-473f-a07c-f03357e04f3f> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-06-31_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "90a2c111715233d28fafb9e66aa2384f" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/1c1fb78f-a0b5-473f-a07c-f03357e04f3f> ;
+    dcat:byteSize 198080 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-06-31_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/25ddb0ed-613a-4975-bbbf-a3182fc4cc37> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-03-45_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "59be7bcfb2c27dac9760174e658af983" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/25ddb0ed-613a-4975-bbbf-a3182fc4cc37> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-03-45_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/5545a376-0a50-4255-8088-63102f0fd45c> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-08-02_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "f5fb7b12ff489da566bf1d3fe14b4307" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/5545a376-0a50-4255-8088-63102f0fd45c> ;
+    dcat:byteSize 993869 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-08-02_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/5f203aa4-edf9-4d36-9579-3a7392a59dd2> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-05-09_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "624594922c8c91edd2c75a2a2ba4b15e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/5f203aa4-edf9-4d36-9579-3a7392a59dd2> ;
+    dcat:byteSize 981609 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-05-09_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/884ba7d2-0421-4456-bc5a-23ee23a50fc6> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-05-09_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c3a68c1f79dddf8b50e71798b1b052f8" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/884ba7d2-0421-4456-bc5a-23ee23a50fc6> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-05-09_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/b5f0571d-0515-4968-8146-cebe58307cda> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-08-02_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c333310bd24a988d262df44c6420c3c4" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/b5f0571d-0515-4968-8146-cebe58307cda> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-08-02_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411653/files/cf72283d-bb10-4962-af28-7d1d56180786> a dcat:Distribution ;
+    dcterms:title "2023-11-07-19-03-45_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "e4c1cf495f0ee47e221eae5581d23744" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411653/files/cf72283d-bb10-4962-af28-7d1d56180786> ;
+    dcat:byteSize 977284 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411653/files/2023-11-07-19-03-45_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/07d56c25-ab35-4ec8-b1a4-026df938f3b6> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-37-29_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c95da7f74af459499ab38fda4a5e4577" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/07d56c25-ab35-4ec8-b1a4-026df938f3b6> ;
+    dcat:byteSize 198074 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-37-29_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/085af95b-4f59-452b-bc21-a19df0e57924> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-42-40_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "1149826406113a3d4e75e6b73d7d1716" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/085af95b-4f59-452b-bc21-a19df0e57924> ;
+    dcat:byteSize 198070 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-42-40_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/123b26c5-8663-4b08-8a04-1c7adfe0623f> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-47-53_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "0135eaca0a3f1236f69dd7030669e01c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/123b26c5-8663-4b08-8a04-1c7adfe0623f> ;
+    dcat:byteSize 198077 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-47-53_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/2eb98ae5-3309-4e11-97b7-8bc0625ce141> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-42-40_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "2ccd4d7143ac7f63fbd73f2d37863ca7" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/2eb98ae5-3309-4e11-97b7-8bc0625ce141> ;
+    dcat:byteSize 992167 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-42-40_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/306023bb-e077-480a-923b-c2e75e2cb772> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-49-18_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "dbb98f79662835fd08cef2891747976c" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/306023bb-e077-480a-923b-c2e75e2cb772> ;
+    dcat:byteSize 198075 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-49-18_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/43765b7e-e562-459b-be5c-47e0f73b9258> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-47-53_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "ac22bcc2e74cd39a556f9adecb5bfeaf" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/43765b7e-e562-459b-be5c-47e0f73b9258> ;
+    dcat:byteSize 985426 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-47-53_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/60cc99e1-3346-4280-a3b9-c184d960c8f8> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-39-50_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "b0aba89a4542fad9a2db6c80f25270f6" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/60cc99e1-3346-4280-a3b9-c184d960c8f8> ;
+    dcat:byteSize 941836 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-39-50_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/7958dccf-0550-44c8-b3a0-a70df0f1504c> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-44-30_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "d5a72148846e40c3b4111f564325675e" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/7958dccf-0550-44c8-b3a0-a70df0f1504c> ;
+    dcat:byteSize 997378 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-44-30_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/991fee22-0c55-4820-b040-50ab0dda348b> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-41-18_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "c6e8927bff07589d29cb4bc58a6cbabd" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/991fee22-0c55-4820-b040-50ab0dda348b> ;
+    dcat:byteSize 979152 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-41-18_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/b046e314-38b6-4e85-8e30-76f53aa1632f> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-39-50_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "1c46c731659814a2fd5a33660ffa0c49" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/b046e314-38b6-4e85-8e30-76f53aa1632f> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-39-50_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/b69980e6-b9b3-49a3-a5ed-6051ca8d25d2> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-37-29_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "686de004cd48cf664cb04d8d7c5e0537" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/b69980e6-b9b3-49a3-a5ed-6051ca8d25d2> ;
+    dcat:byteSize 959785 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-37-29_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/b6b90a55-c178-4b80-827b-423179b0dbdf> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-49-18_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "a078d27081e6fe939fde76c4499fdcf3" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/b6b90a55-c178-4b80-827b-423179b0dbdf> ;
+    dcat:byteSize 975148 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-49-18_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/c10794cb-7932-40b3-826e-4678cd0de029> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-44-30_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "53e6a6b71d537ee734e3c22172b4fe62" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/c10794cb-7932-40b3-826e-4678cd0de029> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-44-30_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/cf3dd165-4d23-411f-9919-ea1cbf6d4927> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-36-03_run.hdf" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "4d1286bcb984ed13e16c46284f435350" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/cf3dd165-4d23-411f-9919-ea1cbf6d4927> ;
+    dcat:byteSize 987817 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-36-03_run.hdf/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/application/x-hdf> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/f1e69996-105d-49ac-93a6-be7260ff8cc9> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-36-03_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "ef2419e1b4ec187010d9501b54d4a300" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/f1e69996-105d-49ac-93a6-be7260ff8cc9> ;
+    dcat:byteSize 198076 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-36-03_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://sandbox.zenodo.org/api/records/411654/files/f81ab833-205f-4e6d-b48a-a16a94c24a2e> a dcat:Distribution ;
+    dcterms:title "2023-11-08-15-41-18_run.ttl" ;
+    spdx:checksum [ a spdx:Checksum ;
+            spdx:algorithm <https://spdx.org/rdf/terms#checksumAlgorithm_md5> ;
+            spdx:checksumValue "63ae9a7dd209563aaa79631d7cc69f71" ] ;
+    dcat:accessURL <https://sandbox.zenodo.org/api/records/411654/files/f81ab833-205f-4e6d-b48a-a16a94c24a2e> ;
+    dcat:byteSize 198078 ;
+    dcat:downloadURL <https://sandbox.zenodo.org/api/records/411654/files/2023-11-08-15-41-18_run.ttl/content> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://orcid.org/0000-0001-8729-0482> a prov:Person ;
+    schema:affiliation [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ] .
+
+<https://orcid.org/0000-0001-9560-500X> a prov:Person ;
+    schema:affiliation [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ],
+        [ a prov:Organization ;
+            foaf:name "Karlsruhe Institute of Technology" ] .
+
+<https://www.wikidata.org/wiki/Q22661177> a foaf:Organization ;
+    foaf:homepage <https://zenodo.org/> ;
+    foaf:name "Zenodo" .
+

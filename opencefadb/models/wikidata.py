@@ -1,0 +1,2 @@
+FAN_OPERATING_POINT = "https://www.wikidata.org/wiki/Q137525225"
+Q137525225 = FAN_OPERATING_POINT

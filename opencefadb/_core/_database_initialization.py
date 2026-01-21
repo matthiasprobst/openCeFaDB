@@ -1,0 +1,333 @@
+"""
+
+# Downloading Metadata files from Zenodo Sandbox
+
+This script shows how to download metadata files from the Zenodo sandbox environment for testing purposes.
+It reads a mapping of dataset names to their corresponding DOIs and downloads the relevant files into a specified
+directory.
+
+"""
+import hashlib
+import pathlib
+import re
+from dataclasses import dataclass
+from typing import Dict, Tuple, Iterator, List
+
+import rdflib
+import requests
+from pydantic.v1 import HttpUrl
+
+__this_dir__ = pathlib.Path(__file__).parent
+
+from opencefadb.utils import opencefa_print
+
+
+@dataclass
+class DownloadStatus:
+    record_id: str
+    filename: str
+    ok: bool
+    message: str
+
+
+def extract_record_id(value: str) -> str:
+    """
+    Accepts either a bare record ID like '1234567' or a Zenodo URL
+    and returns the numeric record ID as a string.
+    """
+    # If it's just digits, assume it's already the ID
+    if value.isdigit():
+        return value
+
+    # Try to pull the last number sequence from the string (e.g. URL)
+    match = re.search(r'(\d+)/?$', value.strip())
+    if match:
+        return match.group(1)
+
+    raise ValueError(f"Could not extract a numeric record ID from '{value}'")
+
+
+
+
+
+from dataclasses import dataclass
+
+
+@dataclass
+class WebResource:
+    download_url: HttpUrl
+    checksum: str
+    title: str
+    identifier: str
+    mediaType: str
+
+
+def compute_md5_of_file(path: pathlib.Path) -> str:
+    """Return hex md5 of file at path."""
+    h = hashlib.md5()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def sanitize_filename(name: str) -> str:
+    """Return a filesystem-safe filename (very small sanitizer)."""
+    # remove path separators and control chars
+    name = str(name)
+    name = name.replace("/", "_").replace("\\\\", "_")
+    # simple collapse of problematic characters
+    return re.sub(r"[^\w\-.()\[\] ]+", "_", name)
+
+
+def parse_checksum(raw: str) -> Tuple[str, str]:
+    """Parse checksum string like 'md5:abcd' or just 'abcd' -> (algo, hex)"""
+    if not raw:
+        return "md5", ""
+    s = str(raw)
+    if ":" in s:
+        algo, val = s.split(":", 1)
+    else:
+        algo, val = "md5", s
+    return algo.lower(), val.lower()
+
+
+def download(download_directory: pathlib.Path, web_resources: List[WebResource]) -> List[DownloadStatus]:
+    """Download and verify a list of WebResource items.
+
+    For each resource:
+    - determine a record id (using extract_record_id when possible) and create a subfolder
+    - skip download if a file with the expected checksum already exists
+    - stream-download into a .tmp file while computing md5
+    - on success move the .tmp to final filename; on checksum mismatch rename with conflict suffix
+    - append status entries to the overall list and print progress
+
+    Returns a list of DownloadStatus entries.
+    """
+    overall = []
+    download_directory.mkdir(parents=True, exist_ok=True)
+
+    for web_resource in web_resources:
+        doi = web_resource.identifier
+        # normalize DOI-like URLs
+        if isinstance(doi, str) and (doi.startswith("http://doi.org/") or doi.startswith("https://doi.org/")):
+            doi = doi.split("doi.org/", 1)[-1]
+
+        # try to extract numeric record id; otherwise fall back to sanitized doi string
+        try:
+            rec_id = extract_record_id(str(doi))
+        except Exception:
+            rec_id = str(doi).replace("/", "_")
+
+        record_dir = download_directory / str(rec_id)
+        record_dir.mkdir(parents=True, exist_ok=True)
+
+        url = str(web_resource.download_url)
+        title = str(web_resource.title) if web_resource.title is not None else ""
+        title = title.replace(".", "_")
+        if web_resource.mediaType == "text/turtle":
+            expected_suffix = ".ttl"
+        elif web_resource.mediaType == "application/ld+json":
+            expected_suffix = ".jsonld"
+        elif web_resource.mediaType == "application/json":
+            expected_suffix = ".json"
+        elif web_resource.mediaType == "application/rdf+xml":
+            expected_suffix = ".rdf"
+        elif web_resource.mediaType == "application/x+hdf5":
+            expected_suffix = ".hdf"
+        else:
+            expected_suffix = None
+
+        # determine filename: prefer title, else last segment of URL
+        if url.endswith("/content"):
+            _url = url.rsplit("/", 2)[-2]  # remove trailing /content for Zenodo URLs
+            _fname = _url.rsplit("/", 1)[-1]
+        else:
+            _fname = url.rsplit("/", 1)[-1]
+
+        if pathlib.Path(_fname).suffix == "":
+            if title != "":
+                filename = sanitize_filename(title)
+            else:
+                if expected_suffix:
+                    filename = f"download{expected_suffix}"
+                else:
+                    filename = "download.bin"
+        else:
+            filename = sanitize_filename(_fname)
+        filename = filename.replace(" ", "_")
+        dest_path = record_dir / filename
+        if dest_path.suffix == "" and expected_suffix:
+            dest_path = dest_path.with_suffix(expected_suffix)
+
+        expected_algo, expected_val = parse_checksum(web_resource.checksum)
+
+        # If destination exists and matches expected checksum, skip
+        if dest_path.exists() and expected_val:
+            try:
+                existing_md5 = compute_md5_of_file(dest_path)
+                if expected_algo == "md5" and existing_md5.lower() == expected_val.lower():
+                    # opencefa_print(f" > SKIP (exists & checksum ok): {filename} -> {dest_path}")
+                    overall.append(DownloadStatus(rec_id, filename, True, f"exists, checksum matches"))
+                    continue
+            except Exception:
+                # fall through to re-download
+                pass
+
+        # stream download to tmp file while computing md5
+        tmp_path = record_dir / (filename + ".tmp")
+        try:
+            resp = requests.get(url, stream=True, timeout=60)
+            resp.raise_for_status()
+
+            md5 = hashlib.md5()
+            with open(tmp_path, "wb") as fh:
+                for chunk in resp.iter_content(chunk_size=8192):
+                    if not chunk:
+                        continue
+                    fh.write(chunk)
+                    md5.update(chunk)
+
+            computed = md5.hexdigest()
+
+            # verify
+            ok = False
+            message = ""
+            if expected_algo == "md5":
+                if expected_val:
+                    ok = computed.lower() == expected_val.lower()
+                    if ok:
+                        # move tmp to final
+                        tmp_path.replace(dest_path)
+                        message = f"saved to {dest_path}"
+                        opencefa_print(f" > OK: {filename} -> {dest_path} (md5 matches)")
+                    else:
+                        # conflict: keep both, rename new file with record id + short hash
+                        new_name = f"{pathlib.Path(filename).stem}__{rec_id}__{computed[:8]}{pathlib.Path(filename).suffix}"
+                        new_path = record_dir / new_name
+                        tmp_path.replace(new_path)
+                        message = f"checksum mismatch: expected={expected_val}, computed={computed}; saved as {new_path}"
+                        opencefa_print(
+                            f" > MISMATCH: {filename} -> {new_path} (expected md5: {expected_val}, computed md5: {computed})")
+                else:
+                    # no expected checksum provided — accept and move
+                    tmp_path.replace(dest_path)
+                    ok = True
+                    message = f"saved to {dest_path} (no expected checksum)"
+                    opencefa_print(f" > SAVED (no expected checksum): {filename} -> {dest_path}")
+            else:
+                # unsupported algorithm: save file but mark as not-verified
+                tmp_path.replace(dest_path)
+                ok = False
+                message = f"saved to {dest_path} (unsupported checksum algorithm: {expected_algo})"
+                opencefa_print(f" > SAVED (unsupported checksum alg '{expected_algo}'): {filename} -> {dest_path}")
+
+            overall.append(DownloadStatus(rec_id, filename, ok, message))
+
+        except Exception as exc:
+            # cleanup tmp file when exists
+            try:
+                if tmp_path.exists():
+                    tmp_path.unlink()
+            except Exception:
+                pass
+            opencefa_print(f" > ERROR downloading {filename}: {exc}")
+            overall.append(DownloadStatus(rec_id, filename, False, str(exc)))
+
+    # summary
+    total = len(overall)
+    ok_count = sum(1 for o in overall if o.ok)
+    opencefa_print(f"Summary: {ok_count}/{total} files verified successfully")
+
+    return overall
+
+
+def get_rdf_format_from_filename(filename: pathlib.Path) -> str:
+    """Return rdflib format string based on filename suffix."""
+    filename = pathlib.Path(filename)
+    if filename.suffix == ".ttl":
+        return "turtle"
+    elif filename.suffix == ".jsonld":
+        return "json-ld"
+    else:
+        return filename.suffix.split(".")[-1]
+
+
+def database_initialization(
+        config_filename: pathlib.Path,
+        download_directory: pathlib.Path
+) -> List[DownloadStatus]:
+    """Initialize the database by downloading metadata files as specified in the config TTL file.
+
+    Parameters
+    ----------
+    config_filename : pathlib.Path
+        Path to the RDF configuration file (TTL or JSON-LD) describing datasets.
+    download_directory : pathlib.Path, optional
+        Directory where downloaded files will be stored.
+
+    Returns
+    -------
+    List[DownloadStatus]
+        A list of DownloadStatus entries indicating the result of each download.
+    """
+    config_filename = pathlib.Path(config_filename)
+    if not pathlib.Path(download_directory).exists():
+        raise ValueError(f"Download directory does not exist: {download_directory}")
+    if not pathlib.Path(download_directory).is_dir():
+        raise ValueError(f"Download directory is not a directory: {download_directory}")
+    g = rdflib.Graph()
+    g.parse(
+        config_filename,
+        format=get_rdf_format_from_filename(config_filename)
+    )
+    # get all dcat:Dataset entries:
+    query = """
+        PREFIX dcat: <http://www.w3.org/ns/dcat#>
+        PREFIX dcterms: <http://purl.org/dc/terms/>
+        PREFIX spdx: <http://spdx.org/rdf/terms#>
+
+        SELECT ?dataset ?identifier ?download ?title ?checksumValue WHERE {
+            ?dataset a dcat:Dataset ;
+                     dcterms:identifier ?identifier ;
+                     dcat:distribution ?dist .
+        
+            ?dist dcat:downloadURL ?download ;
+                  dcterms:title ?title ;
+                  dcat:mediaType ?media .
+        
+            OPTIONAL {
+                ?dist spdx:checksum ?ck .
+                ?ck spdx:checksumValue ?checksumValue .
+            }
+        
+            FILTER(
+                CONTAINS(LCASE(STR(?media)), "text/turtle") ||
+                CONTAINS(LCASE(STR(?media)), "application/ld+json")
+            )
+        }
+        """
+    results = g.query(query)
+    list_of_ttl_web_resources = [WebResource(
+        download_url=row.download,
+        checksum=row.checksumValue,
+        title=row.title,
+        identifier=row.identifier,
+        mediaType="text/turtle"
+    ) for row in results]
+
+    opencefa_print(
+        f"Found {len(list_of_ttl_web_resources)} TTL web resources to download. Downloading to {download_directory}...")
+    return download(
+        download_directory=download_directory,
+        web_resources=list_of_ttl_web_resources
+    )
+
+# if __name__ == "__main__":
+#     sandbox_config_ttl = opencefadb.OpenCeFaDB.get_config(sandbox=True)
+#     assert sandbox_config_ttl.exists(), f"Config file not found: {sandbox_config_ttl}"
+#
+#     database_initialization(
+#         config_ttl_filename=sandbox_config_ttl,
+#         download_directory=__this_dir__ / "download"
+#     )
