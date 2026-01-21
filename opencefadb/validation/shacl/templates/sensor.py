@@ -1,4 +1,4 @@
-SHALL_HAVE_WELL_DESCRIBED_SSN_SENSOR = '''@prefix ex: <https://example.org/> .
+SHALL_HAVE_WELL_DESCRIBED_SSN_SENSOR_WITH_SYSTEM_CAPABILITY = '''@prefix ex: <https://example.org/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -19,8 +19,8 @@ ex:SensorMetadataShape
   sh:property [
     sh:path rdfs:label ;
     sh:minCount 1 ;
-    sh:datatype rdf:langString ;
-    sh:message "Sensor must have rdfs:label with a language tag." ;
+    sh:nodeKind sh:Literal ;
+    sh:message "Sensor must have rdfs:label as a literal." ;
   ] ;
 
   sh:property [
@@ -176,5 +176,39 @@ ex:AccuracyShape
       ] ;
     ]
   ) .
+
+'''
+
+SHALL_HAVE_WELL_DESCRIBED_SSN_SENSOR = '''@prefix ex: <https://example.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix ssn_system: <http://www.w3.org/ns/ssn/systems/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# Top-level sensor shape
+#################################################################
+
+ex:SensorMetadataShape
+  a sh:NodeShape ;
+  sh:targetClass sosa:Sensor ;
+
+  sh:property [
+    sh:path rdfs:label ;
+    sh:minCount 1 ;
+    sh:nodeKind sh:Literal ;
+    sh:message "Sensor must have rdfs:label as a literal." ;
+  ] ;
+
+  sh:property [
+    sh:path sosa:observes ;
+    sh:minCount 1 ;
+    sh:class sosa:ObservableProperty ;
+    sh:message "Sensor must sosa:observes at least one sosa:ObservableProperty." ;
+  ] .
 
 '''

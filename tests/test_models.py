@@ -52,9 +52,6 @@ class TestModels(unittest.TestCase):
 
     def test_fan_curve(self):
         """A fan curve is made up of multiple observations, hence a ObservationCollection"""
-        import requests
-        requests.get("https://zenodo.org/records/17271932/files/Standard_Name_Table_for_the_Property_Descriptions_of_Centrifugal_Fans.jsonld",
-                     timeout=60).raise_for_status()
         vfr1 = Result(
             id="https://example.org/result/vfr1",
             has_numerical_variable=NumericalVariable(

@@ -20,6 +20,7 @@ class TestInitDatabase(unittest.TestCase):
         dotenv.load_dotenv(__this_dir__ / ".env", override=True)
         self.working_dir = pathlib.Path(__this_dir__ / "local-db")
 
+    @unittest.skip("Skipping test that requires a running GraphDB instance.")
     def test_database_with_graphdb(self):
         db = OpenCeFaDB.from_graphdb_setup(
             working_directory=self.working_dir,
@@ -31,8 +32,7 @@ class TestInitDatabase(unittest.TestCase):
             password="admin",
             add_wikidata_store=True
         )
-        db.download_metadata()
-        self.assertEqual(db.catalog.version, "1.7.0")
+        self.assertEqual(db.catalog.version, "1.1.0")
         res = h5cat.RemoteSparqlQuery(
             "SELECT * WHERE { ?s ?p ?o }",
             description="Selects all triples in the RDF database"
@@ -81,7 +81,7 @@ class TestInitDatabase(unittest.TestCase):
 
     def test_database_with_rdflib_store(self):
         db = OpenCeFaDB(working_directory=self.working_dir, version="latest", sandbox=True)
-        self.assertEqual(db.catalog.version, "1.6.0")
+        self.assertEqual(db.catalog.version, "1.1.0")
 
         metadata_store = RDFFileStore(
             data_dir=self.working_dir / "metadata",
@@ -90,6 +90,8 @@ class TestInitDatabase(unittest.TestCase):
         )
 
         db.add_main_rdf_store(metadata_store)
+        db.download_metadata()
+        metadata_store.populate()
         db.add_wikidata_store(augment_main_rdf_store=True)
         res = SELECT_FAN_PROPERTIES.execute(db.main_rdf_store)
         self.assertEqual(88, len(res.data))

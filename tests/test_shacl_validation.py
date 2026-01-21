@@ -10,7 +10,7 @@ from ontolutils.ex.ssn import Accuracy, SystemCapability, MeasurementRange
 from rdflib import DCTERMS, PROV
 
 from opencefadb.validation import validate_hdf
-from opencefadb.validation.shacl.templates.hdf import SHALL_HAVE_CREATED_DATE, NUMERIC_DATASETS_SHALL_HAVE_UNIT, \
+from opencefadb.validation.shacl.templates.hdf import SHALL_HAVE_CREATED_DATE, NUMERIC_DATASETS_SHALL_HAVE_UNIT_AND_KIND_OF_QUANTITY, \
     SHALL_HAVE_CREATOR
 from opencefadb.validation.shacl.templates.sensor import SHALL_HAVE_WELL_DESCRIBED_SSN_SENSOR
 
@@ -27,7 +27,7 @@ class TestPlotting(unittest.TestCase):
 
         res = validate_hdf(
             hdf_source=h5.hdf_filename,
-            shacl_data=NUMERIC_DATASETS_SHALL_HAVE_UNIT
+            shacl_data=NUMERIC_DATASETS_SHALL_HAVE_UNIT_AND_KIND_OF_QUANTITY
         )
         self.assertFalse(res.conforms)
 
@@ -42,7 +42,7 @@ class TestPlotting(unittest.TestCase):
 
         res = validate_hdf(
             hdf_source=h5.hdf_filename,
-            shacl_data=NUMERIC_DATASETS_SHALL_HAVE_UNIT
+            shacl_data=NUMERIC_DATASETS_SHALL_HAVE_UNIT_AND_KIND_OF_QUANTITY
         )
         self.assertFalse(res.conforms)
 
@@ -58,7 +58,7 @@ class TestPlotting(unittest.TestCase):
 
         res = validate_hdf(
             hdf_source=h5.hdf_filename,
-            shacl_data=NUMERIC_DATASETS_SHALL_HAVE_UNIT
+            shacl_data=NUMERIC_DATASETS_SHALL_HAVE_UNIT_AND_KIND_OF_QUANTITY
         )
         self.assertTrue(res.conforms)
 

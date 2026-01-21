@@ -16,7 +16,7 @@ from h5rdmtoolbox.catalog import InMemoryRDFStore, GraphDB, HDF5FileStore
 from h5rdmtoolbox.catalog.profiles import IS_VALID_CATALOG_SHACL
 from h5rdmtoolbox.repository.zenodo import ZenodoRecord
 from ontolutils import Thing
-from ontolutils.ex import dcat, hdf5, qudt, sosa, ssn
+from ontolutils.ex import dcat, qudt, sosa, ssn
 from ontolutils.ex.sis import StandardMU
 from ontolutils.ex.sosa import Observation
 from rdflib.namespace import split_uri
@@ -32,6 +32,8 @@ from opencefadb.utils import download_file, remove_none
 from .models.wikidata import FAN_OPERATING_POINT
 from .utils import opencefa_print
 
+SANDBOX_BASE_URL = "https://sandbox.zenodo.org/api/records/428370"
+PRODUCTION_BASE_URL = "https://zenodo.org/api/records/14551649"
 __this_dir__ = pathlib.Path(__file__).parent
 
 _db_instance = None
@@ -424,6 +426,7 @@ def get_operating_point_observations(
         [((1 - n_rot_tolerance) * n_rot_speed_rpm) / 60.,
          ((1 + n_rot_tolerance) * n_rot_speed_rpm) / 60.]
     )
+    # TODO: this is not entirely correct, as the rotational speed dataset may have different units than rpm!
     q_n_rot = sparql_templates.hdf.find_dataset_for_standard_name(standard_name_of_rotational_speed, n_rot_range)
     standard_names_of_interest = operating_point_standard_names
 
@@ -485,15 +488,15 @@ def get_operating_point_observations(
     observations = []
     for k, v in mean_data.items():
         _hdf_uri = v.pop("hdf_uri")
-        results = [ssn.Result(hasNumericalVariable=nv) for nv in v.values()]
+        results = [ssn.Result(has_numerical_variable=nv) for nv in v.values()]
         hdf_dist = dcat.Distribution(
             id=_hdf_uri,
             media_type="application/x-hdf5",
             download_URL=_hdf_uri
         )
         observation = sosa.Observation(
-            hasFeatureOfInterest=FAN_OPERATING_POINT,
-            hasResult=results,
+            has_feature_of_interest=FAN_OPERATING_POINT,
+            has_result=results,
             hadPrimarySource=hdf_dist
         )
         observations.append(observation)
@@ -510,13 +513,13 @@ def _download_catalog(
         target_directory = pathlib.Path.cwd()
 
     if sandbox:
-        base_url = "https://sandbox.zenodo.org/api/records/419419"
+        base_url = SANDBOX_BASE_URL
         dotenv.load_dotenv(pathlib.Path.cwd() / ".env", override=True)
         access_token = os.getenv("ZENODO_SANDBOX_API_TOKEN", None)
         config_filename = "opencefadb-config-sandbox.ttl"
     else:
         access_token = None
-        base_url = "https://zenodo.org/api/records/14551649"
+        base_url = PRODUCTION_BASE_URL
         config_filename = "opencefadb-config.ttl"
     pathlib.Path(target_directory).mkdir(parents=True, exist_ok=True)
 

@@ -1,14 +1,14 @@
-NUMERIC_DATASETS_SHALL_HAVE_UNIT = '''@prefix sh:   <http://www.w3.org/ns/shacl#> .
+NUMERIC_DATASETS_SHALL_HAVE_UNIT_AND_KIND_OF_QUANTITY = '''@prefix sh:   <http://www.w3.org/ns/shacl#> .
 @prefix hdf:  <http://purl.allotrope.org/ontologies/hdf5/1.8#> .
 @prefix m4i:  <http://w3id.org/nfdi4ing/metadata4ing#> .
 @prefix ex:   <http://example.org/ns#> .
 
-ex:NumericDatasetsMustHaveUnit
+ex:NumericDatasetsMustHaveUnitAndKindOfQuantity
   a sh:NodeShape ;
   sh:targetClass hdf:Dataset ;
   sh:sparql [
     a sh:SPARQLConstraint ;
-    sh:message "Numeric hdf:Dataset (H5T_INTEGER or H5T_FLOAT) must have at least one m4i:hasUnit and the unit must be an IRI." ;
+    sh:message "Numeric hdf:Dataset (H5T_INTEGER or H5T_FLOAT) must have at least one m4i:hasUnit and at least one m4i:hasKindOfQuantity; all values for both properties must be IRIs." ;
     sh:select """
       SELECT ?this WHERE {
         ?this a hdf:Dataset .
@@ -19,20 +19,54 @@ ex:NumericDatasetsMustHaveUnit
           FILTER (?dt IN (hdf:H5T_INTEGER, hdf:H5T_FLOAT))
         }
 
-        # Violation if:
-        #   - no m4i:hasUnit at all, OR
-        #   - there is a m4i:hasUnit but at least one value is not an IRI
+        # Violation if either requirement fails:
+        #  - missing property entirely, OR
+        #  - any value is not an IRI
         FILTER (
-          !EXISTS { ?this m4i:hasUnit ?unitValue . } ||
+          # hasUnit missing OR has a non-IRI value
+          !EXISTS { ?this m4i:hasUnit ?u . } ||
           EXISTS {
-            ?this m4i:hasUnit ?unitValue .
-            FILTER ( !isIRI(?unitValue) )
+            ?this m4i:hasUnit ?u .
+            FILTER ( !isIRI(?u) )
+          } ||
+
+          # hasKindOfQuantity missing OR has a non-IRI value
+          !EXISTS { ?this m4i:hasKindOfQuantity ?kq . } ||
+          EXISTS {
+            ?this m4i:hasKindOfQuantity ?kq .
+            FILTER ( !isIRI(?kq) )
           }
         )
       }
     """ ;
   ] .
 
+'''
+
+SHALL_HAVE_VALID_ATTRIBUTION = '''@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix schema: <https://schema.org/> .
+@prefix ex:   <http://example.org/ns#> .
+
+ex:WasAttributedToMustReferenceAgent
+    a sh:NodeShape ;
+    sh:targetSubjectsOf prov:wasAttributedTo ;
+
+    sh:property [
+        sh:path prov:wasAttributedTo ;
+        sh:message "prov:wasAttributedTo must point to a prov:Agent, prov:Person, foaf:Organization, prov:Organization, schema:Organization or schema:Person." ;
+
+        # Allow any of the valid agent classes:
+        sh:or (
+            [ sh:class prov:Agent ]
+            [ sh:class prov:Person ]
+            [ sh:class foaf:Organization ]
+            [ sh:class schema:Person ]
+            [ sh:class schema:Organization ]
+            [ sh:class prov:Organization ]
+        ) ;
+    ] .
 '''
 
 SHALL_HAVE_CREATED_DATE = '''@prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -84,4 +118,20 @@ ex:HDFFileCreatorShape
         ] ;
     ] .
     
+'''
+
+HDF_FILE_SHALL_HAVE_STANDARD_NAME_TABLE = '''@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix ssno:  <https://matthiasprobst.github.io/ssno#> .
+@prefix hdf:  <http://purl.allotrope.org/ontologies/hdf5/1.8#> .
+
+ssno:HdfFileUsesStandardNameTableShape
+    a sh:NodeShape ;
+    sh:targetClass hdf:File ;
+    sh:property [
+        sh:path ssno:usesStandardNameTable ;
+        sh:class ssno:StandardNameTable ;                 # object must be a StandardNameTable
+        sh:minCount 1 ;
+        sh:maxCount 1 ;                                # exactly one
+        sh:message "A hdf:File file must use exactly one ssno:StandardNameTable via ssno:usesStandardNameTable."@en ;
+    ] .
 '''

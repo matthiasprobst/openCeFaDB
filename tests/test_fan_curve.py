@@ -1,13 +1,15 @@
 import pathlib
 import unittest
 
-from opencefadb import plotting
 import dotenv
 import matplotlib.pyplot as plt
 import rdflib
 import requests
 from h5rdmtoolbox.catalog import GraphDB
+from ontolutils.namespacelib import QUDT_KIND, QUDT_UNIT
+from ssnolib.m4i import NumericalVariable
 
+from opencefadb import plotting
 from opencefadb.core import OpenCeFaDB
 from opencefadb.models.fan_curve import SemanticFanCurve
 
@@ -34,12 +36,21 @@ class TestFanCurve(unittest.TestCase):
         res = graphdb.get_or_create_repository(__this_dir__ / "graphdb-config-sandbox.ttl")
         self.assertTrue(res)
 
-        db = OpenCeFaDB(
-            version=self.working_dir / "opencefadb-config-sandbox-1-5-0.ttl",
-            working_directory=self.working_dir
+        db = OpenCeFaDB.from_graphdb_setup(
+            working_directory=self.working_dir,
+            version="latest",
+            sandbox=True,
+            endpoint="http://localhost:7200",
+            repository="OpenCeFaDB-Sandbox",
+            username="admin",
+            password="admin",
+            add_wikidata_store=True
         )
-        db.add_main_rdf_store(graphdb)
-        db.add_hdf_infile_index()
+        # db.download_metadata()
+        # for file in db.rdf_directory.rglob("*.ttl"):
+        #     db.rdf_store.upload_file(file)
+        #     db.add_hdf_infile_index()
+        # db.add_hdf_infile_index()
 
         # define the standard names:
         zenodo_record_ns = rdflib.namespace.Namespace("https://doi.org/10.5281/zenodo.17572275#")
@@ -51,7 +62,8 @@ class TestFanCurve(unittest.TestCase):
             'standard_name_table/derived_standard_name/arithmetic_mean_of_fan_rotational_speed']
         operating_point_standard_names = {
             sn_mean_dp_stat,
-            sn_mean_vfr
+            sn_mean_vfr,
+            sn_mean_nrot
         }
 
         # test getting fan curve data:
@@ -65,8 +77,16 @@ class TestFanCurve(unittest.TestCase):
         fan_curve = SemanticFanCurve.from_observations(
             observations=operating_point_observations
         )
+        n_scale = NumericalVariable(
+            has_numerical_value=600,
+            has_unit=QUDT_UNIT.REV_PER_MIN,
+            has_kind_of_quantity=QUDT_KIND.RotationalVelocity
+        )
+        fan_curve_scaled = fan_curve.scale(
+            n_scale
+        )
         if n_rot == 600:
-            self.assertEqual(45, len(fan_curve))
+            self.assertEqual(43, len(fan_curve))
         elif n_rot == 1200:
             self.assertEqual(12, len(fan_curve))
 
@@ -82,6 +102,17 @@ class TestFanCurve(unittest.TestCase):
                 label="Test Fan Curve",
                 marker=".",
                 linestyle='-',
+                ax=dax.ax,
+            )
+            fan_curve_scaled.errorbar(
+                x="arithmetic_mean_of_fan_volume_flow_rate",
+                y="arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet",
+                xlabel=None,
+                ylabel=None,
+                label="Scaled Test Fan Curve",
+                marker=".",
+                linestyle='-',
+                color="green",
                 ax=dax.ax,
             )
             plt.legend()

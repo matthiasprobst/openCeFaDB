@@ -9,7 +9,6 @@ SELECT_FAN_PROPERTIES = h5cat.SparqlQuery(
 SELECT ?parameter ?property ?value
 WHERE {
   <https://www.wikidata.org/wiki/Q131549102> m4i:hasParameter ?parameter .
-  ?parameter a ?type .
   ?parameter ?property ?value .
 }
 
