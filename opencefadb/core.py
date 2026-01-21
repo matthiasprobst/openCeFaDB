@@ -33,7 +33,7 @@ from .models.wikidata import FAN_OPERATING_POINT
 from .utils import opencefa_print
 
 SANDBOX_BASE_URL = "https://sandbox.zenodo.org/api/records/428370"
-PRODUCTION_BASE_URL = "https://zenodo.org/api/records/14551649"
+PRODUCTION_BASE_URL = "https://zenodo.org/api/records/17903401"
 __this_dir__ = pathlib.Path(__file__).parent
 
 _db_instance = None
@@ -269,6 +269,8 @@ class OpenCeFaDB(h5cat.CatalogManager):
         if add_wikidata_store:
             db.add_wikidata_store(augment_main_rdf_store=True)
         db.add_hdf_infile_index()
+        hdf_store = HDF5FileStore(data_directory=working_directory / "hdf")
+        db.add_hdf_store(hdf_store)
         return db
 
     @classmethod

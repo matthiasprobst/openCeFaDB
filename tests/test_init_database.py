@@ -56,7 +56,7 @@ class TestInitDatabase(unittest.TestCase):
         res = h5cat.RemoteSparqlQuery(
             SELECT_FAN_PROPERTIES.query,
             description="Selects all properties of the fan"
-        ).execute(db.main_rdf_store)
+        ).execute(db.rdf_store)
         self.assertEqual(88, len(res.data))
 
         # find all names of persons in the database
@@ -88,7 +88,7 @@ class TestInitDatabase(unittest.TestCase):
             }
             """,
             description="Finds a hdf5 dataset based on a hdf attribute standard_name='volume_flow_rate'"
-        ).execute(db.hdf5_store)
+        ).execute(db.rdf_store)
 
     def test_database_with_rdflib_store(self):
         db = OpenCeFaDB(working_directory=self.working_dir, version="latest", sandbox=True)

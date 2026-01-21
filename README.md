@@ -54,77 +54,8 @@ pip install opencefadb
 
 ## Quickstart
 
-Generally, use the help command to get an overview of the available commands:
+A quickstart guide is provided as Jupyter Notebook in the `notebooks/` folder.
 
-```bash
-opencefadb --help
-```
-
-Otherwise, follow the steps below to initialize the database and load the metadata into an RDF store.
-
-### 1. Initialize the database
-
-First, you need to download the configuration metadata file from the main opencefadb zenodo record:
-
-https://zenodo.org/record/17903401
-
-Note, that at the time accessing the above link, there may be a newer version already available. Follow the instructions
-on the zenodo page to download the configuration file.
-
-**Alternatively** (and recommended) you can use the CLI tool, too, which downloads the latest configuration (or a specific version) for you:
-
-```bash
-opencefadb pull
-# or with with parameters:
-# opencefadb pull --target-dir=. --version=latest
-``` 
-
-Next, initialize the database by passing the configuration file to the `init` command. This will download the metadata 
-files to the working directory, which you also may define (In the example below, we use the current directory).
-
-```bash
-opencefadb init --config=opencefadb-config.ttl
-# or with parameters:
-# opencefadb init --config=opencefadb-config.ttl --working-directory=.
-```
-
-### 2. Add metadata to an RDF store
-
-Now that we downloaded the metadata files, we need to add them to an RDF store of your choice.
-
-There are currently two options supported via the CLI to add the metadata to an RDF store:
-1. Using a local RDF database, e.g. GraphDB
-2. Using a local SPARQL endpoint, e.g. via `rdflib`
-
-#### Option 1: Using a (local) instance of GraphDB
-
-Start a local instance of GraphDB.
-
-If not yet done, create a repository in GraphDB to hold the metadata:
-```bash
-opencefadb graphdb create --name="opencefadb-sandbox" --url="http://localhost:7201"   
-```
-Note, that the `--name` and `--url` parameters must match your preferences and GraphDB setup respectively.
-
-Then, you can load the metadata into the repository via console:
-```bash
-opencefadb graphdb add --repo="opencefadb-sandbox" --dir="metadata" --suffix=".ttl" --recursive --url="http://localhost:7201"
-```
-
-#### Option 2: Using a local SPARQL endpoint (rdflib)
-You can also use a local SPARQL endpoint via `rdflib`. For this, first install `rdflib-endpoint`:
-```bash
-pip install rdflib-endpoint[cli]
-```
-
-Then, you can start a local SPARQL endpoint serving the downloaded metadata. The below command 
-assumes that the metadata files are stored in the `metadata` subfolder of the current working directory and 
-that all files have the `.ttl` suffix (which should be the case for the OpenceFaDB. If you have custom data in other 
-RDF formats to add, adjust the command accordingly):
-
-```bash
-rdflib-endpoint serve .\metadata\**\*.ttl 
-```
 
 ## Database Analysis
 
