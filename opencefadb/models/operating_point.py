@@ -19,6 +19,7 @@ def is_operating_point(observation: Observation, verbose: bool = False) -> bool:
             - air_flow_rate
             - static_pressure_difference
             - rotational_speed
+        verbose (bool): If True, print missing quantity kinds.
     Returns:
         bool: True if the observation is a fan operating point, False otherwise.
     """
@@ -30,6 +31,8 @@ def is_operating_point(observation: Observation, verbose: bool = False) -> bool:
     has_n_kind = False
     for result in has_results:
         num_var = result.has_numerical_variable
+        if num_var is None:
+            continue
         if num_var.is_kind_of_quantity(QUDT_KIND.VolumeFlowRate):
             has_vfr_kind = True
             continue

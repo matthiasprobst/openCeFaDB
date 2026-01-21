@@ -90,31 +90,32 @@ class TestFanCurve(unittest.TestCase):
         elif n_rot == 1200:
             self.assertEqual(12, len(fan_curve))
 
-        with plotting.SingleAxis(
-                scale=1.0,
-                filename="test_fan_curve.svg",
-        ) as dax:
-            fan_curve.errorbar(
-                x="arithmetic_mean_of_fan_volume_flow_rate",
-                y="arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet",
-                xlabel=None,
-                ylabel=None,
-                label="Test Fan Curve",
-                marker=".",
-                linestyle='-',
-                ax=dax.ax,
-            )
-            fan_curve_scaled.errorbar(
-                x="arithmetic_mean_of_fan_volume_flow_rate",
-                y="arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet",
-                xlabel=None,
-                ylabel=None,
-                label="Scaled Test Fan Curve",
-                marker=".",
-                linestyle='-',
-                color="green",
-                ax=dax.ax,
-            )
-            plt.legend()
-            plt.tight_layout()
-            plt.show()
+        if False:
+            with plotting.SingleAxis(
+                    scale=1.0,
+                    filename="test_fan_curve.svg",
+            ) as dax:
+                fan_curve.errorbar(
+                    x="arithmetic_mean_of_fan_volume_flow_rate",
+                    y="arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet",
+                    xlabel=None,
+                    ylabel=None,
+                    label="Test Fan Curve",
+                    marker=".",
+                    linestyle='-',
+                    ax=dax.ax,
+                )
+                fan_curve_scaled.errorbar(
+                    x="arithmetic_mean_of_fan_volume_flow_rate",
+                    y="arithmetic_mean_of_difference_of_static_pressure_between_fan_outlet_and_fan_inlet",
+                    xlabel=None,
+                    ylabel=None,
+                    label="Scaled Test Fan Curve",
+                    marker=".",
+                    linestyle='-',
+                    color="green",
+                    ax=dax.ax,
+                )
+                plt.legend()
+                plt.tight_layout()
+                plt.show()

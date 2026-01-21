@@ -3,6 +3,7 @@ import unittest
 
 import dotenv
 import rdflib
+import requests
 from h5rdmtoolbox import catalog as h5cat
 from h5rdmtoolbox.catalog import HDF5SqlDB, GraphDB
 from h5rdmtoolbox.catalog.profiles import IS_VALID_CATALOG_SHACL
@@ -20,8 +21,18 @@ class TestInitDatabase(unittest.TestCase):
         dotenv.load_dotenv(__this_dir__ / ".env", override=True)
         self.working_dir = pathlib.Path(__this_dir__ / "local-db")
 
-    @unittest.skip("Skipping test that requires a running GraphDB instance.")
     def test_database_with_graphdb(self):
+        try:
+            graphdb = GraphDB(
+                endpoint="http://localhost:7200",
+                repository="OpenCeFaDB-Sandbox",
+                username="admin",
+                password="admin"
+            )
+            graphdb.get_repository_info("OpenCeFaDB-Sandbox")
+        except requests.exceptions.ConnectionError as e:
+            self.skipTest(f"GraphDB not available: {e}")
+
         db = OpenCeFaDB.from_graphdb_setup(
             working_directory=self.working_dir,
             version="latest",

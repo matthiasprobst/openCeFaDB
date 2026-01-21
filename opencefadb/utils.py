@@ -9,10 +9,15 @@ import requests
 from rdflib import Graph, Namespace, URIRef
 from tqdm import tqdm
 
+from ._version import __version__
+
 HDF = Namespace("http://purl.allotrope.org/ontologies/hdf5/1.8#")
 SSNO = Namespace("https://matthiasprobst.github.io/ssno#")
 IDX = Namespace("urn:h5cat:index#")
 logger = logging.getLogger("opencefadb")
+USER_AGENT_HEADER = {
+    "User-Agent": f"opencefadb/{__version__} (https://github.com/matthiasprobst/opencefadb)",
+}
 
 
 def opencefa_print(*args, **kwargs):
@@ -62,7 +67,7 @@ def download_file(download_url,
             target_filename = download_url.split("/")[-1]
     target_filename = pathlib.Path(target_filename)
     logger.debug(f"Downloading metadata file from URL {download_url}...")
-    response = requests.get(download_url, stream=True)
+    response = requests.get(download_url, stream=True, headers=USER_AGENT_HEADER)
     response.raise_for_status()
 
     total_size = int(response.headers.get('content-length', 0))  # Get total file size
@@ -149,7 +154,7 @@ def remove_none(obj):
     return obj
 
 
-def build_infile_index_via_parents_for_graphdb(graphdb_store , include_rootgroup: bool = True):
+def build_infile_index_via_parents_for_graphdb(graphdb_store, include_rootgroup: bool = True):
     index_graph_iri: str = "urn:h5cat:index"
     source_graph_iri = None
     clear_first = True
@@ -191,6 +196,7 @@ def build_infile_index_via_parents_for_graphdb(graphdb_store , include_rootgroup
     }}
     """
     graphdb_store._post_update(insert_update)
+
 
 def build_infile_index_via_parents_for_graph(g: Graph, include_rootgroup: bool = True) -> Graph:
     idx_g = Graph()

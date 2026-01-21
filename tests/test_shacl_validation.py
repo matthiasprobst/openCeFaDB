@@ -1,7 +1,6 @@
 import unittest
 
 import h5rdmtoolbox as h5tbx
-import h5rdmtoolbox as h5tbx
 import pytest
 import rdflib
 from ontolutils.ex.qudt import Unit
@@ -10,7 +9,8 @@ from ontolutils.ex.ssn import Accuracy, SystemCapability, MeasurementRange
 from rdflib import DCTERMS, PROV
 
 from opencefadb.validation import validate_hdf
-from opencefadb.validation.shacl.templates.hdf import SHALL_HAVE_CREATED_DATE, NUMERIC_DATASETS_SHALL_HAVE_UNIT_AND_KIND_OF_QUANTITY, \
+from opencefadb.validation.shacl.templates.hdf import SHALL_HAVE_CREATED_DATE, \
+    NUMERIC_DATASETS_SHALL_HAVE_UNIT_AND_KIND_OF_QUANTITY, \
     SHALL_HAVE_CREATOR
 from opencefadb.validation.shacl.templates.sensor import SHALL_HAVE_WELL_DESCRIBED_SSN_SENSOR
 
@@ -51,10 +51,12 @@ class TestPlotting(unittest.TestCase):
                 "numeric_dataset_no_unit",
                 data=[1, 2, 3, 4, 5],
                 dtype='i4',
-                attrs={"units": "m/s"}
+                attrs={"units": "m/s", "kind_of_quantity": "Velocity"}
             )
             ds.rdf["units"].predicate = "http://w3id.org/nfdi4ing/metadata4ing#hasUnit"
             ds.rdf.object["units"] = "https://qudt.org/vocab/unit/M-PER-SEC"
+            ds.rdf["kind_of_quantity"].predicate = "http://w3id.org/nfdi4ing/metadata4ing#hasKindOfQuantity"
+            ds.rdf.object["kind_of_quantity"] = "http://qudt.org/vocab/quantitykind/Velocity"
 
         res = validate_hdf(
             hdf_source=h5.hdf_filename,

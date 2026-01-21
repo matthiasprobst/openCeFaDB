@@ -44,7 +44,8 @@ class TestModels(unittest.TestCase):
                     has_numerical_variable=NumericalVariable(
                         id="https://example.org/numvar/3",
                         has_standard_name="https://example.org/standard_name/rotational_speed",
-                        hasUnit=QUDT_UNIT.PER_MIN
+                        hasUnit=QUDT_UNIT.PER_MIN,
+                        has_kind_of_quantity=QUDT_KIND.RotationalVelocity
                     )
                 ),
             ],
@@ -169,33 +170,34 @@ class TestModels(unittest.TestCase):
             "standard_name",
         }
 
-        with plotting.SingleAxis(
-                scale=1.0,
-                filename="test_fan_curve.svg",
-        ) as dax:
-            sfc.plot(
-                x="https://example.org/standard_name/air_flow_rate",
-                y="https://example.org/standard_name/static_pressure_difference",
-                xlabel=None,
-                ylabel=None,
-                label="raw",
-                marker="o",
-                linestyle='-',
-                ax=dax.ax,
-            )
-            sfc_scaled.plot(
-                x="https://example.org/standard_name/air_flow_rate",
-                y="https://example.org/standard_name/static_pressure_difference",
-                xlabel=None,
-                ylabel=None,
-                label="scaled",
-                marker="+",
-                linestyle='-',
-                ax=dax.ax,
-            )
-            plt.legend()
-            plt.tight_layout()
-            plt.show()
+        if False:  # change to True to enable plotting test
+            with plotting.SingleAxis(
+                    scale=1.0,
+                    filename="test_fan_curve.svg",
+            ) as dax:
+                sfc.plot(
+                    x="https://example.org/standard_name/air_flow_rate",
+                    y="https://example.org/standard_name/static_pressure_difference",
+                    xlabel=None,
+                    ylabel=None,
+                    label="raw",
+                    marker="o",
+                    linestyle='-',
+                    ax=dax.ax,
+                )
+                sfc_scaled.plot(
+                    x="https://example.org/standard_name/air_flow_rate",
+                    y="https://example.org/standard_name/static_pressure_difference",
+                    xlabel=None,
+                    ylabel=None,
+                    label="scaled",
+                    marker="+",
+                    linestyle='-',
+                    ax=dax.ax,
+                )
+                plt.legend()
+                plt.tight_layout()
+                plt.show()
 
     def test_is_operating_point(self):
         is_op = is_operating_point(self.valid_observation, verbose=True)
