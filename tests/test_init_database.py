@@ -36,14 +36,14 @@ class TestInitDatabase(unittest.TestCase):
         db = OpenCeFaDB.from_graphdb_setup(
             working_directory=self.working_dir,
             version="latest",
-            sandbox=True,
+            sandbox=False,
             endpoint="http://localhost:7200",
             repository="OpenCeFaDB-Sandbox",
             username="admin",
             password="admin",
             add_wikidata_store=True
         )
-        self.assertEqual(db.catalog.version, "1.1.0")
+        self.assertEqual(db.catalog.version, "1.0.0")
         res = h5cat.RemoteSparqlQuery(
             "SELECT * WHERE { ?s ?p ?o }",
             description="Selects all triples in the RDF database"
@@ -91,8 +91,8 @@ class TestInitDatabase(unittest.TestCase):
         ).execute(db.rdf_store)
 
     def test_database_with_rdflib_store(self):
-        db = OpenCeFaDB(working_directory=self.working_dir, version="latest", sandbox=True)
-        self.assertEqual(db.catalog.version, "1.1.0")
+        db = OpenCeFaDB(working_directory=self.working_dir, version="latest", sandbox=False)
+        self.assertEqual(db.catalog.version, "1.0.0")
 
         metadata_store = RDFFileStore(
             data_dir=self.working_dir / "metadata",
@@ -155,7 +155,7 @@ class TestInitDatabase(unittest.TestCase):
         catalog = OpenCeFaDB.download_catalog(
             version="latest",
             target_directory=self.working_dir,
-            sandbox=True,
+            sandbox=False,
             validate=False
         )
         validation_result = catalog.validate(shacl_data=IS_VALID_CATALOG_SHACL)

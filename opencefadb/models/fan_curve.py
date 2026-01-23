@@ -149,9 +149,19 @@ class SemanticOperationPoint:
 
     def scale(
             self,
-            reference_rotational_frequency: NumericalVariable
+            reference_rotational_frequency: NumericalVariable,
+            keep_other_results:bool=True,
     ) -> "SemanticOperationPoint":
-        """Scale the operating point by the provided numerical variable according to the affinity laws."""
+        """Scale the operating point by the provided numerical variable according to the affinity laws.
+
+        Parameters
+        ----------
+        reference_rotational_frequency : NumericalVariable
+            The reference rotational frequency to scale to.
+        keep_other_results : bool, optional
+            Whether to keep other results that are not scaled, by default True.
+        """
+        scaled_result_ids = []
 
         if not isinstance(reference_rotational_frequency, NumericalVariable):
             raise TypeError("reference_rotational_frequency must be a NumericalVariable")
@@ -167,6 +177,11 @@ class SemanticOperationPoint:
             raise ValueError(
                 f"Fan curve must have exactly one numerical variable of kind {self.ROTATIONAL_FREQUENCY_QUANTITY_KIND}")
         observation_rotational_frequency = observation_rotational_frequency[0].to_pint()
+        for res in self.observation.hasResult:
+            nv = res.hasNumericalVariable
+            if nv is not None and nv.is_kind_of_quantity(self.ROTATIONAL_FREQUENCY_QUANTITY_KIND):
+                scaled_result_ids.append(res.id)
+                break
 
         if "turn" in observation_rotational_frequency._units:
             observation_rotational_frequency_pint = observation_rotational_frequency.to("turns/s")
@@ -179,6 +194,11 @@ class SemanticOperationPoint:
         if len(vfr_numerical_variables) != 1:
             raise ValueError(
                 f"Fan curve must have exactly one numerical variable of kind {self.VOLUME_FLOW_RATE_QUANTITY_KIND}")
+        for res in self.observation.hasResult:
+            nv = res.hasNumericalVariable
+            if nv is not None and nv.is_kind_of_quantity(self.ROTATIONAL_FREQUENCY_QUANTITY_KIND):
+                scaled_result_ids.append(res.id)
+                break
 
         pressure_numerical_variables = []
         for PKC in self.EXPECTED_PRESSURE_QUANTITY_KINDS:
@@ -196,9 +216,11 @@ class SemanticOperationPoint:
                             if str(nv.hasUnit) == str(QUDT_UNIT.PA):
                                 if nv not in pressure_numerical_variables:
                                     pressure_numerical_variables.append(nv)
+                                    scaled_result_ids.append(result.id)
                         elif str(nv.hasUnit.id) == str(QUDT_UNIT.PA):
                             if nv not in pressure_numerical_variables:
                                 pressure_numerical_variables.append(nv)
+                                scaled_result_ids.append(result.id)
 
         reference_rotational_frequency_pint = reference_rotational_frequency.to_pint()
         if "turn" in reference_rotational_frequency_pint._units:
@@ -225,6 +247,14 @@ class SemanticOperationPoint:
             reference_rotational_frequency.model_copy()
         )
 
+        if keep_other_results:
+            for result in self.observation.hasResult:
+                if result.id in scaled_result_ids:
+                    continue
+                nv = result.hasNumericalVariable
+                if nv is not None:
+                    scaled_variables.append(nv)
+
         scaled_observation = Observation(
             has_result=[
                 Result(
@@ -234,6 +264,28 @@ class SemanticOperationPoint:
             ]
         )
         return SemanticOperationPoint(scaled_observation)
+
+
+def get_result_by_standard_name(observation: Observation, name: str=None, iri:str=None):
+        """Get all results matching the provided standard name or IRI."""
+        if name is None and iri is None:
+            raise ValueError("Either name or iri must be provided")
+        for result in observation.hasResult:
+            nv = result.hasNumericalVariable
+            if nv is not None:
+                sn = nv.hasStandardName
+                if name is not None:
+                    if isinstance(sn, str):
+                        continue
+                    if sn and sn.standardName == name:
+                        return result
+                elif iri is not None:
+                    if isinstance(sn, str):
+                        if str(sn) == iri:
+                            return result
+                    elif sn and str(sn.id) == iri:
+                        return result
+        return None
 
 
 class SemanticFanCurve:
@@ -247,7 +299,7 @@ class SemanticFanCurve:
             raise ValueError("collection must not be None")
         if not isinstance(collection, ObservationCollection):
             raise TypeError("collection must be an ObservationCollection")
-        self.collection = collection
+        self.collection: ObservationCollection = collection
 
     def __len__(self):
         return len(self.collection.hasMember)
@@ -280,21 +332,9 @@ class SemanticFanCurve:
             raise ValueError("Either name or iri must be provided")
         results = []
         for obs in self.collection.hasMember:
-            for result in obs.hasResult:
-                nv = result.hasNumericalVariable
-                if nv is not None:
-                    sn = nv.hasStandardName
-                    if name is not None:
-                        if isinstance(sn, str):
-                            continue
-                        if sn and sn.standardName == name:
-                            results.append(result)
-                    elif iri is not None:
-                        if isinstance(sn, str):
-                            if str(sn) == iri:
-                                results.append(result)
-                        elif sn and str(sn.id) == iri:
-                            results.append(result)
+            _res = get_result_by_standard_name(obs, name=name, iri=iri)
+            if _res is not None:
+                results.append(_res)
         return results
 
     def get_result_by_kind_of_quantity(self, koq: qudt.QuantityKind=None, iri: str=None):
@@ -338,13 +378,14 @@ class SemanticFanCurve:
 
     def scale(
             self,
-            n: NumericalVariable
+            n: NumericalVariable,
+            keep_other_results: bool = True,
     ):
         """Scale the fan curve by the provided numerical variable according to the affinity laws."""
         if len(self) == 0:
             raise ValueError("Cannot scale an empty fan curve.")
         scaled_members = [
-            SemanticOperationPoint(observation).scale(n).observation for observation in self.collection.hasMember
+            SemanticOperationPoint(observation).scale(n, keep_other_results=keep_other_results).observation for observation in self.collection.hasMember
         ]
         return SemanticFanCurve.from_observations(
             scaled_members,
