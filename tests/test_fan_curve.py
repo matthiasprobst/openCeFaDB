@@ -39,7 +39,7 @@ class TestFanCurve(unittest.TestCase):
         db = OpenCeFaDB.from_graphdb_setup(
             working_directory=self.working_dir,
             version="latest",
-            sandbox=True,
+            sandbox=False,
             endpoint="http://localhost:7200",
             repository="OpenCeFaDB-Sandbox",
             username="admin",
@@ -90,7 +90,7 @@ class TestFanCurve(unittest.TestCase):
         elif n_rot == 1200:
             self.assertEqual(12, len(fan_curve))
 
-        if False:
+        if True:
             with plotting.SingleAxis(
                     scale=1.0,
                     filename="test_fan_curve.svg",

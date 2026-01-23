@@ -33,7 +33,7 @@ from .models.wikidata import FAN_OPERATING_POINT
 from .utils import opencefa_print
 
 SANDBOX_BASE_URL = "https://sandbox.zenodo.org/api/records/428370"
-PRODUCTION_BASE_URL = "https://zenodo.org/api/records/17903401"
+PRODUCTION_BASE_URL = "https://zenodo.org/api/records/18349358"
 __this_dir__ = pathlib.Path(__file__).parent
 
 _db_instance = None
@@ -166,42 +166,42 @@ def _get_download_urls_of_metadata_distributions_of_zenodo_record(doi: str) -> L
         filename.endswith('.ttl') or filename.endswith('.jsonld')]
 
 
-def _get_metadata_datasets(
-        config_filename: Union[str, pathlib.Path],
-        config_dir: Union[str, pathlib.Path]
-) -> rdflib.Graph:
-    """Parses the configuration file and returns the graph with metadata datasets.
-    The configuration file should contain DCAT descriptions of datasets.
-
-    Parameters
-    ----------
-    config_filename : str or pathlib.Path
-        The path to the configuration file (e.g., config.ttl or config.jsonld).
-    config_dir : str or pathlib.Path
-        The directory where the configuration file will be copied to and parsed from.
-    """
-    config_filename = pathlib.Path(config_filename)
-    if not config_filename.exists():
-        raise FileNotFoundError(f"Configuration file not found: {config_filename}")
-    config_dir = pathlib.Path(config_dir)
-    if not config_dir.exists():
-        raise FileNotFoundError(f"Configuration directory not found: {config_dir}")
-    config_suffix = config_filename.suffix
-    db_dataset_config_filename = config_dir / f"db-dataset-config.{config_suffix}"
-    shutil.copy(config_filename, db_dataset_config_filename)
-
-    logger.debug(f"Parsing database dataset config '{db_dataset_config_filename.resolve().absolute()}'...")
-
-    if config_suffix == '.ttl':
-        fmt = "ttl"
-    elif config_suffix in ('.json', '.jsonld', '.json-ld'):
-        fmt = "json-ld"
-    else:
-        raise ValueError(f"Unsupported config file suffix: {config_suffix}")
-    g = rdflib.Graph()
-    g.parse(source=db_dataset_config_filename, format=fmt)
-    logger.debug("Successfully parsed database dataset config.")
-    return g
+# def _get_metadata_datasets(
+#         config_filename: Union[str, pathlib.Path],
+#         config_dir: Union[str, pathlib.Path]
+# ) -> rdflib.Graph:
+#     """Parses the configuration file and returns the graph with metadata datasets.
+#     The configuration file should contain DCAT descriptions of datasets.
+#
+#     Parameters
+#     ----------
+#     config_filename : str or pathlib.Path
+#         The path to the configuration file (e.g., config.ttl or config.jsonld).
+#     config_dir : str or pathlib.Path
+#         The directory where the configuration file will be copied to and parsed from.
+#     """
+#     config_filename = pathlib.Path(config_filename)
+#     if not config_filename.exists():
+#         raise FileNotFoundError(f"Configuration file not found: {config_filename}")
+#     config_dir = pathlib.Path(config_dir)
+#     if not config_dir.exists():
+#         raise FileNotFoundError(f"Configuration directory not found: {config_dir}")
+#     config_suffix = config_filename.suffix
+#     db_dataset_config_filename = config_dir / f"db-dataset-config.{config_suffix}"
+#     shutil.copy(config_filename, db_dataset_config_filename)
+#
+#     logger.debug(f"Parsing database dataset config '{db_dataset_config_filename.resolve().absolute()}'...")
+#
+#     if config_suffix == '.ttl':
+#         fmt = "ttl"
+#     elif config_suffix in ('.json', '.jsonld', '.json-ld'):
+#         fmt = "json-ld"
+#     else:
+#         raise ValueError(f"Unsupported config file suffix: {config_suffix}")
+#     g = rdflib.Graph()
+#     g.parse(source=db_dataset_config_filename, format=fmt)
+#     logger.debug("Successfully parsed database dataset config.")
+#     return g
 
 
 class OpenCeFaDB(h5cat.CatalogManager):
@@ -264,6 +264,7 @@ class OpenCeFaDB(h5cat.CatalogManager):
         gdb_exists = gdb.get_repository_info(repository)
         if not gdb_exists:
             raise RuntimeError(f"GraphDB repository '{repository}' does not exist.")
+        working_directory = pathlib.Path(working_directory)
         db = cls(working_directory=working_directory, version=version, sandbox=sandbox)
         db.add_main_rdf_store(gdb)
         if add_wikidata_store:
@@ -449,6 +450,7 @@ def get_operating_point_observations(
                 if len(res) > 1:
                     raise ValueError(f"Expected one dataset for standard name {target_standard_name}, got {len(res)}")
                 if len(res) == 0:
+                    print(f"  no data for {target_standard_name}")
                     continue
 
                 target_data = res.data.iloc[0]
@@ -522,7 +524,7 @@ def _download_catalog(
     else:
         access_token = None
         base_url = PRODUCTION_BASE_URL
-        config_filename = "opencefadb-config.ttl"
+        config_filename = "opencefadb-catalog.ttl"
     pathlib.Path(target_directory).mkdir(parents=True, exist_ok=True)
 
     if version is not None and version.lower().strip() == "latest":
@@ -549,10 +551,10 @@ def _download_catalog(
 
         if sandbox:
             target_filename = pathlib.Path(
-                target_directory) / f"opencefadb-config-sandbox-{detected_version.replace('.', '-')}.ttl"
+                target_directory) / f"opencefadb-catalog-sandbox-{detected_version.replace('.', '-')}.ttl"
         else:
             target_filename = pathlib.Path(
-                target_directory) / f"opencefadb-config-{detected_version.replace('.', '-')}.ttl"
+                target_directory) / f"opencefadb-catalog-{detected_version.replace('.', '-')}.ttl"
 
         for file in res.json().get("files", []):
             if file["key"] == config_filename:
