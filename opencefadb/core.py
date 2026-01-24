@@ -233,6 +233,8 @@ class OpenCeFaDB(h5cat.CatalogManager):
                 sandbox=sandbox,
                 target_directory=working_directory
             )
+        working_directory = working_directory / f"opencefadb-{catalog.version}"
+        working_directory.mkdir(parents=True, exist_ok=True)
         super().__init__(
             catalog=catalog,
             working_directory=working_directory
@@ -270,7 +272,7 @@ class OpenCeFaDB(h5cat.CatalogManager):
         if add_wikidata_store:
             db.add_wikidata_store(augment_main_rdf_store=True)
         db.add_hdf_infile_index()
-        hdf_store = HDF5FileStore(data_directory=working_directory / "hdf")
+        hdf_store = HDF5FileStore(data_directory=db.hdf_directory)
         db.add_hdf_store(hdf_store)
         return db
 
@@ -286,22 +288,32 @@ class OpenCeFaDB(h5cat.CatalogManager):
         working_directory = pathlib.Path(working_directory)
         working_directory.mkdir(parents=True, exist_ok=True)
         db = cls(working_directory=working_directory, version=version, sandbox=sandbox)
+        opencefa_print(f"RDF files are/will be stored in the directory: {db.rdf_directory}")
+        opencefa_print(f"HDF files are/will be stored in the directory: {db.hdf_directory}")
+
         InMemoryRDFStore.__populate_on_init__ = False
         local_rdf_store = InMemoryRDFStore(
-            data_dir=working_directory / "rdf",
+            data_dir=db.rdf_directory,
             recursive_exploration=True,
             formats=["ttl"]
         )
         db.add_main_rdf_store(local_rdf_store)
+        opencefa_print("Checking if metadata files need to be downloaded. If yes, this will take a moment...")
         db.download_metadata()
-        _local_graph_file = working_directory / ".graph.nt"
+        opencefa_print("RDF data ready to use.")
+        _local_graph_file = db.rdf_directory / ".graph.nt"
         if _local_graph_file.exists():
             g = rdflib.Graph().parse(_local_graph_file)
             local_rdf_store.graph += g
-        hdf_store = HDF5FileStore(data_directory=working_directory / "hdf")
+        else:
+            local_rdf_store.populate(recursive=True)
+
+        hdf_store = HDF5FileStore(data_directory=db.hdf_directory)
         db.add_hdf_store(hdf_store)
+
         if add_wikidata_store:
             db.add_wikidata_store(augment_main_rdf_store=True)
+
         db.add_hdf_infile_index()
         return db
 

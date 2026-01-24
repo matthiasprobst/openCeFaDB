@@ -21,10 +21,10 @@ USER_AGENT_HEADER = {
 
 
 def opencefa_print(*args, **kwargs):
-    """opencefa_print is the OpenCEFA DB print function."""
+    """opencefa_print is the OpenCeFa DB print function."""
     verbose = kwargs.pop("verbose", True)
     if verbose:
-        print(" [OpenCEFA DB]:", *args, **kwargs)
+        print(" [OpenCeFa DB]:", *args, **kwargs)
 
 
 class ExportFormat(enum.Enum):
