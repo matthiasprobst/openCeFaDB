@@ -48,6 +48,7 @@ dependencies = [
 test = [
     "pytest",
     "pytest-cov",
+    "toml>0.10.0",
 ]
 complete = [
     "opencefadb[test]",

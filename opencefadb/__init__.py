@@ -8,10 +8,11 @@ to store the metadata.
 Users can choose which specific database to use. There are some predefined configurations available, but users can
 define their own database interfaces, leaving room for integration with their own workflows and databases.
 """
+import json
 import logging
 import pathlib
 from logging.handlers import RotatingFileHandler
-from typing import Union
+from typing import Union, Dict
 
 import appdirs
 
@@ -58,5 +59,13 @@ GRAPH_DB_CONFIG_FILENAME = __this_dir__ / "../data/graphdb-config.ttl"
 from .core import OpenCeFaDB
 
 from .utils import opencefa_print
+
+
+def get_package_meta() -> Dict:
+    """Reads codemeta.json and returns it as dict"""
+    with open(__this_dir__ / '../codemeta.json', 'r') as f:
+        codemeta = json.loads(f.read())
+    return codemeta
+
 
 __all__ = ["set_logging_level", "OpenCeFaDB", "models", "opencefa_print"]
