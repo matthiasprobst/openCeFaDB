@@ -6,7 +6,7 @@
     "codeRepository": "git+https://github.com/matthiasprobst/opencefadb.git",
     "name": "opencefadb",
     "version": "1.0.0",
-    "description": "OpenCeFaDB - A FAIR Database for a Generic Centrifugal Fa",
+    "description": "OpenCeFaDB - A FAIR Database for a Generic Centrifugal Fan",
     "applicationCategory": "Engineering",
     "programmingLanguage": [
         "Python 3",

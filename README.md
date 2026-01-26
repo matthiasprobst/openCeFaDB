@@ -35,7 +35,7 @@ database.
 
 ## Working with the OpenCeFaDB
 The following steps are needed to work with the OpenCeFaDB:
-1. Download the configuration (https://zenodo.org/records/18349358)
+1. Download the configuration (https://doi.org/10.5281/zenodo.18349358)
 2. Download the metadata files defined in the configuration
 3. Load the metadata into an RDF store
 4. Query the metadata to identify relevant data files
