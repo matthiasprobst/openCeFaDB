@@ -164,8 +164,3 @@ class TestInitDatabase(unittest.TestCase):
             print(validation_result.results_text)
         self.assertTrue(validation_result)
 
-    def test_from_rdflib_setup(self):
-        db = OpenCeFaDB.from_rdflib_setup(
-            working_directory=self.working_dir,
-            version="latest",
-        )

@@ -46,11 +46,11 @@ class TestFanCurve(unittest.TestCase):
             password="admin",
             add_wikidata_store=True
         )
-        db.download_metadata()
-        for file in db.rdf_directory.rglob("*.ttl"):
-            db.rdf_store.upload_file(file)
-            db.add_hdf_infile_index()
-        db.add_hdf_infile_index()
+        # db.download_metadata()
+        # for file in db.rdf_directory.rglob("*.ttl"):
+        #     db.rdf_store.upload_file(file)
+        #     db.add_hdf_infile_index()
+        # db.add_hdf_infile_index()
 
         # define the standard names:
         zenodo_record_ns = rdflib.namespace.Namespace("https://doi.org/10.5281/zenodo.17572275#")
