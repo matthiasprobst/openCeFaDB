@@ -173,3 +173,9 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 *.igs
+notebooks/**/*.ttl
+notebooks/**/*.hdf
+notebooks/**/*.pdf
+notebooks/**/*.svg
+notebooks/**/*.pdf_tex
+notebooks/**/*.jsonld
