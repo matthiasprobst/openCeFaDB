@@ -2,6 +2,10 @@
 
 Log of changes in the versions
 
+## v1.0.2
+
+- set `ontolutils` dependency to 0.27.6
+
 ## v1.0.1
 
 - Update to newer version of `h5rdmtoolbox` (v2.7.2).

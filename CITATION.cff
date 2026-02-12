@@ -5,7 +5,7 @@ authors:
     given-names: "Matthias"
     orcid: "https://orcid.org/0000-0001-8729-0482"
 title: "OpenCeFaDB - A FAIR Database for a Generic Centrifugal Fan"
-version: 1.0.1
-doi: 10.5281/zenodo.18412779
-date-released: 2026-01-29
+version: 1.0.2
+doi: 10.5281/zenodo.18623426
+date-released: 2026-02-12
 url: "https://github.com/matthiasprobst/opencefadb"
