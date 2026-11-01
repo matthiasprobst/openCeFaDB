@@ -179,3 +179,6 @@ notebooks/**/*.pdf
 notebooks/**/*.svg
 notebooks/**/*.pdf_tex
 notebooks/**/*.jsonld
+
+# Local work items and investigation notes; never commit these files.
+.work/
