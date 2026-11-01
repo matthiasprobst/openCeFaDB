@@ -74,3 +74,8 @@ opencefadb viewer
 
 
 ![streamlit viewer screenshot](docs/viewer-screenshot.png)
+
+## Dependency maintenance
+
+See [dependency bounds and upgrade guidance](DEPENDENCIES.md) before upgrading
+related packages to a new major release.
