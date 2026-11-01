@@ -85,3 +85,13 @@ related packages to a new major release.
 Use `.work/` for local work items and investigation notes. Its contents are
 ignored by Git and must not be committed or force-added. Keep accepted project
 documentation in the regular documentation files.
+
+## Compatibility and feature dependencies
+
+For the experimental viewer, install `pip install "opencefadb[viewer]"`.
+Library usage does not require Streamlit. The semantic layer currently targets
+ontolutils 0.27.x; new pre-1.0 API families need explicit validation.
+
+Dependency metadata is checked by `tests/test_dependency_contracts.py`. Run it
+from a fresh install of this checkout so its installed metadata matches the
+source; an older editable installation can otherwise report stale requirements.

@@ -6,7 +6,7 @@ Both next-major boundaries are now strict. Existing gldb and ontolutils pins rem
 
 | File | Before | After |
 | --- | --- | --- |
-| pyproject.toml | `h5rdmtoolbox>=2.7.3,<=3.0.0` | `h5rdmtoolbox>=2.7.3,<3.0.0` |
+| pyproject.toml | `h5rdmtoolbox>=2.7.2,<=3.0.0` | `h5rdmtoolbox>=2.7.2,<3.0.0` |
 | pyproject.toml | `ssnolib>=2.2.0.3,<=3.0.0.0` | `ssnolib>=2.2.0.3,<3.0.0.0` |
 
 Dependencies on related packages must exclude the next major release.

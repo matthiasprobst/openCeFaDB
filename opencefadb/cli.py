@@ -1,6 +1,7 @@
 import os
 import pathlib
 import sys
+from importlib.util import find_spec
 from textwrap import dedent
 from typing import List, Optional
 
@@ -304,6 +305,10 @@ def graphdb_add(repo_name: str,
 @click.option("--host", default="0.0.0.0", show_default=True, help="Host address to bind the Graph Viewer to.")
 def graph_viewer(port: int = 8501, host: str = "0.0.0.0"):
     """Launch the OpenCeFaDB Graph Viewer."""
+    if find_spec("streamlit") is None:
+        raise click.ClickException(
+            'The viewer requires Streamlit. Install it with pip install "opencefadb[viewer]".'
+        )
     import subprocess
     app_path = __this_dir__ / "app/app.py"
 
